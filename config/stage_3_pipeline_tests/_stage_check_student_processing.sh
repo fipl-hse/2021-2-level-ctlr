@@ -16,7 +16,7 @@ if [[ ${TARGET_SCORE} != 0 ]]; then
     fi
   fi
   mv *_raw.txt tmp/articles
-  bash config/stage_3_pipeline_tests/s3_4_student_text_preprocess.sh
+  bash config/stage_3_pipeline_tests/s3_5_student_text_preprocess.sh
 else
   echo "Skip stage"
 fi

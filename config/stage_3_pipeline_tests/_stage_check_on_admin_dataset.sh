@@ -11,7 +11,7 @@ if [[ ${TARGET_SCORE} != 0 ]]; then
     mv *_meta.json tmp/articles
   fi
   mv *_raw.txt tmp/articles
-  bash config/stage_3_pipeline_tests/s3_3_reference_text_preprocess.sh
+  bash config/stage_3_pipeline_tests/s3_4_reference_text_preprocess.sh
   ls -la tmp/articles
 else
   echo "Skip stage"
