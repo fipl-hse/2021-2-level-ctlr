@@ -80,7 +80,7 @@ def validate_config(crawler_path):
         with open(crawler_path) as file:
             config = json.load(file)
         return config["seed_urls"], config["total_articles_to_find_and_parse"]
-    except IncorrectURLError or NumberOfArticlesOutOfRangeError or IncorrectNumberOfArticlesError:
+    except (IncorrectURLError, NumberOfArticlesOutOfRangeError, IncorrectNumberOfArticlesError):
         return
 
 
