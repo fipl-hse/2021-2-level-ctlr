@@ -3,7 +3,7 @@ set -ex
 echo "Stage 2B: Student text preprocessing"
 echo "Starting tests for student dataset"
 
-TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh pipeline)
 
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"
