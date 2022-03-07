@@ -72,7 +72,6 @@ def prepare_environment(base_path):
     except FileNotFoundError:
         pass
     os.mkdir('ASSETS_PATH')
-    return
 
 
 def validate_config(crawler_path):
@@ -84,7 +83,7 @@ def validate_config(crawler_path):
             config = json.load(file)
         return config["seed_urls"], config["total_articles_to_find_and_parse"]
     except (IncorrectURLError, NumberOfArticlesOutOfRangeError, IncorrectNumberOfArticlesError):
-        return
+        pass
 
 
 if __name__ == '__main__':
