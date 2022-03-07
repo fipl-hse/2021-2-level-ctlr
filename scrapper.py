@@ -5,6 +5,7 @@ import json
 import os
 import requests
 
+
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
@@ -27,6 +28,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
@@ -70,6 +72,7 @@ def prepare_environment(base_path):
     except FileNotFoundError:
         pass
     os.mkdir('ASSETS_PATH')
+    return
 
 
 def validate_config(crawler_path):
