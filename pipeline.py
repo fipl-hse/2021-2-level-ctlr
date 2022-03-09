@@ -1,12 +1,25 @@
 """
 Pipeline for text processing implementation
 """
-
+import requests
 
 class EmptyDirectoryError(Exception):
     """
     No data to process
     """
+
+    def main():
+        html = "https://languagejournal.spbu.ru/issue/view/682"
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " \
+                     "(KHTML, like Gecko) Chrome/96.0.4664.174 YaBrowser/22.1.4.837 " \
+                     "Yowser/2.5 Safari/537.36"
+        response = requests.get(html, headers = {'user-agent': user_agent})
+
+        with open('index.html', 'w', encoding='utf-8') as f:
+            f.write(response.text)
+
+    if __name__ == "__main__":
+        main()
 
 
 class InconsistentDatasetError(Exception):
