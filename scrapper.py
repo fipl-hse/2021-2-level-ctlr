@@ -13,9 +13,6 @@ class IncorrectURLError(Exception):
     Seed URL does not match standard pattern
     """
 
-    def __init__(self, message='Seed URL does not match standard pattern'):
-        self.message = message
-
 
 class NumberOfArticlesOutOfRangeError(Exception):
     """
@@ -96,11 +93,11 @@ def validate_config(crawler_path):
         return seed_urls, total_articles
 
     except IncorrectURLError:
-        pass
+        print('Seed URL does not match standard pattern')
     except NumberOfArticlesOutOfRangeError:
-        pass
+        print('Total number of articles to parse is too big')
     except IncorrectNumberOfArticlesError:
-        pass
+        print('Total number of articles to parse in not integer')
 
 
 if __name__ == '__main__':
