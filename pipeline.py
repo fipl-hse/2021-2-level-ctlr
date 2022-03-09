@@ -1,7 +1,7 @@
 """
 Pipeline for text processing implementation
 """
-
+print('line')
 
 class EmptyDirectoryError(Exception):
     """
