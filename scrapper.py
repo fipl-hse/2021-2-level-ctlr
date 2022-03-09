@@ -7,6 +7,7 @@ class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
     """
+    #potomu chto ja pudge
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
