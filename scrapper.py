@@ -2,6 +2,7 @@
 Scrapper implementation
 """
 
+import requests
 
 class IncorrectURLError(Exception):
     """
@@ -35,6 +36,14 @@ class Crawler:
         """
         Finds articles
         """
+        # get data from website
+        response = requests.get('http://www.vestnik.vsu.ru/content/lingvo/index_ru.asp',
+                                headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                                                       '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'})
+        # print(response.status_code)
+
+        with open('index.html', 'w', encoding='utf-8') as f:
+            f.write(response.text)
         pass
 
     def get_search_urls(self):
@@ -50,13 +59,18 @@ def prepare_environment(base_path):
     """
     pass
 
-
 def validate_config(crawler_path):
     """
     Validates given config
     """
     pass
 
+def main():
+    response = requests.get('http://www.vestnik.vsu.ru/content/lingvo/index_ru.asp', headers={'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'})
+    #print(response.status_code)
+
+    with open('index.html', 'w', encoding='utf-8') as f:
+        f.write(response.text)
 
 if __name__ == '__main__':
     # YOUR CODE HERE
