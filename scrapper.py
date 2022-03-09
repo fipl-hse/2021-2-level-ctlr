@@ -58,7 +58,7 @@ def validate_config(crawler_path):
     """
     pass
 #like if you love python
-
+#freehova
 if __name__ == '__main__':
     # YOUR CODE HERE
     pass
