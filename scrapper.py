@@ -57,7 +57,7 @@ def validate_config(crawler_path):
     Validates given config
     """
     pass
-
+#like if you love python
 
 if __name__ == '__main__':
     # YOUR CODE HERE
