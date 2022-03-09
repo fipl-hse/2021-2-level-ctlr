@@ -98,8 +98,8 @@ def main():
     html_raw = requests.get(html, headers={'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 '
                                                          '(KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'})
     page_code = html_raw.text
-    with open("page_code.html", "w", encoding="utf-8") as f:
-        f.write(page_code)
+    with open("page_code.html", "w", encoding="utf-8") as file_to_write:
+        file_to_write.write(page_code)
 
 
 if __name__ == "__main__":
