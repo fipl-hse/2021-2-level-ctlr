@@ -5,11 +5,16 @@ import json
 import os
 import requests
 
+from constants import ASSETS_PATH
+
 
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
     """
+
+    def __init__(self, message='Seed URL does not match standard pattern'):
+        self.message = message
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
@@ -41,18 +46,18 @@ class Crawler:
         """
         Finds articles
         """
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome'
+                          '/97.0.4692.99 Safari/537.36 OPR/83.0.4254.70',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;'
+                      'q=0.8,applicat '
+                      'ion/signed-exchange;v=b3;q=0.9',
+            'Acccept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
         for url in self.seed_urls:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome'
-                              '/97.0.4692.99 Safari/537.36 OPR/83.0.4254.70',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;'
-                          'q=0.8,applicat '
-                          'ion/signed-exchange;v=b3;q=0.9',
-                'Acccept-Encoding': 'gzip, deflate',
-                'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
-            }
             response = requests.get(url=url, headers=headers)
-            with open('ASSETS_PATH/url.html', 'w', encoding='utf-8') as file:
+            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
                 file.write(response.text)
             self.urls.append(url)
 
@@ -68,10 +73,10 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     try:
-        os.rmdir('ASSETS_PATH')
+        os.rmdir(ASSETS_PATH)
     except FileNotFoundError:
         pass
-    os.mkdir('ASSETS_PATH')
+    os.mkdir(ASSETS_PATH)
 
 
 def validate_config(crawler_path):
@@ -81,8 +86,20 @@ def validate_config(crawler_path):
     try:
         with open(crawler_path) as file:
             config = json.load(file)
-        return config["seed_urls"], config["total_articles_to_find_and_parse"]
-    except (IncorrectURLError, NumberOfArticlesOutOfRangeError, IncorrectNumberOfArticlesError):
+
+        seed_urls = config["seed_urls"]
+        total_articles = config["total_articles_to_find_and_parse"]
+
+        if not isinstance(total_articles, int):
+            raise IncorrectNumberOfArticlesError
+
+        return seed_urls, total_articles
+
+    except IncorrectURLError:
+        pass
+    except NumberOfArticlesOutOfRangeError:
+        pass
+    except IncorrectNumberOfArticlesError:
         pass
 
 
