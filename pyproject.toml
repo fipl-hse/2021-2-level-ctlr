@@ -11,7 +11,8 @@ markers = [
     "stage_2_5_dataset_validation: tests for Dataset structure validation",
     "stage_3_1_dataset_sanity_checks: tests for Dataset sanity checks",
     "stage_3_2_corpus_manager_checks: tests for Corpus Manager",
-    "stage_3_3_admin_data_processing: tests for Admin data processing",
-    "stage_3_4_student_dataset_validation: tests for Student dataset validation",
+    "stage_3_3_morphological_token_checks: tests for Morphological Token",
+    "stage_3_4_admin_data_processing: tests for Admin data processing",
+    "stage_3_5_student_dataset_validation: tests for Student dataset validation",
 ]
   

@@ -41,8 +41,9 @@ Instructors:
 
 |Date|Lecture topic|Important links|
 |:--:|:---|:---|
-|21.02.2022|Exceptions: built-in and custom for error handling and information exchange|[Introduction tutorial](https://realpython.com/python-exceptions/)|
-|25.02.2022|Programming assignment: main concept and implementation details|**N/A**|
+|21.02.2022|Exceptions: built-in and custom for error handling and information exchange.|[Introduction tutorial](https://realpython.com/python-exceptions/)|
+|25.02.2022|Programming assignment: main concept and implementation details.|**N/A**|
+|04.03.2022|**Lecture:** installing external dependencies with `python -m pip install -r requirements.txt`, learning `requests` library: basics, tricks. **Practice:** downloading your website pages, working with exceptions.|[Exceptions practice](./seminars/03.04.2022/try_exceptions.py), [`requests` practice](./seminars/03.04.2022/try_requests.py)|
 
 ## Technical solution
 

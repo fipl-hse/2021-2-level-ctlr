@@ -26,12 +26,30 @@ class ArticleInstanceCreationBasicTest(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_3_2_corpus_manager_checks
+    def test_corpus_manager_instantiation(self):
+        self.assertTrue(hasattr(self.corpus_manager, '_storage'), 'CorpusManager instance must have _storage field')
+        self.assertIsInstance(self.corpus_manager._storage, dict,
+                              'CorpusManager attribute _storage must be dict object')
+        self.assertTrue(self.corpus_manager._storage,
+                        'CorpusManager attribute _storage must be filled right away during initialisation')
+
+    @pytest.mark.mark4
+    @pytest.mark.mark6
+    @pytest.mark.mark8
+    @pytest.mark.mark10
+    @pytest.mark.stage_3_2_corpus_manager_checks
+    def test_raw_files_are_found(self):
+        self.assertIn(0, self.corpus_manager._storage,
+                      "Corpus Manager does not create article instances given raw files only")
+
+    @pytest.mark.mark4
+    @pytest.mark.mark6
+    @pytest.mark.mark8
+    @pytest.mark.mark10
+    @pytest.mark.stage_3_2_corpus_manager_checks
     def test_article_instance_is_created(self):
-        try:
-            self.assertIsInstance(self.corpus_manager.storage[0], Article, "CorpusManager does not initialize \
-Article instance")
-        except KeyError as exception:
-            raise Exception("Corpus Manager does not create article instances when given raw files only") from exception
+        self.assertIsInstance(self.corpus_manager._storage[0], Article,
+                              "CorpusManager _storage values must be Article instances")
 
     @pytest.mark.mark4
     @pytest.mark.mark6
@@ -40,14 +58,14 @@ Article instance")
     @pytest.mark.stage_3_2_corpus_manager_checks
     def test_article_instance_fields_are_empty(self):
 
-        article = self.corpus_manager.storage[0]
+        article = self.corpus_manager._storage[0]
+        msg = "Fields of Article instances created by CorpusManager must me empty unless meta files are available"
         self.assertFalse(any((article.title,
                               article.author,
                               article.topics,
                               article.date,
-                              article.text)), "Newly created article instance fields must me empty\
-unless there is meta file available")
-        print(self.corpus_manager.storage)
+                              article.text)),
+                         msg)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -71,11 +89,9 @@ class ArticleInstanceCreationAdvancedTest(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_3_2_corpus_manager_checks
-    def test_article_instance_is_created(self):
-        try:
-            _ = self.corpus_manager.storage[0]
-        except KeyError:
-            self.fail("Corpus Manager does not create article instances given both raw and meta files")
+    def test_meta_files_are_found(self):
+        self.assertIn(0, self.corpus_manager._storage,
+                      "Corpus Manager does not create article instances given both raw and meta files")
 
     @pytest.mark.mark6
     @pytest.mark.mark8
@@ -83,7 +99,7 @@ class ArticleInstanceCreationAdvancedTest(unittest.TestCase):
     @pytest.mark.stage_3_2_corpus_manager_checks
     def test_article_instance_fields_are_filled(self):
 
-        student_meta = self.corpus_manager.storage[0]._get_meta()
+        student_meta = self.corpus_manager._storage[0]._get_meta()
 
         message = '{field_name} field of newly created article instance differs from corresponding {field_name} \
 value in meta file'
