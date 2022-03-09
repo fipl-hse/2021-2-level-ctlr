@@ -1,6 +1,6 @@
 # Technical Track of Computer Tools for Linguistic Research (2021/2022)
 
-As a part of a compulsory course 
+As a part of a compulsory course  
 [Computer Tools for Linguistic Research](https://www.hse.ru/en/edu/courses/494759476)
 in [National Research University Higher School of Economics](https://www.hse.ru/).
 
