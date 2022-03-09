@@ -1,6 +1,20 @@
 """
 Scrapper implementation
 """
+import requests
+
+
+def main():
+    response = requests.get('https://vz.ru/')
+    print(response.status_code)
+
+    with open('index.html', 'w', encoding='utf-8') as f:
+        f.write(response.text)
+
+
+if __name__ == "__main__":
+    main()
+
 
 
 class IncorrectURLError(Exception):
