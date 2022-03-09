@@ -39,8 +39,8 @@ if __name__ == '__main__':
     parser.add_argument('--target-score', type=str, help='Target score')
     args: argparse.Namespace = parser.parse_args()
 
-    scores = [score for score in args.target_score.split('\n')]
-    target_lint_level = transform_score_into_lint(max(int(scores[1]), int(scores[4])))
+    score = int(args.target_score)
+    target_lint_level = transform_score_into_lint(score)
     if not target_lint_level:
         print('\nInvalid value for target score: accepted are 4, 6, 8, 10.\n')
         sys.exit(target_lint_level)

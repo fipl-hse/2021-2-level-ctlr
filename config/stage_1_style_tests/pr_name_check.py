@@ -9,11 +9,11 @@ def convert_raw_pr_name(pr_name_raw: str) -> str:
 
 
 def is_matching_name(pr_name: str) -> bool:
-    template = r'Dataset Collector #\d, \w+ \w+ - 19FPL\d'
+    template = r'Laboratory Work #\d, \w+ \w+ - 20FPL\d'
     pr_name = re.search(template, pr_name)
     if not pr_name:
         print('Your Pull Request title does not confirm to the template.')
-        print('Template: Laboratory work #1, Name Surname - 19FPL1\n')
+        print('Template: Laboratory work #1, Name Surname - 20FPL1\n')
         return False
     print('Your Pull Request name confirm to provided template!')
     return True
