@@ -2,10 +2,10 @@
 Scrapper implementation
 """
 import json
-import requests
 import re
 import os
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+import requests
+from constants import ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -58,8 +58,8 @@ class Crawler:
             }
         for seed_url in self.seed_urls:
             response = requests.get(html, headers=headers)
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as f:
-                f.write(response.text)
+            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
+                file.write(response.text)
             self.urls.append(seed_url)
 
     def get_search_urls(self):
