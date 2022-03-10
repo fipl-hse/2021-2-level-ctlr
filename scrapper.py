@@ -2,6 +2,7 @@
 Scrapper implementation
 """
 
+import requests
 
 class IncorrectURLError(Exception):
     """
@@ -58,6 +59,20 @@ def validate_config(crawler_path):
     pass
 
 
+def main():
+    response = requests.get('https://russkayarech.ru/ru')
+    if response:
+        print(f'Response code is: {response.status_code}')
+    if response.ok:
+        print('Response is OK')
+    with open('index.html', 'w', encoding='utf-8') as f:
+        f.write(response.text)
+    response = requests.get('https://russkayarech.ru/images/topsite2.png')
+    with open('logo.png', 'wb') as f:
+        f.write(response.content)
+
+
 if __name__ == '__main__':
     # YOUR CODE HERE
     pass
+    main()
