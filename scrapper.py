@@ -7,6 +7,7 @@ class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
     """
+    #test
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
