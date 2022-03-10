@@ -1,7 +1,7 @@
 """
 Scrapper implementation
 """
-
+import requests
 
 class IncorrectURLError(Exception):
     """
@@ -29,6 +29,9 @@ class Crawler:
         pass
 
     def _extract_url(self, article_bs):
+        response = requests.get('https://periodical.pstgu.ru/ru/series/index/3')
+        with open('index.HTML', 'w', encoding='utf-8') as file:
+            file.write(response.text)
         pass
 
     def find_articles(self):
