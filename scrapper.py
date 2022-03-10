@@ -9,6 +9,7 @@ class IncorrectURLError(Exception):
     """
 
 
+
 class NumberOfArticlesOutOfRangeError(Exception):
     """
     Total number of articles to parse is too big
