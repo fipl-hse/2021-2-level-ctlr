@@ -57,10 +57,10 @@ simply speaking it is a set of key-value pairs.
 You state your ambitions on the mark by editing the file `config/target_score.txt` at the `line 2`. 
 For example, such content:
 ```
-# Target score for scrapper.py:
+# Target score for scrapper:
 6
 
-# Target score for pipeline.py:
+# Target score for pipeline:
 0
 ```
 would mean that you have made tasks for mark `6` and request mentors to check if you can get it.
