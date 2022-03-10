@@ -6,7 +6,7 @@ from requests import Timeout, HTTPError
 
 if __name__ == '__main__':
     # 1. requests basics
-    CORRECT_URL = 'https://pypi.org/project/requests/'
+    CORRECT_URL = 'https://novayagazeta.ru/#'
     INCORRECT_URL = f'{CORRECT_URL}garbagegarbage'
 
     response = requests.get(CORRECT_URL)
