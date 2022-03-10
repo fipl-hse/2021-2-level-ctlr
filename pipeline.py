@@ -1,5 +1,3 @@
-import requests
-
 """
 Pipeline for text processing implementation
 """
@@ -94,13 +92,8 @@ def validate_dataset(path_to_validate):
 
 
 def main():
-    html = 'https://vestnik.lunn.ru/arhiv-zhurnala/2021-god/vypusk-56-iv-kvartal-2021-g/'
-    response = requests.get(html, headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit'
-                                                         '/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'})
-    page_code = response.text
-
-    with open('page_code.html', 'w', encoding='utf-8') as file:
-        file.write(page_code)
+    # YOUR CODE HERE
+    pass
 
 
 if __name__ == "__main__":
