@@ -34,7 +34,9 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
-        pass
+        self.seed_urls = seed_urls
+        self.max_articles = max_articles
+        self.urls = []
 
     def _extract_url(self, article_bs):
         pass
@@ -71,20 +73,22 @@ def validate_config(crawler_path):
             data = json.load(config)
 
         seed_urls = data["seed_urls"]
-        number_of_articles = data["total_articles_to_find_and_parse"]
+        max_articles = data["total_articles_to_find_and_parse"]
 
         for url in seed_urls:
             url_validation = re.match(r'http://.*|https://.*', url)
             if not url_validation:
                 raise IncorrectURLError
 
-        if not isinstance(number_of_articles, int):
+        if not isinstance(max_articles, int):
             raise IncorrectNumberOfArticlesError
 
-        if number_of_articles > 300:
+        if max_articles > 300:
             raise NumberOfArticlesOutOfRangeError
 
-        return seed_urls, number_of_articles
+        prepare_environment(ASSETS_PATH)
+
+        return seed_urls, max_articles
 
     except IncorrectURLError:
         print('Incorrect URL')
@@ -93,7 +97,8 @@ def validate_config(crawler_path):
     except NumberOfArticlesOutOfRangeError:
         print('Number of articles out of range')
 
-    prepare_environment(ASSETS_PATH)
+
+crawler = Crawler(validate_config(CRAWLER_CONFIG_PATH)[0], validate_config(CRAWLER_CONFIG_PATH)[1])
 
 
 if __name__ == '__main__':
