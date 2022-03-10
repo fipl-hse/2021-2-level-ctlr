@@ -3,6 +3,8 @@ Scrapper implementation
 """
 import json
 import os
+import re
+
 import requests
 
 from constants import ASSETS_PATH
@@ -86,9 +88,17 @@ def validate_config(crawler_path):
 
         seed_urls = config["seed_urls"]
         total_articles = config["total_articles_to_find_and_parse"]
+        hhtp_pattern = re.compile(r'^https?://')
+        for url in seed_urls:
+            result = hhtp_pattern.search(url)
+            if not result:
+                raise IncorrectURLError
 
         if not isinstance(total_articles, int):
             raise IncorrectNumberOfArticlesError
+
+        if total_articles > 200:
+            raise NumberOfArticlesOutOfRangeError
 
         return seed_urls, total_articles
 
