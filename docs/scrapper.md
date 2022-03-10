@@ -260,7 +260,7 @@ text of each article from a PDF file. A link to this PDF should be present on ea
 Then you need to follow certain steps:
 
 1. find a URL to PDF using the `article_bs`
-2. create instance of `PDFRawFile` defined in [core_utils/pdf_utils.py](../core_utils/pdf_utils.py)
+2. create instance of `PDFRawFile` defined in [`core_utils/pdf_utils.py`](../core_utils/pdf_utils.py)
    by passing an url to the PDF file and the article ID (look into the interface of `PDFRawFile.__init__` method)
 3. download a file with `PDFRawFile.download` method
 4. get a text from PDF by calling `pdf_file.get_text` method
@@ -377,9 +377,9 @@ continues search and crawling process without repetitions.
 > need to store?
 
 > NOTE: For those who have chosen a scientific web resource when you scrape your website,
-> you can get monolithic PDFs, especially when you are working with
+> you can get monolithic PDF files, especially when you are working with
 > old and respected journals. Generally, if you meet such a PDF and there is a way to collect
-> 100 articles without parsing such monolithic PDFs, you are welcome to do that, and you can 
+> 100 articles without parsing such monolithic PDF files, you are welcome to do that, and you can 
 > simply ignore such files. At the same time, if you cannot collect enough articles and there are
 > monolithic issues of your journal, you need to implement your own `PDFCrawler` and `PDFParser`
 > following all the guidelines for plain versions of crawler and parser.
