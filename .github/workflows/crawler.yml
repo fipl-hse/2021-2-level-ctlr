@@ -403,6 +403,42 @@ jobs:
         run: |
           bash config/stage_3_pipeline_tests/_stage_check_corpus_manager.sh
 
+  checking-morphological-token-works-correctly:
+    name: MorphologicalToken displays tokens
+    needs: milestone-2-pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          # This path is specific to Ubuntu
+          path: ~/.cache/pip
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_qa.txt
+          pip install -r requirements.txt
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Run MorphologicalToken tests
+        run: |
+          bash config/stage_3_pipeline_tests/_stage_check_morphological_token.sh
+
   checking-student-processing-works-for-admin-dataset:
     name: Pipe processed admin data
     needs: milestone-2-pipeline
@@ -525,7 +561,8 @@ jobs:
       checking-raw-dataset-before-running-pipeline,
       checking-student-processing-works-for-admin-dataset,
       checking-student-processing-works-for-student-dataset,
-      checking-corpus-manager-creates-instances-correctly
+      checking-corpus-manager-creates-instances-correctly,
+      checking-morphological-token-works-correctly
     ]
     runs-on: ubuntu-latest
     timeout-minutes: 3

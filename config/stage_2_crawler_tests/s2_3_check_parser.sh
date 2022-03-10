@@ -3,7 +3,7 @@ set -ex
 echo "HTMLParser validation"
 echo "Starting tests for HTMLParser"
 
-TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh crawler)
 
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"
