@@ -96,9 +96,10 @@ python -m pip install -r requirements.txt
 1. Stage 3. Text Processing Pipeline
    1. Stage 3.1. Dataset sanity checks (we ensure that pipeline has certain sanity checks)
    1. Stage 3.2. `CorpusManager` sanity checks (we ensure that pipeline identifies all articles correctly)
-   1. Stage 3.3. Admin data processing
-   1. Stage 3.4. Student dataset processing
-   1. Stage 3.5. Student dataset validation
+   1. Stage 3.3. `MorphologicalToken` sanity checks (we ensure that pipeline displays all tokens appropriately)
+   1. Stage 3.4. Admin data processing
+   1. Stage 3.5. Student dataset processing
+   1. Stage 3.6. Student dataset validation
    
 1. Stage 4. Additional tasks
    1. Stage 4.1. Frequency visualization
