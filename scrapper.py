@@ -5,6 +5,9 @@ Scrapper implementation
 import json
 import os
 import re
+
+import requests
+
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
@@ -45,7 +48,23 @@ class Crawler:
         """
         Finds articles
         """
-        pass
+        headers = {
+            'User-Agent': """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
+            (KHTML, like Gecko) Chrome"""
+                          '/97.0.4692.99 Safari/537.36 OPR/83.0.4254.70',
+            'Accept': """text/html,application/xhtml+xml,application/xml;q=0.9,
+            image/avif,image/webp,image/apng,*/*;"""
+                      'q=0.8,applicat '
+                      'ion/signed-exchange;v=b3;q=0.9',
+            'Acccept-Encoding': 'gzip, deflate',
+            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
+        }
+
+        for seed_url in self.seed_urls:
+            response = requests.get(url=seed_url, headers=headers)
+            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
+                file.write(response.text)
+            self.urls.append(seed_url)
 
     def get_search_urls(self):
         """
@@ -76,7 +95,7 @@ def validate_config(crawler_path):
         max_articles = data["total_articles_to_find_and_parse"]
 
         for url in seed_urls:
-            url_validation = re.match(r'http://.*|https://.*', url)
+            url_validation = re.match(r'https?://', url)
             if not url_validation:
                 raise IncorrectURLError
 
