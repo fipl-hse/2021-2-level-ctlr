@@ -36,7 +36,7 @@ class Crawler:
         with open('index.HTML', 'w', encoding='utf-8') as file:
             file.write(response.text)
         soup = BeautifulSoup(response.text, 'html.parser')
-        all_links = soup.find_all('a', attrs={'href': re.compile("^http[s]://")})
+        all_links = soup.find_all('a', attrs={'href': re.compile("^http[s]?://")})
         for link in all_links:
             print(link.get('href'))
         pass
