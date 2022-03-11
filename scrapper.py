@@ -1,6 +1,8 @@
 """
 Scrapper implementation
 """
+import requests
+from bs4 import Beautifulsoup4, BeautifulSoup
 
 
 class IncorrectURLError(Exception):
@@ -29,6 +31,13 @@ class Crawler:
         pass
 
     def _extract_url(self, article_bs):
+        response = requests.get('https://lingngu.elpub.ru/jour')
+        with open('index.HTML', 'w', encoding='utf-8') as file:
+            file.write(response.text)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        all_links = soup.find_all('a', attrs={'href': re.compile("^http[s]://")})
+        for link in all_links:
+            print(link.get('href'))
         pass
 
     def find_articles(self):
