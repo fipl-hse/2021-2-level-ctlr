@@ -1,4 +1,4 @@
 {
-    "seed_urls": [],
+    "seed_urls": ["https://daily-nn.ru/"],
     "total_articles_to_find_and_parse": 0
 }

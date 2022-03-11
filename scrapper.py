@@ -1,6 +1,8 @@
 """
 Scrapper implementation
 """
+import requests
+from bs4 import BeautifulSoup
 
 
 class IncorrectURLError(Exception):
@@ -56,6 +58,12 @@ def validate_config(crawler_path):
     Validates given config
     """
     pass
+
+
+def main():
+    response = requests.get('https://daily-nn.ru/')
+    with open('index.html', 'w', encoding='utf-16') as file:
+        file.write(response.text)
 
 
 if __name__ == '__main__':
