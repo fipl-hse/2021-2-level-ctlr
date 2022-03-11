@@ -2,7 +2,8 @@
 Scrapper implementation
 """
 import requests
-from bs4 import Beautifulsoup4, BeautifulSoup
+from bs4 import BeautifulSoup
+import re
 
 
 class IncorrectURLError(Exception):
