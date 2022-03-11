@@ -30,6 +30,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
@@ -42,22 +43,22 @@ class Crawler:
         """
         Finds articles
         """
-        html = "https://languagejournal.spbu.ru/issue/view/682"
+        # html = "https://languagejournal.spbu.ru/issue/view/682"
         user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " \
                      "(KHTML, like Gecko) Chrome/96.0.4664.174 YaBrowser/22.1.4.837 " \
                      "Yowser/2.5 Safari/537.36"
-        accept = "width=device-width, initial-scale=1.0"
-        accept_encoding = "utf-8"
-        accept_language = "ru-RU"
+        accept = "*/*"
+        accept_encoding = "gzip, deflate, br"
+        accept_language = "en-US,en;q=0.5"
         headers = \
             {
-            'user-agent': user_agent,
-            'accept': accept,
-            'accept-encoding': accept_encoding,
-            'accept-language': accept_language
+                'User-Agent': user_agent,
+                'Accept': accept,
+                'Accept-Encoding': accept_encoding,
+                'Accept-Language': accept_language
             }
         for seed_url in self.seed_urls:
-            response = requests.get(html, headers=headers)
+            response = requests.get(seed_url, headers=headers)
             with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
                 file.write(response.text)
             self.urls.append(seed_url)
