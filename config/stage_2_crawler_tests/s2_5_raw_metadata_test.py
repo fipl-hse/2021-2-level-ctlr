@@ -23,6 +23,7 @@ class RawBasicDataValidator(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
+    @pytest.mark.stage_2_5_dataset_validation
     def test_validate_sort(self):
         list_ids = [pair[0] for pair in self.texts]
         for i in range(1, len(list_ids)+1):
@@ -33,7 +34,7 @@ class RawBasicDataValidator(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_texts_are_not_empty(self):
         for file_name in self.texts:
             self.assertTrue(len(file_name[1]) > 50,
@@ -60,7 +61,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_match_requested_volume_sample(self):
         metas, raws = 0, 0
         for file in os.listdir(ASSETS_PATH):
@@ -74,7 +75,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_validate_sort(self):
         list_ids = [pair[0] for pair in self.metadata]
         for i in range(1, len(list_ids)+1):
@@ -84,7 +85,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_validate_metadata(self):
         # can i open this URL?
         for metadata in self.metadata:
@@ -115,7 +116,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_texts_are_not_empty(self):
         for file_name in os.listdir(ASSETS_PATH):
             if file_name.endswith("_raw.txt"):
@@ -146,7 +147,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
 
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_match_requested_volume_sample(self):
         metas, raws = 0, 0
         for file in os.listdir(ASSETS_PATH):
@@ -159,7 +160,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
 
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_validate_sort(self):
         list_ids = [pair[0] for pair in self.metadata]
         for i in range(1, len(list_ids)+1):
@@ -168,7 +169,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
 
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_validate_metadata(self):
         # can i open this URL?
         for metadata in self.metadata:
@@ -211,7 +212,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
 
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_4_dataset_validation
+    @pytest.mark.stage_2_5_dataset_validation
     def test_texts_are_not_empty(self):
         for file_name in os.listdir(ASSETS_PATH):
             if file_name.endswith("_raw.txt"):

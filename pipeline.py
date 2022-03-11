@@ -11,7 +11,7 @@ class EmptyDirectoryError(Exception):
 
 class InconsistentDatasetError(Exception):
     """
-    Corrupt data: numeration is expected to start from 1 and to be continuous and
+    Corrupt data: numeration is expected to start from 1 and to be continuous
     """
 
 

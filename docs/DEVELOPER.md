@@ -87,17 +87,38 @@ python -m pip install -r requirements.txt
    
 1. Stage 2. Crawler
    1. Stage 2.1. Crawler config validation (we ensure that crawler has certain sanity checks)
-   1. Stage 2.2. Articles downloading
-   1. Stage 2.3. Dataset volume validation
-   1. Stage 2.4. Dataset structure validation
+   1. Stage 2.2. `Crawler` instantiation validation
+   1. Stage 2.3. `Parser` instantiation validation
+   1. Stage 2.4. Articles downloading
+   1. Stage 2.5. Dataset volume validation
+   1. Stage 2.6. Dataset structure validation
    
 1. Stage 3. Text Processing Pipeline
    1. Stage 3.1. Dataset sanity checks (we ensure that pipeline has certain sanity checks)
    1. Stage 3.2. `CorpusManager` sanity checks (we ensure that pipeline identifies all articles correctly)
-   1. Stage 3.3. Admin data processing
-   1. Stage 3.4. Student dataset processing
-   1. Stage 3.5. Student dataset validation
+   1. Stage 3.3. `MorphologicalToken` sanity checks (we ensure that pipeline displays all tokens appropriately)
+   1. Stage 3.4. Admin data processing
+   1. Stage 3.5. Student dataset processing
+   1. Stage 3.6. Student dataset validation
    
 1. Stage 4. Additional tasks
    1. Stage 4.1. Frequency visualization
+   
+
+## Synchronizing between admin and public repository
+
+1. Run the following command (macOS specific):
+ 
+   ```bash
+   cd ..
+   diff -rq 2021-2-level-ctlr 2021-2-level-ctlr-admin/ \
+          -x .git -x .idea -x .pytest_cache -x __pycache__ \
+          -x venv -x tmp \
+          -x dictionary.dic -x target_score.txt \
+          -x scrapper_config.json -x scrapper.py \
+          -x pipeline.py -x pos_frequency_pipeline.py \
+          -x crawler_pdf.yml -x html_with_pdf_parser_launcher.py \
+          -x get_mark.sh -x requirements.txt \
+          -x scrapper_config_test.json > hse.diff
+   ```
    

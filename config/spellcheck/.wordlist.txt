@@ -9,8 +9,9 @@ getters
 HTMl
 incapsulate
 inplace
+instantiation
 JSON
-Kaziulina
+Kazyulina
 Khomenko
 lemmatization
 lemmatize

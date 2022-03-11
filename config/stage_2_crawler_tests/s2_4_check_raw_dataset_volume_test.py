@@ -19,7 +19,7 @@ class VolumeBasicCheckTest(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_3_dataset_volume_check
+    @pytest.mark.stage_2_4_dataset_volume_check
     def test_folder_is_appropriate(self):
         self.assertTrue(os.listdir(ASSETS_PATH),
                         msg="ASSETS_PATH directory is empty")
@@ -33,7 +33,7 @@ class VolumeCheckTest(unittest.TestCase):
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
-    @pytest.mark.stage_2_3_dataset_volume_check
+    @pytest.mark.stage_2_4_dataset_volume_check
     def test_folder_is_appropriate(self):
         metas, raws = 0, 0
         for file in os.listdir(ASSETS_PATH):

@@ -5,10 +5,14 @@ markers = [
     "mark8: tests for level 8",
     "mark10: tests for level 10",
     "stage_2_1_crawler_config_check: tests for Crawler config validation",
-    "stage_2_3_dataset_volume_check: tests for Dataset volume validation",
-    "stage_2_4_dataset_validation: tests for Dataset structure validation",
+    "stage_2_2_crawler_check: tests for Crawler",
+    "stage_2_3_HTML_parser_check: tests for HTML Parser",
+    "stage_2_4_dataset_volume_check: tests for Dataset volume validation",
+    "stage_2_5_dataset_validation: tests for Dataset structure validation",
     "stage_3_1_dataset_sanity_checks: tests for Dataset sanity checks",
     "stage_3_2_corpus_manager_checks: tests for Corpus Manager",
-    "stage_3_3_admin_data_processing: tests for Admin data processing",
-    "stage_3_4_student_dataset_validation: tests for Student dataset validation",
+    "stage_3_3_morphological_token_checks: tests for Morphological Token",
+    "stage_3_4_admin_data_processing: tests for Admin data processing",
+    "stage_3_5_student_dataset_validation: tests for Student dataset validation",
 ]
+  

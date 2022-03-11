@@ -44,13 +44,12 @@ jobs:
         pip install -r requirements.txt
     - name: PR name check
       run: |
-        echo "Pull Request Name is $PR_NAME"
-        python config/stage_1_style_tests/pr_name_check.py --pr-name="$PR_NAME" --pr-author="$PR_AUTHOR"
+        bash config/stage_1_style_tests/_stage_pr_name_check.sh "$PR_NAME" "$PR_AUTHOR"
 
   code-style:
     name: Code Style
     runs-on: ubuntu-latest
-    timeout-minutes: 2
+    timeout-minutes: 3
 
     steps:
     - uses: actions/checkout@v2
@@ -75,12 +74,12 @@ jobs:
         pip install -r requirements.txt
     - name: Code Syle
       run: |
-        bash config/stage_1_style_tests/run_lint.sh
+        bash config/stage_1_style_tests/_stage_run_lint.sh
 
   spellcheck:
     name: Spellcheck
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@master
       - name: Install Aspell
@@ -107,14 +106,14 @@ jobs:
           pip install -r requirements_qa.txt
       - name: Spell check
         run: |
-          python -m pyspelling -c config/spellcheck/.spellcheck.yaml
+          bash config/spellcheck/_stage_spellcheck.sh
 
   # Stage 2. Crawler tests
   checking-crawler-config:
     name: Crawler checks config
     needs: [ code-style ]
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 3
 
     steps:
     - uses: actions/checkout@v2
@@ -139,17 +138,77 @@ jobs:
         pip install -r requirements.txt
     - name: Run crawler config checks
       run: |
-        TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
+        bash config/stage_2_crawler_tests/_stage_check_crawler_config.sh
 
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          python -m pytest -m "mark10 and stage_2_1_crawler_config_check"
-        else
-          echo "Skipping stage"
-        fi
+  checking-crawler:
+    name: Crawler checks
+    needs: [ code-style ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          # This path is specific to Ubuntu
+          path: ~/.cache/pip
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_qa.txt
+          pip install -r requirements.txt
+      - name: Run crawler config checks
+        run: |
+          bash config/stage_2_crawler_tests/_stage_crawler_checks.sh
+
+  checking-parser:
+    name: Parser checks
+    needs: [ code-style ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          # This path is specific to Ubuntu
+          path: ~/.cache/pip
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_qa.txt
+          pip install -r requirements.txt
+      - name: Run crawler config checks
+        run: |
+          bash config/stage_2_crawler_tests/_stage_parser_checks.sh
 
   collecting-articles-from-internet:
     name: Download articles
-    needs: [ code-style ]
+    needs: [
+      checking-crawler-config,
+      checking-crawler,
+      checking-parser
+    ]
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -176,24 +235,18 @@ jobs:
         pip install -r requirements.txt
     - name: Crawl a raw dataset from web
       run: |
-        TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          bash config/stage_2_crawler_tests/s2_3_collect_articles_from_internet.sh
-          ls -la tmp/articles
-        else
-          echo "Skipping stage"
-        fi
+        bash config/stage_2_crawler_tests/_stage_collect_articles.sh
     - name: Archive raw dataset
       uses: actions/upload-artifact@v2
       with:
         name: raw-dataset
         path: |
           tmp/articles
-        retention-days: 40
+        retention-days: 5
+
   checking-articles-dataset:
     name: Validate dataset
-    needs: [ checking-crawler-config, collecting-articles-from-internet ]
+    needs: [ collecting-articles-from-internet ]
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
@@ -225,19 +278,7 @@ jobs:
         name: raw-dataset
     - name: Run metadata validation
       run: |
-        echo "Validate raw data"
-        TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          mkdir -p tmp/articles
-          mv *_raw.txt tmp/articles
-          if [[ ${TARGET_SCORE} != 4 ]]; then
-            mv *_meta.json tmp/articles
-          fi
-          bash config/stage_2_crawler_tests/s2_4_check_raw_data.sh
-        else
-          echo "Skipping stage"
-        fi
+        bash config/stage_2_crawler_tests/_stage_validate_metadata.sh
 
   milestone-1-crawler-is-working:
     name: Crawler is accepted!
@@ -246,7 +287,7 @@ jobs:
         spellcheck
     ]
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 2
 
     steps:
     - uses: actions/checkout@v2
@@ -276,13 +317,7 @@ jobs:
         name: raw-dataset
     - name: Congratulations
       run: |
-        TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          echo "Crawler is working. Proceed to text processing pipeline."
-        else
-          echo "Skipping stage"
-        fi
+        bash config/stage_2_crawler_tests/_stage_accept_dataset.sh
 
 # Stage 3. Pipeline tests
   milestone-2-pipeline:
@@ -300,7 +335,7 @@ jobs:
     name: Pipe verifies dataset
     needs: milestone-2-pipeline
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 5
 
     steps:
     - uses: actions/checkout@v2
@@ -330,19 +365,7 @@ jobs:
         name: raw-dataset
     - name: Run crawler config checks
       run: |
-        TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          mkdir -p tmp/articles
-          if [[ ${TARGET_SCORE} != 4 ]]; then
-            mv *_meta.json tmp/articles
-          fi
-          mv *_raw.txt tmp/articles
-          python -m pytest -m "mark10 and stage_3_1_dataset_sanity_checks"
-        else
-          echo "Skip stage"
-        fi
-
+        bash config/stage_3_pipeline_tests/_stage_check_raw_dataset.sh
 
   checking-corpus-manager-creates-instances-correctly:
     name: CorpusManager detects articles
@@ -378,20 +401,43 @@ jobs:
           name: raw-dataset
       - name: Run CorpusManager tests
         run: |
-          TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
+          bash config/stage_3_pipeline_tests/_stage_check_corpus_manager.sh
 
-          if [[ ${TARGET_SCORE} != 0 ]]; then
-            mkdir -p tmp/articles
-            if [[ ${TARGET_SCORE} != 4 ]]; then
-              mv *_meta.json tmp/articles
-            fi
-            mv *_raw.txt tmp/articles
-            bash config/stage_3_pipeline_tests/s3_2_corpus_manager.sh
-            ls -la tmp/articles
-          else
-            echo "Skip stage"
-          fi
+  checking-morphological-token-works-correctly:
+    name: MorphologicalToken displays tokens
+    needs: milestone-2-pipeline
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
 
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          # This path is specific to Ubuntu
+          path: ~/.cache/pip
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_qa.txt
+          pip install -r requirements.txt
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Run MorphologicalToken tests
+        run: |
+          bash config/stage_3_pipeline_tests/_stage_check_morphological_token.sh
 
   checking-student-processing-works-for-admin-dataset:
     name: Pipe processed admin data
@@ -427,19 +473,7 @@ jobs:
         name: raw-dataset
     - name: Run metadata validation
       run: |
-        TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          mkdir -p tmp/articles
-          if [[ ${TARGET_SCORE} != 4 ]]; then
-            mv *_meta.json tmp/articles
-          fi
-          mv *_raw.txt tmp/articles
-          bash config/stage_3_pipeline_tests/s3_3_reference_text_preprocess.sh
-          ls -la tmp/articles
-        else
-          echo "Skip stage"
-        fi
+        bash config/stage_3_pipeline_tests/_stage_check_on_admin_dataset.sh
 
   run-student-processing:
     name: Pipe processed student data
@@ -475,19 +509,7 @@ jobs:
         name: raw-dataset
     - name: Run validation of `_processed.txt` files
       run: |
-        TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          mkdir -p tmp/articles
-          if [[ ${TARGET_SCORE} != 4 ]]; then
-            mv *_meta.json tmp/articles
-          fi
-          mv *_raw.txt tmp/articles
-          python pipeline.py
-          ls -la tmp/articles
-        else
-          echo "Skip stage"
-        fi
+        bash config/stage_3_pipeline_tests/_stage_check_on_student_dataset.sh
     - name: Archive processed dataset
       continue-on-error: true
       uses: actions/upload-artifact@v2
@@ -495,7 +517,7 @@ jobs:
         name: processed-dataset
         path: |
           tmp/articles
-        retention-days: 40
+        retention-days: 5
 
   checking-student-processing-works-for-student-dataset:
     name: Validate final dataset
@@ -531,23 +553,7 @@ jobs:
         name: processed-dataset
     - name: Run validation of `_processed.txt` files
       run: |
-        TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          mkdir -p tmp/articles
-          mv *_cleaned.txt tmp/articles
-          if [[ ${TARGET_SCORE} != 4 ]]; then
-            mv *_meta.json tmp/articles
-            mv *_single_tagged.txt tmp/articles
-            if [[ ${TARGET_SCORE} != 6 ]]; then
-              mv *_multiple_tagged.txt tmp/articles
-            fi
-          fi
-          mv *_raw.txt tmp/articles
-          bash config/stage_3_pipeline_tests/s3_4_student_text_preprocess.sh
-        else
-          echo "Skip stage"
-        fi
+        bash config/stage_3_pipeline_tests/_stage_check_student_processing.sh
 
   milestone-2-pipeline-is-working:
     name: Pipeline is accepted!
@@ -555,10 +561,11 @@ jobs:
       checking-raw-dataset-before-running-pipeline,
       checking-student-processing-works-for-admin-dataset,
       checking-student-processing-works-for-student-dataset,
-      checking-corpus-manager-creates-instances-correctly
+      checking-corpus-manager-creates-instances-correctly,
+      checking-morphological-token-works-correctly
     ]
     runs-on: ubuntu-latest
-    timeout-minutes: 1
+    timeout-minutes: 3
 
     steps:
     - uses: actions/checkout@v2
@@ -588,21 +595,4 @@ jobs:
         name: processed-dataset
     - name: Congratulations
       run: |
-        TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
-
-        if [[ ${TARGET_SCORE} != 0 ]]; then
-          mkdir -p tmp/articles
-          mv *_cleaned.txt tmp/articles
-          if [[ ${TARGET_SCORE} != 4 ]]; then
-            mv *_meta.json tmp/articles
-            mv *_single_tagged.txt tmp/articles
-            if [[ ${TARGET_SCORE} != 6 ]]; then
-              mv *_multiple_tagged.txt tmp/articles
-            fi
-          fi
-          mv *_raw.txt tmp/articles
-          bash config/stage_4_pos_frequency_pipeline_tests/run_pos_frequency_pipeline.sh
-          echo "Your solution is accepted! Proceed to further tasks from your lecturer."
-        else
-          echo "Skip stage"
-        fi
+        bash config/stage_4_pos_frequency_pipeline_tests/_stage_check_pos_pipeline.sh

@@ -22,11 +22,11 @@ When it is run as a standalone Python program, it should perform all aforementio
 Example execution (`Windows`):
 
 ```bash
-py pipeline.py
+python pipeline.py
 ```
 
 Expected result:
-1. `N` raw texts previously collected by crawler are processed
+1. `N` raw texts previously collected by scrapper are processed
 1. each article has a processed version (or versions) saved in the `tmp/articles` directory. An example `tmp` directory content for grade 8:
 ```
 +-- 2020-2-level-ctlr
@@ -45,10 +45,10 @@ Expected result:
 
 ## Configuring pipeline
 
-Processing behavior is not configurable:
+Processing behavior must follow several steps:
 
 1. pipeline takes a raw dataset that is collected by
-   `crawler.py` and placed at `ASSETS_PATH` (see `constants.py` for a particular place)
+   `scrapper.py` and placed at `ASSETS_PATH` (see `constants.py` for a particular place)
 1. pipeline goes through each raw file, for example `1_raw.txt`
 1. pipeline cleans the text by lowercasing it and removing punctuation marks, saves the result in file,
    for example, `1_cleaned.txt`
@@ -511,6 +511,8 @@ visualize(statistics=frequencies_dict, path_to_save='./tmp/articles/1_image.png'
 ```
 
 #### Stage 8.3. Refactor your own code to use `pathlib`
+
+> NOTE: !!! `pathlib` to be used from early beginning !!!
 
 As we discussed during lectures it is always better to have something designed specifically for the
 given task. Comparing `os` and `pathlib` modules, the latter is the one that is designed for most of

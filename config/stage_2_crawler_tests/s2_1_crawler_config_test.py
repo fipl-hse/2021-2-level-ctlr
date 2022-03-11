@@ -38,12 +38,31 @@ class CrawlerConfigCheck(ExtendedTestCase):
         """
         Checks that scrapper returns error message and exit code 1 with incorrect config params
         """
+        generate_config(seed_urls='https://sample.com/',
+                        num_articles=self.reference['total_articles_to_find_and_parse'])
+
+        error_message = """Checking that scrapper can handle incorrect seed_urls inputs. 
+                            Seed URLs must be a list of strings, not a single string"""
+        self.assertRaisesWithMessage(error_message,
+                                     IncorrectURLError,
+                                     scrapper.validate_config,
+                                     TEST_CRAWLER_CONFIG_PATH)
+
+        generate_config(seed_urls=[],
+                        num_articles=self.reference['total_articles_to_find_and_parse'])
+
+        error_message = """Checking that scrapper can handle incorrect seed_urls inputs. 
+                            A list of seed URLs must not be empty"""
+        self.assertRaisesWithMessage(error_message,
+                                     IncorrectURLError,
+                                     scrapper.validate_config,
+                                     TEST_CRAWLER_CONFIG_PATH)
+
         generate_config(seed_urls=['plain text', 1],
                         num_articles=self.reference['total_articles_to_find_and_parse'])
 
         error_message = """Checking that scrapper can handle incorrect seed_urls inputs. 
-                            If fails - Check URLs that you are trying to give to scrapper.
-                            Some of them may not appear to be in the URL  format"""
+                           Real URLs always follow https:// pattern or similar"""
         self.assertRaisesWithMessage(error_message,
                                      IncorrectURLError,
                                      scrapper.validate_config,
@@ -62,8 +81,7 @@ class CrawlerConfigCheck(ExtendedTestCase):
                         num_articles=1000000)
 
         error_message = """Checking that num_articles parameter is not big for connection block.
-                                If fails - Too big amount of articles to collect. 
-                                Try less number of articles to collect"""
+                            This parameter must not be too big so as not to break connection"""
         self.assertRaisesWithMessage(error_message,
                                      NumberOfArticlesOutOfRangeError,
                                      scrapper.validate_config,
@@ -81,12 +99,41 @@ class CrawlerConfigCheck(ExtendedTestCase):
         generate_config(seed_urls=self.reference['seed_urls'],
                         num_articles='plain text')
 
-        error_message = """Checking that number of articles parameter is integer.
-                                If fails - check your config"""
+        error_message = """Checking that scrapper can handle incorrect total_articles_to_find_and_parse inputs. 
+                           Number of articles parameter must be an integer for scrapper to work"""
         self.assertRaisesWithMessage(error_message,
                                      IncorrectNumberOfArticlesError,
                                      scrapper.validate_config,
                                      TEST_CRAWLER_CONFIG_PATH)
+
+        generate_config(seed_urls=self.reference['seed_urls'],
+                        num_articles=0)
+
+        error_message = """Checking that scrapper can handle incorrect total_articles_to_find_and_parse inputs. 
+                           Number of articles parameter must be a positive integer value for scrapper to work"""
+        self.assertRaisesWithMessage(error_message,
+                                     IncorrectNumberOfArticlesError,
+                                     scrapper.validate_config,
+                                     TEST_CRAWLER_CONFIG_PATH)
+
+    @pytest.mark.mark4
+    @pytest.mark.mark6
+    @pytest.mark.mark8
+    @pytest.mark.mark10
+    @pytest.mark.stage_2_1_crawler_config_check
+    def test_return_value_is_correct(self):
+        """
+        Checks that validation of correct config returns correct values
+        """
+        generate_config(seed_urls=self.reference['seed_urls'],
+                        num_articles=self.reference['total_articles_to_find_and_parse'])
+
+        error_message = """Checking that validate config returns exclusively the values from config file"""
+
+        self.assertTrue(scrapper.validate_config(TEST_CRAWLER_CONFIG_PATH) in
+                        [(self.reference['seed_urls'], self.reference['total_articles_to_find_and_parse']),
+                         (self.reference['total_articles_to_find_and_parse'], self.reference['seed_urls'])],
+                        error_message)
 
 
 if __name__ == "__main__":
