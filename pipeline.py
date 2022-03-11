@@ -1,7 +1,8 @@
 """
 Pipeline for text processing implementation
 """
-
+from bs4 import BeautifulSoup
+import requests
 
 class EmptyDirectoryError(Exception):
     """
@@ -92,8 +93,11 @@ def validate_dataset(path_to_validate):
 
 
 def main():
-    # YOUR CODE HERE
-    pass
+    main_url = 'https://nn.rbc.ru/nn/'
+    response = requests.get(main_url)
+    soup = BeautifulSoup(response.text, 'lxml')
+    title_bs = soup.find_all('span', class_="item__title rm-cm-item-text")[0]
+    print(title_bs.text.strip())
 
 
 if __name__ == "__main__":
