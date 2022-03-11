@@ -44,9 +44,8 @@ class Crawler:
         Finds articles
         """
         # html = "https://languagejournal.spbu.ru/issue/view/682"
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 " \
-                     "(KHTML, like Gecko) Chrome/96.0.4664.174 YaBrowser/22.1.4.837 " \
-                     "Yowser/2.5 Safari/537.36"
+        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) " \
+                     "Gecko/20100101 Firefox/99.0"
         accept = "*/*"
         accept_encoding = "gzip, deflate, br"
         accept_language = "en-US,en;q=0.5"
