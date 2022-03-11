@@ -93,7 +93,7 @@ def validate_dataset(path_to_validate):
 
 def main():
     # YOUR CODE HERE
-    pass
+
 
 
 if __name__ == "__main__":
