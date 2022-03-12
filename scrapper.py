@@ -2,8 +2,8 @@
 Scrapper implementation
 """
 
-import requests
 import json
+import requests
 
 class IncorrectURLError(Exception):
     """
@@ -43,8 +43,8 @@ class Crawler:
         response = requests.get('http://www.vestnik.vsu.ru/content/lingvo/index_ru.asp', headers=headers)
         # print(response.status_code)
 
-        with open('index.html', 'w', encoding='utf-8') as f:
-            f.write(response.text)
+        with open('index.html', 'w', encoding='utf-8') as file:
+            file.write(response.text)
         pass
 
     def get_search_urls(self):
