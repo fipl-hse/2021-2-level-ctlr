@@ -1,4 +1,6 @@
 {
-    "seed_urls": ["http://journals.tsu.ru/philology/&journal_page=ar"],
+    "seed_urls": ["http://journals.tsu.ru/philology/&journal_page=archive&id=2044",
+        "http://journals.tsu.ru/philology/&journal_page=archive&id=2066",
+        "http://journals.tsu.ru/philology/&journal_page=archive&id=2105"],
     "total_articles_to_find_and_parse": 1
 }

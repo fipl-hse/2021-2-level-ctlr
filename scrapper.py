@@ -49,15 +49,10 @@ class Crawler:
         Finds articles
         """
         headers = {
-            'User-Agent': """Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 
-            (KHTML, like Gecko) Chrome"""
-                          '/97.0.4692.99 Safari/537.36 OPR/83.0.4254.70',
-            'Accept': """text/html,application/xhtml+xml,application/xml;q=0.9,
-            image/avif,image/webp,image/apng,*/*;"""
-                      'q=0.8,applicat '
-                      'ion/signed-exchange;v=b3;q=0.9',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'Acccept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
+            'Accept-Language': 'ru,en-GB;q=0.9,en;q=0.8,en-US;q=0.7'
         }
 
         for seed_url in self.seed_urls:
@@ -71,6 +66,13 @@ class Crawler:
         Returns seed_urls param
         """
         pass
+
+
+class ArticleParser:
+    def __init__(self, full_url, i):
+        self.article_url = full_url
+        self.article_id = i
+        self.article = ''
 
 
 def prepare_environment(base_path):
