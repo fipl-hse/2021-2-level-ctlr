@@ -82,22 +82,20 @@ def validate_config(crawler_path):
         config = json.load(file)
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
-    try:
-        for seed_url in seed_urls:
-            if seed_url[0:7] != 'https://':
-                raise IncorrectURLError
-        if not isinstance(max_articles, int):
-            raise IncorrectNumberOfArticlesError
-        if max_articles > 100:
-            raise NumberOfArticlesOutOfRangeError
-        return seed_urls, max_articles
-    except IncorrectURLError:
-        print('Seed URL does not match standard pattern')
-    except IncorrectNumberOfArticlesError:
-        print('Total number of articles to parse in not integer')
-    except NumberOfArticlesOutOfRangeError:
-        print('Total number of articles to parse is too big')
-
+    for seed_url in seed_urls:
+        if seed_url[0:8] != 'https://':
+            raise IncorrectURLError
+    if not seed_urls:
+        raise IncorrectURLError
+    if not isinstance(max_articles, int):
+        raise IncorrectNumberOfArticlesError
+    if max_articles > 100:
+        raise NumberOfArticlesOutOfRangeError
+    if max_articles == 0 or max_articles < 0:
+        raise IncorrectNumberOfArticlesError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
