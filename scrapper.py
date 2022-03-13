@@ -1,11 +1,12 @@
 """
 Scrapper implementation
 """
-import requests
 import os
-from bs4 import BeautifulSoup
 import json
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+import requests
+from bs4 import BeautifulSoup
+
+
 
 class IncorrectURLError(Exception):
     """
@@ -33,7 +34,7 @@ class Crawler:
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
-        pass
+
 
     def _extract_url(self, article_bs):
         class_bs = article_bs.find('div', class_='view-content view-rows')
@@ -47,19 +48,19 @@ class Crawler:
         """
         Finds articles
         """
-        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
+        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
+                                 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
-        pass
+
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
         return self.seed_urls
-        pass
 
 
 def prepare_environment(base_path):
