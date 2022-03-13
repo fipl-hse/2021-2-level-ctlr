@@ -83,7 +83,7 @@ def validate_config(crawler_path):
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
     for seed_url in seed_urls:
-        if seed_url[0:8] != 'https://':
+        if seed_url[0:8] != 'https://' and seed_url[0:7] != 'http://':
             raise IncorrectURLError
     if not seed_urls:
         raise IncorrectURLError
