@@ -1,7 +1,11 @@
 """
 Scrapper implementation
 """
-
+import requests
+import os
+from bs4 import BeautifulSoup
+import json
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 class IncorrectURLError(Exception):
     """
@@ -26,21 +30,35 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
+        self.seed_urls = seed_urls
+        self.max_articles = max_articles
+        self.urls = []
         pass
 
     def _extract_url(self, article_bs):
-        pass
+        class_bs = article_bs.find('div', class_='view-content view-rows')
+        title_bs = class_bs.find_all('td', class_="views-field views-field-title table__cell")
+        for link in title_bs:
+            link = link.find('a')
+            self.urls.append('https://rjano.ruslang.ru' + link['href'])
+
 
     def find_articles(self):
         """
         Finds articles
         """
+        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
+        for seed_url in self.seed_urls:
+            response = requests.get(seed_url, headers)
+            article_bs = BeautifulSoup(response.text, 'html.parser')
+            self._extract_url(article_bs)
         pass
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
+        return self.seed_urls
         pass
 
 
@@ -48,14 +66,37 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    pass
+    try:
+        os.rmdir(base_path)
+    except FileNotFoundError:
+        pass
+    os.mkdir(base_path)
 
 
 def validate_config(crawler_path):
     """
     Validates given config
     """
-    pass
+    with open(crawler_path, 'r', encoding='utf-8') as file:
+        config = json.load(file)
+    seed_urls = config['seed_urls']
+    max_articles = config['total_articles_to_find_and_parse']
+    try:
+        for seed_url in seed_urls:
+            if seed_url[0:7] != 'https://':
+                raise IncorrectURLError
+        if not isinstance(max_articles, int):
+            raise IncorrectNumberOfArticlesError
+        if max_articles > 100:
+            raise NumberOfArticlesOutOfRangeError
+        return seed_urls, max_articles
+    except IncorrectURLError:
+        print('Seed URL does not match standard pattern')
+    except IncorrectNumberOfArticlesError:
+        print('Total number of articles to parse in not integer')
+    except NumberOfArticlesOutOfRangeError:
+        print('Total number of articles to parse is too big')
+
 
 
 if __name__ == '__main__':
