@@ -65,18 +65,19 @@ class Crawler:
         all_links = soup.find_all('a')
         print(len(all_links))
 
-        links = []
+        seed_urls = []
 
         for link in all_links:
             try:
                 # print(url + link['href'])
-                links.append(link['href'])
+                seed_urls.append(link['href'])
             except (KeyError, urllib.error.URLError, urllib.error.HTTPError):
                 print('Found incorrect link')
 
-            for elements in links:
+            for elements in seed_urls:
                 if ('http://' and 'https://') not in elements:
-                    links.remove(elements)
+                    seed_urls.remove(elements)
+            return seed_urls
 
 
 def prepare_environment(base_path):
