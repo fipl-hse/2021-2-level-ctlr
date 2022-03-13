@@ -77,7 +77,7 @@ class Crawler:
             for elements in seed_urls:
                 if ('http://' and 'https://') not in elements:
                     seed_urls.remove(elements)
-            return seed_urls
+        return seed_urls
 
 
 def prepare_environment(base_path):
