@@ -1,4 +1,6 @@
 {
-    "seed_urls": ["https://rjano.ruslang.ru/ru/archive/2001-1"],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": ["https://rjano.ruslang.ru/ru/archive/2001-1", "https://rjano.ruslang.ru/ru/archive/2001-2", "https://rjano.ruslang.ru/ru/archive/2002-1",
+    "https://rjano.ruslang.ru/ru/archive/2002-2", "https://rjano.ruslang.ru/ru/archive/2003-1", "https://rjano.ruslang.ru/ru/archive/2003-2",
+    "https://rjano.ruslang.ru/ru/archive/2004-1", "https://rjano.ruslang.ru/ru/archive/2004-2"],
+    "total_articles_to_find_and_parse": 100
 }
