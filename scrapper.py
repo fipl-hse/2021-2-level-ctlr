@@ -69,7 +69,7 @@ class Crawler:
             if not response.status_code == 200:
                 raise BadStatusCode
 
-            soup = BeautifulSoup(response.text, 'lxml')  # install and add lxml to requirements.txt
+            soup = BeautifulSoup(response.text, 'lxml')
             articles = self._extract_url(soup)[:self.total_max_articles]
             return articles
 
@@ -98,13 +98,11 @@ def validate_config(crawler_path):
 
         n_articles = config['total_articles_to_find_and_parse']
         is_n_articles = isinstance(n_articles, int)
-        is_n_in_range = 0 < n_articles < 1000
+        is_n_in_range = is_n_articles and 0 < n_articles < 1000
 
         seed_urls = config['seed_urls']
         pattern = re.compile(r'https://alp\.iling\.spb\.ru/.+')
-        is_seed_urls = isinstance(seed_urls, list)
-        if is_seed_urls:
-            is_seed_urls = all(pattern.match(str(x)) for x in seed_urls)
+        is_seed_urls = all(pattern.match(str(seed)) for seed in seed_urls)
 
         Validation = namedtuple('Validation', ['success', 'error'])
         validations = (
@@ -115,7 +113,7 @@ def validate_config(crawler_path):
 
         for test in validations:
             if not test.success:
-                raise test.error
+                raise test.error('Scrapper config check failed.')
 
         return seed_urls, n_articles
 
