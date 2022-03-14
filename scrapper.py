@@ -56,8 +56,8 @@ class Crawler:
         }
         for url in self.seed_urls:
             response = requests.get(url=url, headers=headers)
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
-                file.write(response.text)
+            with open(ASSETS_PATH, 'w', encoding='utf-8') as f:
+                f.write(response.text)
             self.urls.append(url)
 
     def get_search_urls(self):
@@ -82,34 +82,29 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    try:
-        with open(crawler_path) as file:
-            config = json.load(file)
+    with open(crawler_path) as f:
+        configuration = json.load(f)
 
-        seed_urls = config["seed_urls"]
-        total_articles = config["total_articles_to_find_and_parse"]
-        hhtp_pattern = re.compile(r'^https?://')
-        for url in seed_urls:
-            result = hhtp_pattern.search(url)
-            if not result:
-                raise IncorrectURLError
+    seed_urls = configuration["seed_urls"]
+    total_articles = configuration["total_articles_to_find_and_parse"]
+    http_pattern = re.compile(r'^https?://')
+    for url in seed_urls:
+        result = http_pattern.search(url)
+        if not result:
+            raise IncorrectURLError
 
-        if not isinstance(total_articles, int):
-            raise IncorrectNumberOfArticlesError
+    if not isinstance(total_articles, int):
+        raise IncorrectNumberOfArticlesError
 
-        if total_articles > 200:
-            raise NumberOfArticlesOutOfRangeError
+    if total_articles > 200:
+        raise NumberOfArticlesOutOfRangeError
 
-        return seed_urls, total_articles
-
-    except IncorrectURLError:
-        print('Seed URL does not match standard pattern')
-    except NumberOfArticlesOutOfRangeError:
-        print('Total number of articles to parse is too big')
-    except IncorrectNumberOfArticlesError:
-        print('Total number of articles to parse in not integer')
+    return seed_urls, total_articles
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
+    # with open(crawler_path) as file:
+    #     config = json.load(file)
+    # crawler = Crawler(seed_urls=seed_urls,
+    #                   total_max_articles=max_articles)
     pass
