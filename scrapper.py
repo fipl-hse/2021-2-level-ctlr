@@ -1,16 +1,18 @@
 """
 Scrapper implementation
 """
-import os
-import shutil
 import json
-import re
+import os
 import random
+import re
+import shutil
 from collections import namedtuple
 from time import sleep
-from constants import (HEADERS)
+
 import requests
 from bs4 import BeautifulSoup
+
+from constants import HEADERS
 
 
 class IncorrectURLError(Exception):
