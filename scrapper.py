@@ -56,8 +56,8 @@ class Crawler:
         }
         for url in self.seed_urls:
             response = requests.get(url=url, headers=headers)
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as f:
-                f.write(response.text)
+            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
+                file.write(response.text)
             self.urls.append(url)
 
     def get_search_urls(self):
@@ -82,8 +82,8 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    with open(crawler_path) as f:
-        configuration = json.load(f)
+    with open(crawler_path) as file:
+        configuration = json.load(file)
 
     seed_urls = configuration["seed_urls"]
     total_articles = configuration["total_articles_to_find_and_parse"]
