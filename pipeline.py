@@ -1,7 +1,6 @@
 """
 Pipeline for text processing implementation
 """
-import requests
 
 
 class EmptyDirectoryError(Exception):
@@ -93,13 +92,7 @@ def validate_dataset(path_to_validate):
 
 
 def main():
-    html = 'https://lingngu.elpub.ru/jour/issue/archive'
-    response = requests.get(html, headers={'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 '
-                                                         '(KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'})
-    page_code = response.text
-
-    with open('page_code.html', 'w', encoding='utf-8') as file:
-        file.write(page_code)
+    pass
 
 
 if __name__ == "__main__":
