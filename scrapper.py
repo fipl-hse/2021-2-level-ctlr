@@ -44,7 +44,12 @@ class Crawler:
         """
         Finds articles
         """
-        pass
+        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                                 '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'}
+        for seed_url in self.seed_urls:
+            response = requests.get(seed_url, headers)
+            article_bs = BeautifulSoup(response.text, 'html.parser')
+            self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
@@ -80,7 +85,7 @@ def validate_config(crawler_path):
         if not seed_urls:
             raise IncorrectURLError
         # возбуждает исключение, если такого seed_url
-        # нет в списке, который мы сделали в scrapper_config.json)
+        # нет в списке, который мы сделали в scrapper_config.json
 
         if not isinstance(max_articles, int):
             raise IncorrectNumberOfArticlesError
