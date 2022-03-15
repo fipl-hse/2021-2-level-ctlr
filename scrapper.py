@@ -2,6 +2,8 @@
 Scrapper implementation
 """
 import requests
+from bs4 import BeautifulSoup
+import re
 
 
 def main():
@@ -12,9 +14,7 @@ def main():
         f.write(response.text)
 
 
-if __name__ == "__main__":
-    main()
-
+main()
 
 
 class IncorrectURLError(Exception):
@@ -40,10 +40,20 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
-        pass
+        self.seed_urls = seed_urls
+        self.max_articles = max_articles
+        self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        url = 'https://vz.ru/news/'
+        reqs = requests.get(url)
+        soup = BeautifulSoup(reqs.text, 'html.parser')
+
+        try:
+            for link in soup.find_all('a', attrs={'href': re.compile("^http[s]?://")}):
+                print(link.get('href'))
+        except KeyError:
+            print('Incorrect link')
 
     def find_articles(self):
         """
