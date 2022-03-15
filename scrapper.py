@@ -10,6 +10,7 @@ from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -72,6 +73,28 @@ class Crawler:
         return self.seed_urls
 
 
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(article_url, article_id)
+
+    def parse(self):
+        response = requests.get(self.article_url)
+        # прописать обманку для сайта!!!
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        self.article.save_raw()
+
+        return self.article
+
+    def _fill_article_with_text(self, article_bs):
+
+    def _fill_article_with_meta_information(self, article_bs):
+
+
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
@@ -130,4 +153,6 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=seed_urls, max_articles=max_articles)
     crawler.find_articles()
     print(crawler.urls)
+    # article.save_raw()
+
 
