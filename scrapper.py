@@ -2,11 +2,13 @@
 Scrapper implementation
 """
 
-import requests
 import json
 import os
 import re
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+
+import requests
+from bs4 import BeautifulSoup
 
 
 class IncorrectURLError(Exception):
@@ -56,6 +58,20 @@ class Crawler:
 
             if not response.ok:
                 print("Request failed")
+
+            soup = BeautifulSoup(response.text, 'lxml')
+
+            article = soup.find('div', class_='entry-content')
+            all_links = article.find_all('a')[1:]
+            for link in all_links:
+                try:
+                    if (('https://vestnik.lunn.ru/' in link['href']) or
+                            ('http://vestnik.lunn.ru/' in link['href'])):
+                        self.urls.append(link['href'])
+                    else:
+                        self.urls.append('https://vestnik.lunn.ru/' + link['href'])
+                except KeyError:
+                    print('Found incorrect link')
 
     def get_search_urls(self):
         """
