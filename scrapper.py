@@ -94,8 +94,10 @@ class ArticleParser:
         self.pdf = PDFRawFile(article_url, article_id)
         self.article = Article(article_url, article_id)
 
-    @staticmethod
     def _fill_article_with_text(self, article_bs):
+        # just for code style
+        art = article_bs
+
         self.article.text = self.pdf.get_text()
         self.article.save_raw()
         return None
@@ -103,7 +105,7 @@ class ArticleParser:
     def parse(self):
         self.pdf.download()
         article_bs = BeautifulSoup()
-        self._fill_article_with_text(self, article_bs=article_bs)
+        self._fill_article_with_text(article_bs)
         return
 
 
