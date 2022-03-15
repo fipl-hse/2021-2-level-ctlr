@@ -1,11 +1,12 @@
 """
 Scrapper implementation
 """
-import requests
+
 import json
 import shutil
 from pathlib import Path
 import re
+import requests
 from bs4 import BeautifulSoup
 
 from core_utils.article import Article
@@ -101,13 +102,12 @@ class ArticleParser:
 
         self.article.text = self.pdf.get_text()
         self.article.save_raw()
-        return None
+        return art
 
     def parse(self):
         self.pdf.download()
         article_bs = BeautifulSoup()
         self._fill_article_with_text(article_bs)
-        return
 
 
 def prepare_environment(base_path):
