@@ -1,6 +1,7 @@
 """
 Scrapper implementation
 """
+import requests
 import json
 import shutil
 from pathlib import Path
@@ -9,7 +10,7 @@ from bs4 import BeautifulSoup
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-import requests
+
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PROJECT_ROOT
 
