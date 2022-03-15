@@ -64,7 +64,11 @@ class Crawler:
             if not response.ok:
                 print('request failed')
 
-            self.urls.append(seed_url)
+            soup = BeautifulSoup(response.text, 'lxml')
+            main_block_bs = soup.find('div', {'class': 'two_thirds'})
+            urls = main_block_bs.find_all('a')
+            for url in urls:
+                self.urls.append('http://journals.tsu.ru' + url['href'])
 
     def get_search_urls(self):
         """
