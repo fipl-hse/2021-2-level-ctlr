@@ -1,12 +1,15 @@
 """
 Scrapper implementation
 """
-
+import requests
+import json
+import re
 
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
     """
+    pass
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
@@ -55,8 +58,31 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    pass
+    try:
+        with open(crawler_path) as file:
+            config = json.load(file)
 
+        seed_url = config["seed_url"]
+        max_articles = config["total_articles_to find_and_parse"]
+
+        for url in seed_url:
+            validation = re.match(r'https?://', url)
+            if not validation:
+                raise IncorrectURLError
+
+        if not isinstance(max_articles, int):
+            raise IncorrectNumberOfArticlesError
+        if max_articles > 300:
+            raise NumberOfArticlesOutOfRangeError
+        prepare_environment(ASSETS_PATH)
+        return seed_url, max_articles
+
+    except IncorrectURLError:
+        print('IncorrectURLError')
+    except NumberOfArticlesOutOfRangeError:
+        print('NumberOfArticlesOutOfRangeError')
+    except IncorrectNumberOfArticlesError:
+        print('IncorrectNumberOfArticlesError')
 
 if __name__ == '__main__':
     # YOUR CODE HERE

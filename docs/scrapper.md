@@ -121,7 +121,7 @@ imported from the `constants.py` module.
 Example call:
 
 ```py
-seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+seed_urls,   = validate_config(CRAWLER_CONFIG_PATH)
 ```
 
 * `seed_urls` - is a list of URLs specified in the config with a parameter 
