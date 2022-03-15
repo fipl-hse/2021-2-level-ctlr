@@ -3,12 +3,12 @@ Scrapper implementation
 """
 
 import json
-import requests
 import re
 import os
 import time
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+import requests
 from bs4 import BeautifulSoup
+# from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
