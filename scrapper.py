@@ -2,10 +2,13 @@
 Scrapper implementation
 """
 import json
-import os
+import shutil
+from pathlib import Path
 import re
 from bs4 import BeautifulSoup
 
+from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
 import requests
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PROJECT_ROOT
@@ -88,9 +91,13 @@ class ArticleParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
+        self.pdf = PDFRawFile(article_url, article_id)
+        self.article = Article(article_url, article_id)
 
     @staticmethod
     def _fill_article_with_text(self, article_bs):
+        self.article.text = self.pdf.get_text()
+        self.article.save_raw()
         return None
 
     def parse(self):
@@ -104,11 +111,9 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(ASSETS_PATH)
-    except FileNotFoundError:
-        pass
-    os.mkdir(ASSETS_PATH)
+    if Path(base_path).exists():
+        shutil.rmtree(base_path)
+    Path(base_path).mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
