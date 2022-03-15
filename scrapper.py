@@ -82,7 +82,7 @@ class Crawler:
 
             soup = BeautifulSoup(response, 'lxml')
 
-            articles_urls_bs = self._extract_url(self, soup)
+            articles_urls_bs = self._extract_url(soup)
             full_list_with_urls = [url_bs for url_bs in articles_urls_bs if len(self.urls) < self.total_max_articles]
             for full_url in full_list_with_urls:
                 if len(self.urls) <= self.total_max_articles:
