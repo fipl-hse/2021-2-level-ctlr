@@ -2,14 +2,18 @@
 Scrapper implementation
 """
 
-impport re
+import json
+import time
+import requests
+import random
+import re
 import os
+from bs4 import BeautifulSoup
 
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
     """
-    #test
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
@@ -29,16 +33,32 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
-        pass
+        self.seed_urls = seed_urls
+        self.max_articles = max_articles
+        self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        for article_link in article_bs.find_all("a", class_="article__download button-icon"):
+            self.urls.append(''.join(["https://journals.kantiana.ru/", article_link.get("href")]))
 
     def find_articles(self):
         """
         Finds articles
         """
-        pass
+
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                          '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'}
+        sleep_period = random.randrange(3, 7)
+
+        for url in self.seed_urls:
+            response = requests.get(url, headers=headers)
+            if not response.ok:
+                print("Request was unsuccessful.")
+
+            article = BeautifulSoup(response.text, features="html.parser")
+            self._extract_url(article)
+            time.sleep(sleep_period)
 
     def get_search_urls(self):
         """
@@ -80,12 +100,13 @@ def validate_config(crawler_path):
         raise NumberOfArticlesOutOfRangeError
 
     for url in urls:
-        check = http_regex.search(url)
+        check = re.search(http_regex, url)
         if not check:
             raise IncorrectURLError
 
-    return seed_urls, total_articles
+    return urls, articles
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    outer_seed_urls, outer_max_articles = validate_config("scrapper_config.json")
+    crawler = Crawler(outer_seed_urls, outer_max_articles)
+    crawler.find_articles()
