@@ -36,20 +36,18 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
+        content = article_bs.find_all('div', id='content')
+        for article in content:
+            all_links = article.find_all('a')
 
-        all_links = article_bs.find_all('a')
-        for link in all_links:
-            try:
-                href = link['href']
-                if re.match(r'http', href):  # checks if there is a domain at the beginning of url
-                    self.urls.append(href)
-                    print(href)
-                else:
-                    href = 'https://lingngu.elpub.ru/' + href
-                    self.urls.append(href)
-                    print(href)
-            except KeyError:
-                print('Incorrect link or no href found')
+            for link in all_links:
+                try:
+                    href = link['href']
+                    if 'article/view' in href:
+                        self.urls.append(href)
+                        print(href)
+                except KeyError:
+                    print('Incorrect link or no href found')
 
     def find_articles(self):
         """
@@ -68,6 +66,16 @@ class Crawler:
         Returns seed_urls param
         """
         return self.urls
+
+
+class ArticleParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+
+    def _fill_article_with_text(self, article_bs):
+        pass
+        # return None
 
 
 def prepare_environment(base_path):
