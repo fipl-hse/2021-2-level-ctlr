@@ -141,7 +141,7 @@ class Crawler:
                 if not match:
                     continue
 
-                self.urls.append(''.join("http://www.vestnik.unn.ru/ru/nomera", link['href']))
+                self.urls.append(''.join(["http://www.vestnik.unn.ru/ru/nomera", link['href']]))
                 self._article_count += 1
 
     def find_articles(self):
