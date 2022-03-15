@@ -61,7 +61,7 @@ class Crawler:
     def _extract_url(article_bs):
         urls_bs = article_bs.find('div', class_='two_thirds')
         urls_bs = urls_bs.find_all('a')
-        urls_bs_full = [self._changing_the_link(url_bs['href']) for url_bs in urls_bs]
+        urls_bs_full = [_changing_the_link(url_bs['href']) for url_bs in urls_bs]
         return urls_bs_full
 
     def find_articles(self):
