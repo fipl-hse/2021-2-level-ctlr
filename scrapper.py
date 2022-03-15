@@ -4,10 +4,11 @@ Scrapper implementation
 import json
 import os
 import re
+from bs4 import BeautifulSoup
 
 import requests
 
-from constants import ASSETS_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PROJECT_ROOT
 
 
 class IncorrectURLError(Exception):
@@ -28,14 +29,20 @@ class IncorrectNumberOfArticlesError(Exception):
     """
 
 
+class ResponseIsNotOk(Exception):
+    """
+    Response status code is not ok
+    """
+
+
 class Crawler:
     """
     Crawler implementation
     """
 
-    def __init__(self, seed_urls, max_articles: int):
+    def __init__(self, seed_urls, total_max_articles: int):
         self.seed_urls = seed_urls
-        self.max_articles = max_articles
+        self.total_max_articles = total_max_articles
         self.urls = []
 
     def _extract_url(self, article_bs):
@@ -54,17 +61,43 @@ class Crawler:
             'Acccept-Encoding': 'gzip, deflate',
             'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
         }
-        for url in self.seed_urls:
+        for index, url in enumerate(self.seed_urls):
             response = requests.get(url=url, headers=headers)
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
+
+            if not response.ok:
+                raise ResponseIsNotOk
+
+            with open(f'{ASSETS_PATH}/{index}_url.html', 'w', encoding='utf-8') as file:
                 file.write(response.text)
-            self.urls.append(url)
+
+            with open(f'{ASSETS_PATH}/{index}_url.html', encoding='utf-8') as file:
+                response = file.read()
+
+            soup = BeautifulSoup(response, 'lxml')
+            article = soup.find('a', class_='file pdf')
+            self.urls.append(article['href'])
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
         pass
+
+
+class ArticleParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+
+    @staticmethod
+    def _fill_article_with_text(self, article_bs):
+        return None
+
+    def parse(self):
+        response = requests.get(self.article_url)
+        with open(f'{ASSETS_PATH}/{self.article_id}_article.html', 'w') as file:
+            file.write(response.text)
+        return
 
 
 def prepare_environment(base_path):
@@ -103,8 +136,6 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    # with open(crawler_path) as file:
-    #     config = json.load(file)
-    # crawler = Crawler(seed_urls=seed_urls,
-    #                   total_max_articles=max_articles)
-    pass
+    prepare_environment(PROJECT_ROOT)
+    validate_config(CRAWLER_CONFIG_PATH)
+    # parser = ArticleParser(article_url=full_url, article_id=i)

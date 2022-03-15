@@ -1,3 +1,5 @@
-pytest~=7.0.1
-requests~=2.27.1
-numpy~=1.22.2
+pytest==7.0.1
+requests==2.27.1
+numpy==1.22.2
+bs4==0.0.1
+beautifulsoup4==4.10.0
