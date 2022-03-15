@@ -1,4 +1,11 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": [
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2021-god/vypusk-56-iv-kvartal-2021-g/",
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2021-god/vypusk-55-iii-kvartal-2021-g/",
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2021-god/vypusk-54-ii-kvartal-2021-g/",
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2021-god/vypusk-53-i-kvartal-2021-g/",
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2020-god/vypusk-52-iv-kvartal-2020-g/",
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2020-god/vypusk-51-iii-kvartal-2020-g/",
+        "https://vestnik.lunn.ru/arhiv-zhurnala/2019-god/vypusk-48-iv-kvartal-2019-g/"],
+    "total_articles_to_find_and_parse": 103
 }
