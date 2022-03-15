@@ -14,7 +14,7 @@ from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 from constants import HEADERS
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -58,7 +58,7 @@ class Crawler:
         return link
 
     @staticmethod
-    def _extract_url(self, article_bs):
+    def _extract_url(article_bs):
         urls_bs = article_bs.find('div', class_='two_thirds')
         urls_bs = urls_bs.find_all('a')
         urls_bs_full = [self._changing_the_link(url_bs['href']) for url_bs in urls_bs]
