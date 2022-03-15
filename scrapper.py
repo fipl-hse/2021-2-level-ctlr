@@ -5,10 +5,12 @@ Scrapper implementation
 import json
 import os
 import re
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 import requests
 from bs4 import BeautifulSoup
+
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from core_utils import article
 
 
 class IncorrectURLError(Exception):
@@ -61,8 +63,8 @@ class Crawler:
 
             soup = BeautifulSoup(response.text, 'lxml')
 
-            article = soup.find('div', class_='entry-content')
-            all_links = article.find_all('a')[1:]
+            articles = soup.find('div', class_='entry-content')
+            all_links = articles.find_all('a')[1:]
             for link in all_links:
                 try:
                     if (('https://vestnik.lunn.ru/' in link['href']) or
@@ -78,6 +80,21 @@ class Crawler:
         Returns seed_urls param
         """
         pass
+
+
+class ArticleParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = article.Article
+
+    def parse(self):
+        response = requests.get(self.article_url)
+
+        article_bs = BeautifulSoup(response.text, 'lxml')
+
+    def _fill_article_with_text(self, article_bs):
+        return
 
 
 def prepare_environment(base_path):
