@@ -3,11 +3,11 @@ Scrapper implementation
 """
 import datetime
 import os.path
+import json
+import re
 
 from bs4 import BeautifulSoup
 import requests
-import json
-import re
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
@@ -132,16 +132,16 @@ class Crawler:
 
             links = table_row.find_all('a')
 
-            for a in links:
+            for link in links:
                 if self._article_count + 1 > self.max_articles:
                     break
 
-                match = re.match(r'^\?anum', a['href'])
+                match = re.match(r'^\?anum', link['href'])
 
                 if not match:
                     continue
 
-                self.urls.append("http://www.vestnik.unn.ru/ru/nomera" + a['href'])
+                self.urls.append(''.join("http://www.vestnik.unn.ru/ru/nomera", link['href']))
                 self._article_count += 1
 
     def find_articles(self):
@@ -190,7 +190,8 @@ def validate_config(crawler_path):
 
         if max_articles <= 0:
             raise IncorrectNumberOfArticlesError
-        elif max_articles > 100:
+
+        if max_articles > 100:
             raise NumberOfArticlesOutOfRangeError
 
         seed_urls = crawler_config['seed_urls']
@@ -208,16 +209,12 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls, max_articles)
+    crawler = Crawler(outer_seed_urls, outer_max_articles)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
         parser = HTMLParser(url, i + 1)
         # parser = HTMLParser("http://www.vestnik.unn.ru/ru/nomera?anum=11565", 0)
         article = parser.parse()
-
-
-
-
