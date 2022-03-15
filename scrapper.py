@@ -5,7 +5,7 @@ import json
 import re
 import os
 import requests
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from bs4 import BeautifulSoup
 
 
 class IncorrectURLError(Exception):
@@ -36,19 +36,38 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+
+        all_links = article_bs.find_all('a')
+        for link in all_links:
+            try:
+                href = link['href']
+                if re.match(r'http', href):
+                    self.urls.append(href)
+                    print(href)
+                else:
+                    href = 'https://lingngu.elpub.ru/' + href
+                    self.urls.append(href)
+                    print(href)
+            except KeyError:
+                print('Incorrect link or no href found')
 
     def find_articles(self):
         """
         Finds articles
         """
-        pass
+        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                                 'Chrome/99.0.4844.51 Safari/537.36'}
+
+        for url in self.seed_urls:
+            response = requests.get(url, headers)
+            article_bs = BeautifulSoup(response.text, 'html.parser')
+            self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.urls
 
 
 def prepare_environment(base_path):
@@ -65,8 +84,8 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    with open(crawler_path, 'r', encoding='utf-8') as dictionary:
-        config = json.load(dictionary)  # load is for decoding
+    with open(crawler_path, 'r', encoding='utf-8') as file:
+        config = json.load(file)  # load is for decoding
 
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
@@ -75,25 +94,13 @@ def validate_config(crawler_path):
         if not re.match(r'https?://', url):  # https or http
             raise IncorrectURLError('IncorrectURLError')
 
-    if max_articles > 200:
-        raise NumberOfArticlesOutOfRangeError('NumberOfArticlesOutOfRangeError')
-
     if not isinstance(max_articles, int):
-        raise IncorrectNumberOfArticlesError('IncorrectNumberOfArticlesError')
+        raise IncorrectNumberOfArticlesError
+
+    if max_articles > 200:
+        raise NumberOfArticlesOutOfRangeError
 
     return seed_urls, max_articles
-
-
-'''
-    html = 'https://lingngu.elpub.ru/jour/issue/view/18/showToc'
-    headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                             'Chrome/99.0.4844.51 Safari/537.36'}
-
-    response = requests.get(html, headers)
-    page_code = response.text
-
-    with open('page_code.html', 'w', encoding='utf-8') as file:
-        file.write(page_code)'''
 
 
 if __name__ == '__main__':
