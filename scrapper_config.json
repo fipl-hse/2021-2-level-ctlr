@@ -1,4 +1,4 @@
 {
-    "seed_urls": [],
+    "seed_urls": ["http://www.vestnik-mslu.ru/vestnik.asp?vest_lang=Rus&vest_type=gum"],
     "total_articles_to_find_and_parse": 0
 }

@@ -1,1 +1,4 @@
-beautifulsoup4 == 4.10.0
+beautifulsoup4==4.10.0
+pdf-utils==0.1.1
+requests==2.27.1
+
