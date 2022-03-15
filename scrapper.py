@@ -1,8 +1,9 @@
 """
 Scrapper implementation
 """
-import os, json, requests
+import os, json, requests, bs4
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+
 
 class IncorrectURLError(Exception):
     """
@@ -26,6 +27,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
@@ -57,6 +59,7 @@ def prepare_environment(base_path):
         pass
     os.mkdir(base_path)
 
+
 def validate_config(crawler_path):
     """
     Validates given config
@@ -75,6 +78,7 @@ def validate_config(crawler_path):
         if urls[0:8] != 'https://' or urls[0:7] != 'http://':
             raise IncorrectURLError
     return seed_urls, max_articles
+
 
 if __name__ == '__main__':
     # YOUR CODE HERE
