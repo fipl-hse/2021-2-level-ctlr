@@ -1,4 +1,13 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": ["https://snob.ru/theme/907/",
+    "https://snob.ru/theme/910/",
+    "https://snob.ru/theme/151/",
+    "https://snob.ru/theme/909/",
+    "https://snob.ru/theme/904/",
+    "https://snob.ru/theme/545/",
+    "https://snob.ru/theme/168/",
+    "https://snob.ru/theme/153/",
+    "https://snob.ru/theme/177/",
+    "https://snob.ru/theme/164/"],
+    "total_articles_to_find_and_parse": 100
 }
