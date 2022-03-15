@@ -205,16 +205,16 @@ def validate_config(crawler_path):
             if not match:
                 raise IncorrectURLError
 
-        return seed_urls, max_articles
+    prepare_environment(ASSETS_PATH)
+
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
-    prepare_environment(ASSETS_PATH)
     crawler = Crawler(outer_seed_urls, outer_max_articles)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
         parser = HTMLParser(url, i + 1)
-        # parser = HTMLParser("http://www.vestnik.unn.ru/ru/nomera?anum=11565", 0)
         article = parser.parse()
