@@ -101,9 +101,9 @@ class ArticleParser:
         return None
 
     def parse(self):
-        response = requests.get(self.article_url)
-        with open(f'{ASSETS_PATH}/{self.article_id}_article.html', 'w') as file:
-            file.write(response.text)
+        self.pdf.download()
+        article_bs = BeautifulSoup()
+        self._fill_article_with_text(self, article_bs=article_bs)
         return
 
 
