@@ -5,7 +5,8 @@ import json
 import re
 import os
 import requests
-from constants import ASSETS_PATH
+from bs4 import BeautifulSoup
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -58,15 +59,27 @@ class Crawler:
             }
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers=headers)
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
-                file.write(response.text)
-            self.urls.append(seed_url)
+            if not response.ok:
+                print("Failed")
+
+        soup = BeautifulSoup(response.text, 'lxml')
+        sections_bs = soup.find('div', {'class': 'sections'})
+        urls = sections_bs.find_all('a')
+        for url in urls:
+            self.urls.append(url['href'])
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
         pass
+
+
+class ArticleParser:
+    def __init__(self, full_url, id):
+        self.article_url = full_url
+        self.article_id = id
+        self.article = ''
 
 
 def prepare_environment(base_path):
@@ -83,33 +96,29 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    try:
-        with open(crawler_path) as file:
-            config = json.load(file)
+    with open(crawler_path) as file:
+        config = json.load(file)
 
-        seed_urls = config["seed_urls"]
-        total_articles = config["total_articles_to_find_and_parse"]
+    seed_urls = config["seed_urls"]
+    total_articles = config["total_articles_to_find_and_parse"]
 
-        for seed_url in seed_urls:
-            if not re.match(r'https?://', seed_url):
-                raise IncorrectURLError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
 
-        if not isinstance(total_articles, int):
-            raise IncorrectNumberOfArticlesError
+    if not seed_urls:
+        raise IncorrectURLError
 
-        if total_articles > 300:
-            raise NumberOfArticlesOutOfRangeError
+    for seed_url in seed_urls:
+        if not re.match(r'https?://', seed_url):
+            raise IncorrectURLError
 
-        prepare_environment(ASSETS_PATH)
+    if not isinstance(total_articles, int) or total_articles <= 0:
+        raise IncorrectNumberOfArticlesError
 
-        return seed_urls, total_articles
+    if total_articles > 300:
+        raise NumberOfArticlesOutOfRangeError
 
-    except IncorrectURLError:
-        print("IncorrectURLError")
-    except NumberOfArticlesOutOfRangeError:
-        print("NumberOfArticlesOutOfRangeError")
-    except IncorrectNumberOfArticlesError:
-        print("IncorrectNumberOfArticlesError")
+    return seed_urls, total_articles
 
 
 if __name__ == '__main__':

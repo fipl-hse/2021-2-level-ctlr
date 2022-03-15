@@ -1,4 +1,4 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": ["https://languagejournal.spbu.ru/issue/view/682"],
+    "total_articles_to_find_and_parse": 5
 }
