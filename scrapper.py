@@ -6,7 +6,8 @@ import os
 
 import requests
 from bs4 import BeautifulSoup
-
+from random_user_agent.user_agent import UserAgent
+from random_user_agent.params import SoftwareName, OperatingSystem
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
 
@@ -49,12 +50,18 @@ class Crawler:
         """
         Finds articles
         """
-        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                                 '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
-                   'accept': '*/*'}
+        software_names = [SoftwareName.CHROME.value]
+        operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
+        useragent_random = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
+        headers = {'user-agent': useragent_random.get_random_user_agent(),
+                   'accept': '*/*', 'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
+
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers, timeout=5)
-            print('response: ', response)
+            response = requests.get(seed_url, headers=headers, allow_redirects=True, timeout=5)
+            print(response.status_code)
+            with open('index1.html', 'w', encoding='utf-8') as file:
+                file.write(response.text)
+            print(response.status_code)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
 
@@ -119,7 +126,8 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     seed_urls, max_articles = validate_config(crawler_path=CRAWLER_CONFIG_PATH)
-    prepare_environment(ASSETS_PATH)
+    prepare_environment(base_path=ASSETS_PATH)
     crawler = Crawler(seed_urls=seed_urls, max_articles=max_articles)
     crawler.find_articles()
+    print(crawler.urls)
 
