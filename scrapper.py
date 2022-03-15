@@ -7,10 +7,10 @@ import os
 import re
 
 import requests
+from bs4 import BeautifulSoup
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils import article
-from bs4 import BeautifulSoup
 
 
 class IncorrectURLError(Exception):
@@ -61,8 +61,9 @@ class Crawler:
 
         for seed_url in self.seed_urls:
             response = requests.get(url=seed_url, headers=headers)
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
-                file.write(response.text)
+            if not response.ok:
+                print('request failed')
+
             self.urls.append(seed_url)
 
     def get_search_urls(self):
@@ -94,9 +95,8 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     try:
-        os.mkdir(base_path)
-    except OSError:
         os.rmdir(base_path)
+    except FileNotFoundError:
         os.mkdir(base_path)
 
 
@@ -119,7 +119,7 @@ def validate_config(crawler_path):
         if not url_validation:
             raise IncorrectURLError
 
-    if not isinstance(max_articles, int) or 0 >= max_articles:
+    if not isinstance(max_articles, int) or max_articles <= 0:
         raise IncorrectNumberOfArticlesError
 
     if max_articles > 300:
