@@ -38,7 +38,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        content = article_bs.find_all('div', id='content')
+        content = article_bs.find_all('div', id='main-content')
         for article in content:
             all_links = article.find_all('a')
 
