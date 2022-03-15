@@ -57,11 +57,10 @@ class Crawler:
             link = 'http://journals.tsu.ru' + link
         return link
 
-    @staticmethod
-    def _extract_url(article_bs):
+    def _extract_url(self,article_bs):
         urls_bs = article_bs.find('div', class_='two_thirds')
         urls_bs = urls_bs.find_all('a')
-        urls_bs_full = [_changing_the_link(url_bs['href']) for url_bs in urls_bs]
+        urls_bs_full = [self._changing_the_link(url_bs['href']) for url_bs in urls_bs]
         return urls_bs_full
 
     def find_articles(self):
@@ -82,7 +81,7 @@ class Crawler:
 
             soup = BeautifulSoup(response, 'lxml')
 
-            articles_urls_bs = self._extract_url(soup)
+            articles_urls_bs = self._extract_url(self,soup)
             full_list_with_urls = [url_bs for url_bs in articles_urls_bs if len(self.urls) < self.total_max_articles]
             for full_url in full_list_with_urls:
                 if len(self.urls) <= self.total_max_articles:
