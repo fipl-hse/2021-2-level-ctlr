@@ -51,8 +51,11 @@ class Crawler:
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'ru,ru-RU;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6'}
 
-        for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url, headers=headers)
+        for url in self.seed_urls:
+            response = requests.get(url, headers=headers)
+
+            if not response.ok:
+                print("Request failed")
 
     def get_search_urls(self):
         """
@@ -75,30 +78,24 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    try:
-        with open(crawler_path, 'r', encoding='utf-8') as config:
-            conf = json.load(config)
+    with open(crawler_path, 'r', encoding='utf-8') as f:
+        config = json.load(f)
 
-        seed_urls = conf["seed_urls"]
-        max_articles = conf["total_articles_to_find_and_parse"]
+    seed_urls = config["seed_urls"]
+    max_articles = config["total_articles_to_find_and_parse"]
 
-        for url in seed_urls:
-            right_url = re.match(r'https?://', url)
-            if not right_url:
-                raise IncorrectURLError
+    for url in seed_urls:
+        right_url = re.match(r'https?://', url)
+        if not right_url:
+            raise IncorrectURLError
 
-        if not isinstance(max_articles, int):
-            raise IncorrectNumberOfArticlesError
+    if not isinstance(max_articles, int):
+        raise IncorrectNumberOfArticlesError
 
-        if max_articles > 200:
-            raise IncorrectNumberOfArticlesError
+    if max_articles > 200:
+        raise NumberOfArticlesOutOfRangeError
 
-    except IncorrectURLError:
-        print('Incorrect URL')
-    except NumberOfArticlesOutOfRangeError:
-        print('Number of articles out of range')
-    except IncorrectNumberOfArticlesError:
-        print('Incorrect number of articles')
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
