@@ -10,6 +10,7 @@ import re
 import os
 from bs4 import BeautifulSoup
 
+
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
@@ -32,6 +33,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
@@ -64,7 +66,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self._seed_urls
 
 
 def prepare_environment(base_path):
@@ -105,6 +107,18 @@ def validate_config(crawler_path):
             raise IncorrectURLError
 
     return urls, articles
+
+
+class HTMLParser:
+
+    def __init__(self, article_url, article_id):
+        """
+        Init
+        """
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(url=article_url, article_id=article_id)
+
 
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config("scrapper_config.json")
