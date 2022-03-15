@@ -51,6 +51,9 @@ class Crawler:
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'ru,ru-RU;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6'}
 
+        for seed_url in self.seed_urls:
+            response = requests.get(url=seed_url, headers=headers)
+
     def get_search_urls(self):
         """
         Returns seed_urls param
