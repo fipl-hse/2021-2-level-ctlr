@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH
 
 
 class IncorrectURLError(Exception):
@@ -38,16 +39,22 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        class_bs = article_bs.find('div', class_="b-materials-list b-list_infinity")
+        title_bs = class_bs.find_all('p', class_="b-materials-list__title b-materials-list__title_news")
+        for link in title_bs:
+            link = link.find('a')
+            self.urls.append('https://www.m24.ru' + link['href'])
 
     def find_articles(self):
         """
         Finds articles
         """
         headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                                 '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'}
+                                 '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
+                   'accept': '*/*'}
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers)
+            response = requests.get(seed_url, headers, timeout=5)
+            print('response: ', response)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
 
@@ -102,7 +109,7 @@ def validate_config(crawler_path):
         # передаем в scrapper_config.json не является integer
 
         for seed_url in seed_urls:
-            if seed_url[0:8] != 'https://' or seed_url[0:7] != 'http://':
+            if seed_url[0:8] != 'https://' and seed_url[0:7] != 'http://':
                 raise IncorrectURLError
         # если протокол не соответствует стандратному паттерну
 
@@ -111,8 +118,8 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    # with open(crawler_path) as file:
-    #     config = json.load(file)
-    # crawler = Crawler(seed_urls=seed_urls,
-    #                   total_max_articles=max_articles)
+    seed_urls, max_articles = validate_config(crawler_path=CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(seed_urls=seed_urls, max_articles=max_articles)
+    crawler.find_articles()
+
