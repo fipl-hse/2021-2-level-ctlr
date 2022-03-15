@@ -41,7 +41,7 @@ class Crawler:
         for link in all_links:
             try:
                 href = link['href']
-                if re.match(r'http', href):
+                if re.match(r'http', href):  # checks if there is a domain at the beginning of url
                     self.urls.append(href)
                     print(href)
                 else:
@@ -59,8 +59,8 @@ class Crawler:
                                  'Chrome/99.0.4844.51 Safari/537.36'}
 
         for url in self.seed_urls:
-            response = requests.get(url, headers)
-            article_bs = BeautifulSoup(response.text, 'html.parser')
+            response = requests.get(url, headers)  # get html code
+            article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
             self._extract_url(article_bs)
 
     def get_search_urls(self):
@@ -77,7 +77,7 @@ def prepare_environment(base_path):
     try:
         os.rmdir(base_path)  # removes a folder
     except FileNotFoundError:
-        os.mkdir(base_path)  # creates new if it doesn't exist
+        os.mkdir(base_path)  # creates new one if it doesn't exist
 
 
 def validate_config(crawler_path):
@@ -90,11 +90,14 @@ def validate_config(crawler_path):
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
 
+    if not seed_urls:
+        raise IncorrectURLError
+
     for url in seed_urls:
         if not re.match(r'https?://', url):  # https or http
-            raise IncorrectURLError('IncorrectURLError')
+            raise IncorrectURLError
 
-    if not isinstance(max_articles, int):
+    if not isinstance(max_articles, int) or max_articles <= 0:
         raise IncorrectNumberOfArticlesError
 
     if max_articles > 200:
