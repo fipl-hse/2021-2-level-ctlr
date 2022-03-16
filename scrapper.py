@@ -83,7 +83,7 @@ class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
-        self.article = Article(self.article_url, self.article_id)
+        self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
         # title
@@ -107,27 +107,24 @@ class HTMLParser:
         date_year = int(result[0])
         self.article.date = datetime.date(date_year, 1, 1)
 
+        # url
+        self.article.url = self.article_url
+
     def _fill_article_with_text(self, article_bs):
         article_urls_bs = article_bs.find('a', class_='file pdf')
         pdf = PDFRawFile(article_urls_bs['href'], self.article_id)
         pdf.download()
 
         self.article.text = pdf.get_text()
-        self.article.save_raw()
 
     def parse(self):
         response = requests.get(url=self.article_url, headers=HEADERS)
 
-        with open(f'{ASSETS_PATH}/{self.article_id}_article_url.html', 'w', encoding='utf-8') as file:
-            file.write(response.text)
+        article_bs = BeautifulSoup(response.text, 'lxml')
 
-        with open(f'{ASSETS_PATH}/{self.article_id}_article_url.html', encoding='utf-8') as file:
-            response = file.read()
-
-        article_bs = BeautifulSoup(response, 'lxml')
-
-        self._fill_article_with_meta_information(article_bs)
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        self.article.save_raw()
         return self.article
 
 
@@ -169,4 +166,4 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    pass
+    prepare_environment(ASSETS_PATH)
