@@ -3,11 +3,13 @@ Scrapper implementation
 """
 
 import json
-import re
 import os
-import requests
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+import re
+
 from bs4 import BeautifulSoup
+import requests
+
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -79,6 +81,10 @@ class Crawler:
         Returns seed_urls param
         """
         pass
+
+
+class HTMLParser:
+    pass
 
 
 def prepare_environment(base_path):
