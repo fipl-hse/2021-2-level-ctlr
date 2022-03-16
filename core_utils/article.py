@@ -33,7 +33,6 @@ class Article:
 
         self.title = ''
         self.date = None
-        self.doi = ''
         self.authors = []
         self.topics = []
         self.text = ''

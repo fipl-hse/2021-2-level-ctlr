@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, CRAWLER_CONFIG_PATH
+from constants import HEADERS
 
 from constants import ASSETS_PATH
 
@@ -123,9 +123,9 @@ class ArticleParser:
         self.article.topics = [topic.text for topic in topics_bs]
 
         # doi
-        current_crumb_bs = article_bs.find('span', class_='current_crumb')
-        span_text = current_crumb_bs.text
-        self.article.doi = span_text.partition('DOI:')[2].strip()
+        # current_crumb_bs = article_bs.find('span', class_='current_crumb')
+        # span_text = current_crumb_bs.text
+        # self.article.doi = span_text.partition('DOI:')[2].strip()
 
         # date
         big_title = article_bs.find('h1')
@@ -136,10 +136,10 @@ class ArticleParser:
 
     def _fill_article_with_text(self, article_bs):
         article_urls_bs = article_bs.find('a', class_='file pdf')
-        self.pdf = PDFRawFile(article_urls_bs['href'], self.article_id)
-        self.pdf.download()
+        pdf = PDFRawFile(article_urls_bs['href'], self.article_id)
+        pdf.download()
 
-        self.article.text = self.pdf.get_text()
+        self.article.text = pdf.get_text()
         self.article.save_raw()
 
     def parse(self):
