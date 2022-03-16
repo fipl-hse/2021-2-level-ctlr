@@ -10,7 +10,8 @@ import requests
 from bs4 import BeautifulSoup
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
-from core_utils import article
+from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
 
 
 class IncorrectURLError(Exception):
@@ -82,19 +83,32 @@ class Crawler:
         pass
 
 
-class ArticleParser:
+class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
-        self.article = article.Article
+        self.article = Article(article_url, article_id)
 
     def parse(self):
-        response = requests.get(self.article_url)
+        self.article = Article(self.article_url, self.article_id)
 
+        headers = {
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/'
+                          '537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/'
+                      'avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'accept-encoding': 'gzip, deflate, br',
+            'accept-language': 'ru,ru-RU;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6'}
+
+        response = requests.get(self.article_url, headers)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
+        # self._fill_article_with_text(article_bs)
+        # self.article.save_raw()
+        return self.article
+
     def _fill_article_with_text(self, article_bs):
-        return
+        pass
 
 
 def prepare_environment(base_path):
