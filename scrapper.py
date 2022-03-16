@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
-#from constants import ASSETS_PATH
+from constants import ASSETS_PATH
 #from constants import CRAWLER_CONFIG_PATH
 from constants import HEADERS
 
@@ -70,7 +70,7 @@ class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
-        self.article = Article(url=article_url, article_id=article_id)
+        self.article = Article(self.article_url, self.article_id)
 
     def parse(self):
 
@@ -78,6 +78,8 @@ class HTMLParser:
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        self.article.save_raw()
         return self.article
 
     def _fill_article_with_text(self, article_bs):
@@ -97,14 +99,16 @@ class HTMLParser:
 
         pdf.download()
         self.article.text = pdf.get_text()
-        print(pdf.get_text())
-        self.article.save_raw()
+
+    def _fill_article_with_meta_information(self, article_bs):
+        pass
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
+
     try:
         os.rmdir(base_path)  # removes a folder
     except FileNotFoundError:
