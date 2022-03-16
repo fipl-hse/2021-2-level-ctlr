@@ -51,9 +51,10 @@ class Crawler:
         for urls in self.seed_urls:
             response = requests.get(urls)
             response.encoding = 'utf-16'
-          #  with open('index2.html', 'w', encoding='utf-16') as file:
-          #      file.write(response.text)
+            #with open('index2.html', 'w', encoding='utf-16') as file:
+            #     file.write(response.text)
             #print(response.status_code)
+            #uwu
             article_bs = BeautifulSoup(response.text, features='html.parser')
             self._extract_url(article_bs)
 
