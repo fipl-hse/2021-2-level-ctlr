@@ -64,21 +64,21 @@ class Crawler:
         """
         return self.seed_urls
 
-class HTMLParser:
-    def __init__(self, article_url, article_id):
-        self.article_url = article_url
-        self.article_id = article_id
-        self.article = Article(article_url, article_id)
-
-    def parse(self):
-        response = requests.get(self.article_url)
-        article_bs = BeautifulSoup(response.text, 'html.parser')
-
-        self._fill_article_with_text(article_bs)
-        self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
-
-        return self.article
+# class HTMLParser:
+#     def __init__(self, article_url, article_id):
+#         self.article_url = article_url
+#         self.article_id = article_id
+#         self.article = Article(article_url, article_id)
+#
+#     def parse(self):
+#         response = requests.get(self.article_url)
+#         article_bs = BeautifulSoup(response.text, 'html.parser')
+#
+#         self._fill_article_with_text(article_bs)
+#         self._fill_article_with_meta_information(article_bs)
+#         self.article.save_raw()
+#
+#         return self.article
 
 def prepare_environment(base_path):
     """
@@ -111,9 +111,9 @@ def validate_config(crawler_path):
     return seed_urls, max_articles
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    urlsi, articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls, max_articles)
+    crawler = Crawler(urlsi, articles)
     crawler.find_articles()
     print(crawler.urls)
   #  parser = ArticleParser(article_url=full_url, article_id=i)
