@@ -7,3 +7,4 @@ wget==3.2
 matplotlib==3.5.1
 PyMuPDF == 1.19.6
 fitz
+frontend == 0.0.3

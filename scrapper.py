@@ -57,7 +57,7 @@ class Crawler:
             link = 'http://journals.tsu.ru' + link
         return link
 
-    def _extract_url(self,article_bs):
+    def _extract_url(self, article_bs):
         urls_bs = article_bs.find('div', class_='two_thirds')
         urls_bs = urls_bs.find_all('a')
         urls_bs_full = [self._changing_the_link(url_bs['href']) for url_bs in urls_bs]
@@ -100,6 +100,9 @@ class ArticleParser:
         self.article_id = article_id
         self.pdf = None
         self.article = Article(article_url, article_id)
+
+    def _fill_article_with_meta_information(self, article_bs):
+        pass
 
     def _fill_article_with_text(self, article_bs):
         # just for code style because i dont know what to do with article_bs
