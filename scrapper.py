@@ -4,6 +4,9 @@ Scrapper implementation
 import json
 import os
 import requests
+import shutil
+from pathlib import Path
+from bs4 import BeautifulSoup
 
 class IncorrectURLError(Exception):
     """
@@ -32,8 +35,16 @@ class Crawler:
         self.max_articles = max_articles
         self.urls = []
 
+    def _link_formatting(link):
+        if 'https://www.kommersant.ru' not in link:
+            link = 'https://www.kommersant.ru' + link
+        return link
+
     def _extract_url(self, article_bs):
-        pass
+        urls_bs = article_bs.findall(class_="uho__link uho__link--overlay")
+        urls_bs_full = [self._link_formatting(url_bs['href']) for url_bs in urls_bs]
+        return urls_bs_full
+
 
     def find_articles(self):
         """
@@ -46,10 +57,19 @@ class Crawler:
                 'Accept-Encoding': 'gzip, deflate, br'
                 'Accept-Language': 'en-US,en;q=0.5'
             }
-            response = requests.get(url=url, headers=headers)
-            with open('ASSETS_PATH/url.html', 'w', encoding='utf-8') as file:
+            for seed_url_index, seed_url in enumerate(self.seed_urls):
+                response = requests.get(url=seed_url)
+            with open(f'{ASSETS_PATH}/{seed_url_index}_seed_url.html', 'w', encoding='utf-8') as file:
                 file.write(response.text)
-            self.urls.append(url)
+            with open(f'{ASSETS_PATH}/{seed_url_index}_seed_url.html', encoding='utf-8') as file:
+                response = file.read()
+            soup = BeautifulSoup(response.text, features="lxml")
+
+            articles_urls_bs = self._extract_url(soup)
+            list_of_urls = [url_bs for url_bs in articles_urls_bs if len(self.urls) < self.max_articles]
+            for full_url in list_of_urls:
+                if len(self.urls) <= self.max_articles:
+                    self.urls.append(full_url)
 
     def get_search_urls(self):
         """
@@ -73,12 +93,18 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    try:
-        with open(crawler_path) as file:
-            config = json.load(file)
-        return config["seed_urls"], config["total_articles_to_find_and_parse"]
-    except (IncorrectURLError, NumberOfArticlesOutOfRangeError, IncorrectNumberOfArticlesError):
-        pass
+    with open(crawler_path) as file:
+        configuration = json.load(file)
+
+    seed_urls = configuration["seed_urls"]
+    total_articles = configuration["total_articles_to_find_and_parse"]
+
+    if not isinstance(total_articles, int):
+        raise IncorrectNumberOfArticlesError
+    if total_articles > 200:
+        raise NumberOfArticlesOutOfRangeError
+
+    return seed_urls, total_articles
 
 
 if __name__ == '__main__':

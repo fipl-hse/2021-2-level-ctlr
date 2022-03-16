@@ -1,4 +1,14 @@
 {
-    "seed_urls": ["https://www.kommersant.ru/"],
-    "total_articles_to_find_and_parse": 10
+    "seed_urls": [
+        "https://www.kommersant.ru/theme/2036",
+        "https://www.kommersant.ru/theme/3423",
+        "https://www.kommersant.ru/theme/3304",
+        "https://www.kommersant.ru/theme/943",
+        "https://www.kommersant.ru/theme/233",
+        "https://www.kommersant.ru/theme/149",
+        "https://www.kommersant.ru/theme/248",
+        "https://www.kommersant.ru/theme/28",
+        "https://www.kommersant.ru/theme/3326"
+        ],
+    "total_articles_to_find_and_parse": 100
 }
