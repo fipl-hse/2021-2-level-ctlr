@@ -99,7 +99,7 @@ class Article:
             'url': self.url,
             'title': self.title,
             'date': self._date_to_text(),
-            'author': self.authors,
+            'author': self.author,
             'topics': self.topics
         }
 

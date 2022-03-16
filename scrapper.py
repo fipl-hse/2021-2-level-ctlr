@@ -86,7 +86,6 @@ class HTMLParser:
         self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-
         # title
         title_bs = article_bs.find_all('h1')[-1]
         self.article.title = title_bs.text
@@ -129,6 +128,7 @@ class HTMLParser:
 
         self._fill_article_with_meta_information(article_bs)
         self._fill_article_with_text(article_bs)
+        return self.article
 
 
 def prepare_environment(base_path):

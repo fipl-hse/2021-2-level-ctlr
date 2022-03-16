@@ -5,7 +5,8 @@ import unittest
 
 import pytest
 import requests
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+
 
 class RawBasicDataValidator(unittest.TestCase):
     def setUp(self) -> None:
@@ -26,7 +27,7 @@ class RawBasicDataValidator(unittest.TestCase):
     @pytest.mark.stage_2_5_dataset_validation
     def test_validate_sort(self):
         list_ids = [pair[0] for pair in self.texts]
-        for i in range(1, len(list_ids)+1):
+        for i in range(1, len(list_ids) + 1):
             self.assertTrue(i in list_ids,
                             msg="""Articles ids are not homogeneous. E.g. numbers are not from 1 to N""")
 
@@ -78,7 +79,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.stage_2_5_dataset_validation
     def test_validate_sort(self):
         list_ids = [pair[0] for pair in self.metadata]
-        for i in range(1, len(list_ids)+1):
+        for i in range(1, len(list_ids) + 1):
             self.assertTrue(i in list_ids,
                             msg="""Articles ids are not homogeneous. E.g. numbers are not from 1 to N""")
 
@@ -91,11 +92,11 @@ class RawMediumDataValidator(unittest.TestCase):
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
-            self.assertTrue(requests.get(metadata[1]['url']),
+            self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
                             msg="Can not open URL: <{}>. Check how you collect URLs".format(
                                 metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
 
             print(metadata[1]['title'])
             self.assertTrue(metadata[1]['title'] in
@@ -163,7 +164,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
     @pytest.mark.stage_2_5_dataset_validation
     def test_validate_sort(self):
         list_ids = [pair[0] for pair in self.metadata]
-        for i in range(1, len(list_ids)+1):
+        for i in range(1, len(list_ids) + 1):
             self.assertTrue(i in list_ids,
                             msg="""Articles ids are not homogeneous. E.g. numbers are not from 1 to N""")
 
@@ -175,11 +176,11 @@ class RawAdvancedDataValidator(unittest.TestCase):
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
-            self.assertTrue(requests.get(metadata[1]['url']),
+            self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
                             msg="Can not open URL: <{}>. Check how you collect URLs".format(
                                 metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
 
             self.assertTrue(metadata[1]['title'] in
                             html_source,
