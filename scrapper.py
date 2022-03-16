@@ -7,6 +7,9 @@ import requests
 import os
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH
+from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
+# import re
 
 
 headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -58,26 +61,35 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
-class ArticleParser:
-    def __init__(self, article, full_url, i):
+class HTMLParser:
+    def __init__(self, full_url, i):
         self.article_url = full_url
         self.article_id = i
+        self.article = Article(full_url, i)
 
     def _fill_article_with_text(self, article_bs):
-        pass
+        article_bs = article_bs.find('div', class_='container-fluid').find('li')
+        url = article_bs.find_all('a')
+        pdf_raw_file = PDFRawFile(url['href'], self.article_id)
+        pdf_raw_file.download()
+        self.article.text = pdf_raw_file.get_text()
+        if 'ЛИТЕРАТУРА' in self.article.text:
+            text_without_literature = self.article.text.split('ЛИТЕРАТУРА')[:-1]
+            self.article.text = ''.join(text_without_literature)
+
 
     def _fill_article_with_meta_information(self, article_bs):
-        pass
+        self.article.author = article_bs.find('i').get_text()
+        self.article.title = article_bs.find('b').get_text()
 
     def parser(self):
-        article_bs = BeautifulSoup(requests.get(self.article_url, headers=headers).content, 'lxml')
+        article_bs = BeautifulSoup(requests.get(self.article_url, headers=headers).text, 'html.parser')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        return self.article_url
-    pass
-
+        self.article.save_raw()
+        return self.article
 
 def prepare_environment(base_path):
     """
