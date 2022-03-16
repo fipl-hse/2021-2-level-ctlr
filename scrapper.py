@@ -73,10 +73,10 @@ class Crawler:
             if not response.ok:
                 raise ResponseIsNotOk
 
-            with open(f'{ASSETS_PATH}/{seed_url_index}_seed_url.html', 'w', encoding='utf-8') as file:
+            with open(f'{ASSETS_PATH}/seed_url_{seed_url_index}.html', 'w', encoding='utf-8') as file:
                 file.write(response.text)
 
-            with open(f'{ASSETS_PATH}/{seed_url_index}_seed_url.html', encoding='utf-8') as file:
+            with open(f'{ASSETS_PATH}/seed_url_{seed_url_index}.html', encoding='utf-8') as file:
                 response = file.read()
 
             soup = BeautifulSoup(response, 'lxml')
@@ -201,7 +201,7 @@ if __name__ == '__main__':
     #     config = json.load(file)
     #
     # seed_urls = config['seed_urls']
-    # print(seed_urls)
+    #
     # max_articles = config['total_articles_to_find_and_parse']
     # crawler = Crawler(seed_urls=seed_urls, total_max_articles=max_articles)
     #
