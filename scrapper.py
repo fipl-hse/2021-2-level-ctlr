@@ -6,7 +6,7 @@ import re
 import os
 import requests
 from bs4 import BeautifulSoup
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+# from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -76,9 +76,9 @@ class Crawler:
 
 
 class ArticleParser:
-    def __init__(self, full_url, id):
+    def __init__(self, full_url, identification):
         self.article_url = full_url
-        self.article_id = id
+        self.article_id = identification
         self.article = ''
 
 
