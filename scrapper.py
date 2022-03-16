@@ -93,14 +93,14 @@ def validate_config(crawler_path):
             raise IncorrectURLError
     if not seed_urls:
         raise IncorrectURLError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
     if not isinstance(max_articles, int):
         raise IncorrectNumberOfArticlesError
     if max_articles > 100:
         raise NumberOfArticlesOutOfRangeError
     if max_articles == 0 or max_articles < 0:
         raise IncorrectNumberOfArticlesError
-    if not isinstance(seed_urls, list):
-        raise IncorrectURLError
     prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
@@ -136,7 +136,6 @@ class HTMLParser:
             new_list_without_literature = ''.join(new_list_without_literature)
             self.article.text = new_list_without_literature
         print(len(self.article.text))
-
 
     def _fill_article_with_meta_information(self, article_bs):
         author_bs = article_bs.find('span', class_='field__item-wrapper')
