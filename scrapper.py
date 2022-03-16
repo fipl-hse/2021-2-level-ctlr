@@ -1,15 +1,15 @@
 """
 Scrapper implementation
 """
-import datetime
-import os
-import json
-import re
-import requests
-from bs4 import BeautifulSoup
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
-from core_utils.article import Article
-from core_utils.pdf_utils import PDFRawFile
+import datetime #стандартный
+import os #стандартный
+import json #стандартный
+import re #стандартный
+import requests #3rd party imports
+from bs4 import BeautifulSoup  #3rd party imports
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS  #project imports
+from core_utils.article import Article  #project imports
+from core_utils.pdf_utils import PDFRawFile  #project imports
 
 
 
@@ -47,17 +47,15 @@ class Crawler:
             if len(self.urls) >= self.max_articles:
                 break
             link_bs = link_bs.find('a')
-            self.urls.append('https://rjano.ruslang.ru' + link_bs['href'])
+            self.urls.append(ROOT_URL + link_bs['href'])
 
 
     def find_articles(self):
         """
         Finds articles
         """
-        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-                                 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers)
+            response = requests.get(seed_url, HEADERS)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
 
@@ -75,7 +73,7 @@ def prepare_environment(base_path):
     if os.path.isdir(base_path):
         files = os.listdir(base_path)
         for file in files:
-            os.remove(os.path.join(base_path,file))
+            os.remove(os.path.join(base_path, file))
     else:
         os.makedirs(base_path)
 
@@ -89,7 +87,7 @@ def validate_config(crawler_path):
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
     for seed_url in seed_urls:
-        if not re.match(r'https?://', seed_url):
+        if not re.match(r'https?://', seed_url) or ROOT_URL not in seed_url:
             raise IncorrectURLError
     if not seed_urls:
         raise IncorrectURLError
@@ -113,9 +111,7 @@ class HTMLParser:
 
     def parse(self):
         self.article = Article(self.article_url, self.article_id)
-        headers = {'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) '
-                                 'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
-        response = requests.get(self.article_url, headers)
+        response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
@@ -123,40 +119,34 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        table_rows = article_bs.find('iframe', class_='pdf')
-        print(table_rows['data-src'])
-        url_of_pdf = table_rows['data-src']
+        table_rows_bs = article_bs.find('iframe', class_='pdf')
+        url_of_pdf = table_rows_bs['data-src']
         pdf_raw_file = PDFRawFile(url_of_pdf, self.article_id)
         pdf_raw_file.download()
         self.article.text = pdf_raw_file.get_text()
-        print(len(self.article.text))
         if 'Литература' in self.article.text:
             new_list = self.article.text.split('Литература')
-            new_list_without_literature = new_list[:-1]
-            new_list_without_literature = ''.join(new_list_without_literature)
+            new_list_without_literature = ''.join(new_list[:-1])
             self.article.text = new_list_without_literature
-        print(len(self.article.text))
 
     def _fill_article_with_meta_information(self, article_bs):
         author_bs = article_bs.find('span', class_='field__item-wrapper')
         if not author_bs:
             author_bs = 'NOT FOUND'
         else:
-            author_bs = author_bs.get_text()
+            author_bs = author_bs.text
         title_of_the_article_bs = article_bs.find('title')
-        title_of_the_article_bs = title_of_the_article_bs.get_text()
+        title_of_the_article_bs = title_of_the_article_bs.text
         data_bs = article_bs.find('div', class_='node__content clearfix')
         data = data_bs.find('div',
                             {'style':'text-align: left; font-weight: bold; margin-bottom: 10px;'})
-        full_data_string = data.get_text()
+        full_data_string = data.text
         data_year_string = re.search(r'\s+\d{4}', full_data_string)
-        print(data_year_string)
         data_year = data_year_string.group(0)[-4:]
         date = datetime.datetime(int(data_year), 1, 1)
         self.article.author = author_bs
         self.article.title = title_of_the_article_bs
         self.article.date = date
-        print(date)
 
 
 if __name__ == '__main__':
