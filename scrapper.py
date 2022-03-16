@@ -4,12 +4,13 @@ Scrapper implementation
 import datetime
 import os
 import json
+import re
 import requests
 from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-import re
+
 
 
 class IncorrectURLError(Exception):
@@ -88,7 +89,7 @@ def validate_config(crawler_path):
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
     for seed_url in seed_urls:
-        if seed_url[0:8] != 'https://' and seed_url[0:7] != 'http://':
+        if not re.match(r'https?://', seed_url):
             raise IncorrectURLError
     if not seed_urls:
         raise IncorrectURLError
@@ -139,45 +140,30 @@ class HTMLParser:
 
     def _fill_article_with_meta_information(self, article_bs):
         author_bs = article_bs.find('span', class_='field__item-wrapper')
-        # author_bs = author_bs.get_text()
         if not author_bs:
             author_bs = 'NOT FOUND'
         else:
             author_bs = author_bs.get_text()
-        # title_of_the_article_bs = article_bs.find('span', class_='field field-name-title field-formatter-string field-type-string field-label-hidden')
         title_of_the_article_bs = article_bs.find('title')
         title_of_the_article_bs = title_of_the_article_bs.get_text()
         data_bs = article_bs.find('div', class_='node__content clearfix')
-        data = data_bs.find('div', {'style':'text-align: left; font-weight: bold; margin-bottom: 10px;'})
-        # for x in data:
-        #     print(x)
-        #     print('')
-        x = data.get_text()
-        y = re.search(r'\s+\d{4}', x)
-        print(y)
-        another_symbol = y.group(0)[-4:]
-        date = datetime.datetime(int(another_symbol), 1, 1)
+        data = data_bs.find('div',
+                            {'style':'text-align: left; font-weight: bold; margin-bottom: 10px;'})
+        full_data_string = data.get_text()
+        data_year_string = re.search(r'\s+\d{4}', full_data_string)
+        print(data_year_string)
+        data_year = data_year_string.group(0)[-4:]
+        date = datetime.datetime(int(data_year), 1, 1)
         self.article.author = author_bs
         self.article.title = title_of_the_article_bs
         self.article.date = date
         print(date)
-
-        # print(author_bs)
-        # print(title_of_the_article_bs)
-        # print(number)
-
-
 
 
 if __name__ == '__main__':
     seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
     crawler = Crawler(seed_urls, max_articles)
     crawler.find_articles()
-    # parser = HTMLParser(crawler.urls[0], 0)
-    # article = parser.parse()
     for identificator, url in enumerate(crawler.urls):
         number = HTMLParser(url, identificator + 1)
         article = number.parse()
-    # print(identificator)
-    # print(article.text)
-
