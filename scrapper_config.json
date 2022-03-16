@@ -1,6 +1,6 @@
 {
-    "seed_urls": ["https://rjano.ruslang.ru/ru/archive/2001-1", "https://rjano.ruslang.ru/ru/archive/2001-2", "https://rjano.ruslang.ru/ru/archive/2002-1",
-    "https://rjano.ruslang.ru/ru/archive/2002-2", "https://rjano.ruslang.ru/ru/archive/2003-1", "https://rjano.ruslang.ru/ru/archive/2003-2",
-    "https://rjano.ruslang.ru/ru/archive/2004-1", "https://rjano.ruslang.ru/ru/archive/2004-2"],
+    "seed_urls": ["https://rjano.ruslang.ru/ru/archive/2019-1", "https://rjano.ruslang.ru/ru/archive/2019-2", "https://rjano.ruslang.ru/ru/archive/2020-1",
+    "https://rjano.ruslang.ru/ru/archive/2020-2", "https://rjano.ruslang.ru/ru/archive/2021-1", "https://rjano.ruslang.ru/ru/archive/2021-2",
+    "https://rjano.ruslang.ru/ru/archive/2018-2", "https://rjano.ruslang.ru/ru/archive/2018-1"],
     "total_articles_to_find_and_parse": 100
 }

@@ -161,9 +161,9 @@ class HTMLParser:
 
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
-    crawler = Crawler(seed_urls, max_articles)
+    another_seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
+    crawler = Crawler(another_seed_urls, total_articles)
     crawler.find_articles()
-    for identificator, url in enumerate(crawler.urls):
-        number = HTMLParser(url, identificator + 1)
+    for identifier, url in enumerate(crawler.urls):
+        number = HTMLParser(url, identifier + 1)
         article = number.parse()
