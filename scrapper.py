@@ -12,7 +12,7 @@ import requests
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import HEADERS, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -169,16 +169,4 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    prepare_environment(ASSETS_PATH)
-    validate_config(CRAWLER_CONFIG_PATH)
-
-    with open(CRAWLER_CONFIG_PATH) as file:
-        config = json.load(file)
-
-    seed_urls = config['seed_urls']
-
-    max_articles = config['total_articles_to_find_and_parse']
-    crawler = Crawler(seed_urls=seed_urls, total_max_articles=max_articles)
-
-    crawler.find_articles()
     pass
