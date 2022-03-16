@@ -9,7 +9,8 @@ import re
 from bs4 import BeautifulSoup
 import requests
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -57,17 +58,11 @@ class Crawler:
         """
         Finds articles
         """
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10; rv:33.0) '
-            'Gecko/20100101 Firefox/33.0',
-            'Accept': '*/*',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7,fr;q=0.6'}
 
         for url in self.seed_urls:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=HEADERS)
 
-            article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
+            article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
 
             '''
@@ -84,7 +79,19 @@ class Crawler:
 
 
 class HTMLParser:
-    pass
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(self.article_url, self.article_id)
+
+    def parse(self):
+        response = requests.get(self.article_url, HEADERS)
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+        self._fill_article_with_text(article_bs)
+        return self.article
+
+    def _fill_article_with_text(self, article_bs):
+        pass
 
 
 def prepare_environment(base_path):
