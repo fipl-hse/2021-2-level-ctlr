@@ -6,7 +6,7 @@ import json
 import os
 import requests
 from bs4 import BeautifulSoup
-from constants import ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 # import re
@@ -69,27 +69,31 @@ class HTMLParser:
         self.article_id = i
         self.article = Article(full_url, i)
 
+    def parse(self):
+        article_bs = BeautifulSoup(requests.get(self.article_url, headers=headers).text, 'html.parser')
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        self.article.save_raw()
+        return self.article
+
     def _fill_article_with_text(self, article_bs):
-        article_bs = article_bs.find('div', class_='container-fluid').find('li')
-        url = article_bs.find_all('a')
-        pdf_raw_file = PDFRawFile(url['href'], self.article_id)
-        pdf_raw_file.download()
-        self.article.text = pdf_raw_file.get_text()
-        if 'ЛИТЕРАТУРА' in self.article.text:
-            text_without_literature = self.article.text.split('ЛИТЕРАТУРА')[:-1]
-            self.article.text = ''.join(text_without_literature)
+        table_rows = article_bs.find_all('div', class_='container-fluid')
+        for table_row in table_rows:
+            table_data = table_row.find_all('a')
+            for new_table_data in table_data:
+                if "Текст (PDF)" in new_table_data:
+                    url = new_table_data['href']
+                    pdf_raw_file = PDFRawFile(url, self.article_id)
+                    pdf_raw_file.download()
+                    text = pdf_raw_file.get_text()
+                    parts_of_article = text.split('ЛИТЕРАТУРА')
+                    self.article.text = ''.join(parts_of_article[:-1])
 
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.author = article_bs.find('i').get_text()
         self.article.title = article_bs.find('b').get_text()
 
-    def parser(self):
-        article_bs = BeautifulSoup(requests.get(self.article_url, headers=headers).text, 'html.parser')
-        self._fill_article_with_text(article_bs)
-        self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
-        return self.article
 
 def prepare_environment(base_path):
     """
@@ -127,4 +131,11 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
+    another_seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
+    crawler = Crawler(another_seed_urls, total_articles)
+    print(crawler)
+    #crawler.find_articles()
+    #for identifier, url in enumerate(crawler.urls):
+    #    number = HTMLParser(url, identifier + 1)
+    #    article = number.parse()
     pass
