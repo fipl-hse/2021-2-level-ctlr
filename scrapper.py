@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
-from core_utils.article import Article
+#from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
