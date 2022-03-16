@@ -33,7 +33,7 @@ class Article:
 
         self.title = ''
         self.date = None
-        self.authors = []
+        self.author = ''
         self.topics = []
         self.text = ''
 
@@ -68,7 +68,7 @@ class Article:
         self.url = meta.get('url', None)
         self.title = meta.get('title', '')
         self.date = date_from_meta(meta.get('date', None))
-        self.authors = meta.get('author', None)
+        self.author = meta.get('author', None)
         self.topics = meta.get('topics', None)
 
         # intentionally leave it empty
