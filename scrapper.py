@@ -8,7 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
-#from core_utils.article import Article
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -40,7 +40,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        class_bs = article_bs.find_all('div', class_= 'title')
+        class_bs = article_bs.find_all('div', class_='title')
         for title in class_bs:
             self.urls.append(title.find('a')['href'])
 
@@ -51,10 +51,10 @@ class Crawler:
         for urls in self.seed_urls:
             response = requests.get(urls)
             response.encoding = 'utf-16'
-            #with open('index2.html', 'w', encoding='utf-16') as file:
+            # with open('index2.html', 'w', encoding='utf-16') as file:
             #     file.write(response.text)
-            #print(response.status_code)
-            #uwu
+            # print(response.status_code)
+            # uwu
             article_bs = BeautifulSoup(response.text, features='html.parser')
             self._extract_url(article_bs)
 
@@ -64,21 +64,27 @@ class Crawler:
         """
         return self.seed_urls
 
-# class HTMLParser:
-#     def __init__(self, article_url, article_id):
-#         self.article_url = article_url
-#         self.article_id = article_id
-#         self.article = Article(article_url, article_id)
-#
-#     def parse(self):
-#         response = requests.get(self.article_url)
-#         article_bs = BeautifulSoup(response.text, 'html.parser')
-#
-#         self._fill_article_with_text(article_bs)
-#         self._fill_article_with_meta_information(article_bs)
-#         self.article.save_raw()
-#
-#         return self.article
+
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(article_url, article_id)
+
+    def _fill_article_with_text(self, article_bs):
+        pass
+
+    def _fill_article_with_meta_information(self, article_bs):
+        pass
+
+    def parse(self):
+        response = requests.get(self.article_url)
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        self.article.save_raw()
+
 
 def prepare_environment(base_path):
     """
@@ -110,10 +116,11 @@ def validate_config(crawler_path):
             raise IncorrectURLError
     return seed_urls, max_articles
 
+
 if __name__ == '__main__':
     urlsi, articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(urlsi, articles)
     crawler.find_articles()
     print(crawler.urls)
-  #  parser = ArticleParser(article_url=full_url, article_id=i)
+#  parser = ArticleParser(article_url=full_url, article_id=i)
