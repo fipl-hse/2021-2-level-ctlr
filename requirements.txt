@@ -6,4 +6,3 @@ beautifulsoup4==4.10.0
 wget==3.2
 matplotlib==3.5.1
 frontend == 0.0.3
-fitz
