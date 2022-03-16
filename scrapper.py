@@ -7,6 +7,13 @@ import os
 import requests
 from bs4 import BeautifulSoup
 
+from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
+
+#from constants import ASSETS_PATH
+#from constants import CRAWLER_CONFIG_PATH
+from constants import HEADERS
+
 
 class IncorrectURLError(Exception):
     """
@@ -36,28 +43,19 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        content = article_bs.find_all('div', id='content')
+        content = article_bs.find_all('div', {'class': 'issueArticle flex'})
         for article in content:
-            all_links = article.find_all('a')
-
-            for link in all_links:
-                try:
-                    href = link['href']
-                    if 'article/view' in href:
-                        self.urls.append(href)
-                        print(href)
-                except KeyError:
-                    print('Incorrect link or no href found')
+            link = article.find('a')
+            href = link['href']
+            self.urls.append(href)
 
     def find_articles(self):
         """
         Finds articles
         """
-        headers = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                                 'Chrome/99.0.4844.51 Safari/537.36'}
 
         for url in self.seed_urls:
-            response = requests.get(url, headers)  # get html code
+            response = requests.get(url, HEADERS)  # get html code
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
             self._extract_url(article_bs)
 
@@ -68,14 +66,39 @@ class Crawler:
         return self.urls
 
 
-class ArticleParser:
+class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
+        self.article = Article(url=article_url, article_id=article_id)
+
+    def parse(self):
+
+        response = requests.get(self.article_url, HEADERS)
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+
+        self._fill_article_with_text(article_bs)
+        return self.article
 
     def _fill_article_with_text(self, article_bs):
-        pass
-        # return None
+
+        fulltext = article_bs.find('div', {'class': 'fulltext'})
+        page_link = fulltext.find('a')['href']  # link to a page with pdf
+
+        response_pdf = requests.get(page_link, HEADERS)  # downloads page with pdf to find a link for download pdf
+        pdf_bs = BeautifulSoup(response_pdf.text, 'html.parser')
+
+        container = pdf_bs.find('div', id='pdfDownloadLinkContainer')
+        download_link = container.find('a')['href']
+
+        print(download_link)
+
+        pdf = PDFRawFile(download_link, self.article_id)
+
+        pdf.download()
+        self.article.text = pdf.get_text()
+        print(pdf.get_text())
+        self.article.save_raw()
 
 
 def prepare_environment(base_path):
