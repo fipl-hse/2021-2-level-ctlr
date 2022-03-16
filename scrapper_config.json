@@ -1,4 +1,7 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
-}
+    "seed_urls": ["https://magadanpravda.ru/lenta-novostej/politics",
+    "https://magadanpravda.ru/lenta-novostej/economics",
+    "https://magadanpravda.ru/lenta-novostej/nauka",
+    "https://magadanpravda.ru/lenta-novostej/medicine"],
+    "total_articles_to_find_and_parse": 100
+}git
