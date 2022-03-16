@@ -11,7 +11,7 @@ from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
 from constants import ASSETS_PATH
-#from constants import CRAWLER_CONFIG_PATH
+# from constants import CRAWLER_CONFIG_PATH ... idk what to do with this
 from constants import HEADERS
 
 
@@ -43,6 +43,9 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
+        """
+        Extracts urls of articles
+        """
         content = article_bs.find_all('div', {'class': 'issueArticle flex'})
         for article in content:
             link = article.find('a')
@@ -53,7 +56,6 @@ class Crawler:
         """
         Finds articles
         """
-
         for url in self.seed_urls:
             response = requests.get(url, HEADERS)  # get html code
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
@@ -67,25 +69,33 @@ class Crawler:
 
 
 class HTMLParser:
+    """
+    Parser implementation
+    """
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
         self.article = Article(self.article_url, self.article_id)
 
     def parse(self):
-
+        """
+        Extracts all necessary data from the article web page
+        """
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
+        #self.article.save_raw()
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-
+        """
+        Fills the Article instance with text
+        """
         fulltext = article_bs.find('div', {'class': 'fulltext'})
         page_link = fulltext.find('a')['href']  # link to a page with pdf
+        #print(page_link)
 
         response_pdf = requests.get(page_link, HEADERS)  # downloads page with pdf to find a link for download pdf
         pdf_bs = BeautifulSoup(response_pdf.text, 'html.parser')
@@ -93,26 +103,39 @@ class HTMLParser:
         container = pdf_bs.find('div', id='pdfDownloadLinkContainer')
         download_link = container.find('a')['href']
 
-        print(download_link)
-
         pdf = PDFRawFile(download_link, self.article_id)
 
         pdf.download()
         self.article.text = pdf.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
-        pass
+        """
+        Fills the Article instance with meta information
+        """
+        article_title = article_bs.find('div', id='articleTitle').find('h1')
+        self.article.title = article_title.get_text()
+        #print(self.article.title)
+
+        authors = article_bs.find('div', id='authorString').find_all('a')
+        article_author = ''
+        for author in authors:
+            if author.get_text() != '...':
+                article_author = ', ' + author.get_text()  # in case if there are several authors
+
+        self.article.author = article_author[1:]
+        #print(self.article.author)
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-
-    try:
-        os.rmdir(base_path)  # removes a folder
-    except FileNotFoundError:
-        os.mkdir(base_path)  # creates new one if it doesn't exist
+    if os.path.isdir(base_path):
+        files = os.listdir(base_path)
+        for file in files:
+            os.remove(os.path.join(base_path, file))
+    else:
+        os.makedirs(base_path)
 
 
 def validate_config(crawler_path):
@@ -138,6 +161,7 @@ def validate_config(crawler_path):
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
+    prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
 
