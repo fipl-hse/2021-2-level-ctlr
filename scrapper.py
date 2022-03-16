@@ -1,7 +1,7 @@
 """
 Scrapper implementation
 """
-
+import datetime
 import json
 import shutil
 from pathlib import Path
@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS
+from constants import HEADERS, CRAWLER_CONFIG_PATH
 
 from constants import ASSETS_PATH
 
@@ -98,19 +98,49 @@ class ArticleParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
-        self.pdf = None
-        self.article = Article(article_url, article_id)
+        self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        pass
+
+        # title
+        title_bs = article_bs.find_all('h1')[-1]
+        self.article.title = title_bs.text
+
+        # authors and additional information
+        table_with_authors = article_bs.find('table', class_='content_table otvet_list')
+        author_list_bs = table_with_authors.find_all('tr')[1:]
+        for element in author_list_bs:
+            author = element.find_all('td')
+            author_dict = dict(author=author[0].text,
+                               organization=author[1].text,
+                               add_info=author[2].text,
+                               e_mail=author[3].text)
+            self.article.authors.append(author_dict)
+
+        # topics
+        header2_bs = article_bs.find('h2')
+        topics_bs = header2_bs.find_next_siblings('a')
+        self.article.topics = [topic.text for topic in topics_bs]
+
+        # doi
+        current_crumb_bs = article_bs.find('span', class_='current_crumb')
+        span_text = current_crumb_bs.text
+        self.article.doi = span_text.partition('DOI:')[2].strip()
+
+        # date
+        big_title = article_bs.find('h1')
+        pattern_of_date = r'\d{4}'
+        result = re.findall(pattern_of_date, big_title.text)
+        date_year = int(result[0])
+        self.article.date = datetime.date(date_year, 1, 1)
 
     def _fill_article_with_text(self, article_bs):
-        # just for code style because i dont know what to do with article_bs
-        art = article_bs
+        article_urls_bs = article_bs.find('a', class_='file pdf')
+        self.pdf = PDFRawFile(article_urls_bs['href'], self.article_id)
+        self.pdf.download()
 
         self.article.text = self.pdf.get_text()
         self.article.save_raw()
-        return art
 
     def parse(self):
         response = requests.get(url=self.article_url, headers=HEADERS)
@@ -126,12 +156,7 @@ class ArticleParser:
 
         article_bs = BeautifulSoup(response, 'lxml')
 
-        article_urls_bs = article_bs.find('a', class_='file pdf')
-
-        self.pdf = PDFRawFile(article_urls_bs['href'], self.article_id)
-        self.pdf.download()
-
-        article_bs = BeautifulSoup()
+        self._fill_article_with_meta_information(article_bs)
         self._fill_article_with_text(article_bs)
 
 
