@@ -12,7 +12,7 @@ import requests
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS,ASSETS_PATH
+from constants import HEADERS, ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 
 class IncorrectURLError(Exception):
@@ -65,11 +65,11 @@ class Crawler:
             if not response.ok:
                 continue
 
-            soup = BeautifulSoup(response, 'lxml')
+            soup = BeautifulSoup(response.text, 'lxml')
 
             articles_urls = self._extract_url(soup)
             for full_url in articles_urls:
-                if len(self.urls) <= self.total_max_articles:
+                if len(self.urls) < self.total_max_articles:
                     self.urls.append(full_url)
 
     def get_search_urls(self):
@@ -148,7 +148,7 @@ def validate_config(crawler_path):
         configuration = json.load(file)
 
     seed_urls = configuration["seed_urls"]
-    total_articles = configuration["total_articles_to_find_and_parse"]
+    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
     http_pattern = re.compile(r'^https?://')
     if not seed_urls:
         raise IncorrectURLError
@@ -156,18 +156,29 @@ def validate_config(crawler_path):
         result = http_pattern.search(url)
         if not result:
             raise IncorrectURLError
-
-    if not isinstance(total_articles, int):
-        raise AttributeError
-
-    if total_articles < 0:
+    if not isinstance(total_articles_to_find_and_parse, int):
         raise IncorrectNumberOfArticlesError
 
-    if total_articles > 200:
+    if total_articles_to_find_and_parse <= 0:
+        raise IncorrectNumberOfArticlesError
+
+    if total_articles_to_find_and_parse > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    return seed_urls, total_articles
+    return seed_urls, total_articles_to_find_and_parse
 
 
 if __name__ == '__main__':
+    prepare_environment(ASSETS_PATH)
+    validate_config(CRAWLER_CONFIG_PATH)
+
+    with open(CRAWLER_CONFIG_PATH) as file:
+        config = json.load(file)
+
+    seed_urls = config['seed_urls']
+
+    max_articles = config['total_articles_to_find_and_parse']
+    crawler = Crawler(seed_urls=seed_urls, total_max_articles=max_articles)
+
+    crawler.find_articles()
     pass
