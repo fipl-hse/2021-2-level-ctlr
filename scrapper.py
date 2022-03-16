@@ -6,7 +6,6 @@ import json
 import shutil
 from pathlib import Path
 import re
-
 import requests
 from bs4 import BeautifulSoup
 

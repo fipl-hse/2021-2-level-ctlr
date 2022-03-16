@@ -1,9 +1,2 @@
-pytest==7.0.1
-requests==2.27.1
-numpy==1.22.2
-bs4==0.0.1
-beautifulsoup4==4.10.0
-wget==3.2
-matplotlib==3.5.1
-frontend == 0.0.3
-PyMuPDF == 1.19.6
+requests == 2.27.1
+beautifulsoup4 == 4.10.0
