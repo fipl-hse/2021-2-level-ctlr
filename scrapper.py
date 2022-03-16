@@ -45,19 +45,11 @@ class Crawler:
         """
         Finds articles
         """
-        software_names = [SoftwareName.CHROME.value]
-        operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
-        useragent_random = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
-        headers = {
-            'user-Agent': useragent_random.get_random_user_agent(),
-            'accept': '*/*', 'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7',
-            'cookie': 'yandexuid=378107381599902934; yuidss=378107381599902934; yabs-sid=77084811599902934; _ym_uid=1599999416687409591; mda=0; yandex_login=Lamba.san.ves; is_gdpr=0; is_gdpr_b=CIecPxCgCCgC; ymex=1946826689.yrts.1631466689; i=2qKOpp0zgPBNSDoDCJiNrbXokGItqy4PgraK6tsDBOdas2KbnfHX9YlbmbqtITRh9B3+Gpoo0CB/ED19gC0v6EWW5yo=; my=YycCAAEA; ys=udn.cDpBenpydWdl#c_chck.2557583304; engineering=1; adequate=1; Session_id=3:1647183118.5.0.1600707115417:L3zQUg:7a.1.2:1|165114763.0.2|3:249379.414541.dtAgEpshCbhT1OCLh-rZpRjkeyc; sessionid2=3:1647183118.5.0.1600707115417:L3zQUg:7a.1.2:1|165114763.0.2|3:249379.414541.dtAgEpshCbhT1OCLh-rZpRjkeyc; yandex_gid=47; _ym_d=1647346782; _ym_isad=1; engineer=1; yabs-frequency=/5/1m0004ALic400000/_tpvefXTkLUWHI4Se3zjXW000A158N0_GMs60000e4KX5Hn1ROO0002OHIE2OK5jXW0009X58zbmYRSKiv9De4KW7SvxfH5gytrVHVp___zZIlIyL2gUUA15GDgIfCn34kfoe4MWWFeWDc9_qrQWHI1Zu8-izch6QQ1589NZTDXB_tbCe4KWbqyobYOQBagWHM0qPUZmFLzFGQ1588WF772I0000e4L0-n8SS980002XHG01-rImS9K0002XHQ01iniSS980002WHI3kTx1mbG000A15u0LKi72L0000e4M0Kt2mS9K0002WHI1GSB1mbG000A15O0Xqi72L0000e4L0/; yp=1916067115.udn.cDpBenpydWdl#1663114786.szm.1_25:1536x864:1382x642#1672264872.p_sw.1640728872#1678882784.ygu.1#1647692282.spcs.d#1649861531.csc.2'
-        }
         for urls in self.seed_urls:
-            response = requests.get(urls, headers=headers, allow_redirects=True)
+            response = requests.get(urls)
             response.encoding = 'utf-8'
-            with open('index2.html', 'w', encoding='utf-16') as file:
-                file.write(response.text)
+          #  with open('index2.html', 'w', encoding='utf-16') as file:
+          #      file.write(response.text)
             #print(response.status_code)
             article_bs = BeautifulSoup(response.text, features='html.parser')
             self._extract_url(article_bs)
