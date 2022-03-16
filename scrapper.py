@@ -59,7 +59,7 @@ class Crawler:
         """
         Finds articles
         """
-        for seed_url_index, seed_url in enumerate(self.seed_urls):
+        for seed_url in self.seed_urls:
             response = requests.get(url=seed_url, headers=HEADERS)
 
             if not response.ok:
@@ -91,7 +91,7 @@ class HTMLParser:
         title_bs = article_bs.find_all('h1')[-1]
         self.article.title = title_bs.text
 
-        # authors and additional information
+        # author
         table_with_authors = article_bs.find('table', class_='content_table otvet_list')
         author_list_bs = table_with_authors.find_all('tr')[1]
         self.article.author = author_list_bs.find('td').text
