@@ -1,12 +1,15 @@
 """
 Scrapper implementation
 """
-import os, json, requests
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+import json
+import os
+import requests
+
 from bs4 import BeautifulSoup
-from random_user_agent.user_agent import UserAgent
-from random_user_agent.params import SoftwareName, OperatingSystem
+
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
+
 
 class IncorrectURLError(Exception):
     """
@@ -47,7 +50,7 @@ class Crawler:
         """
         for urls in self.seed_urls:
             response = requests.get(urls)
-            response.encoding = 'utf-8'
+            response.encoding = 'utf-16'
           #  with open('index2.html', 'w', encoding='utf-16') as file:
           #      file.write(response.text)
             #print(response.status_code)
