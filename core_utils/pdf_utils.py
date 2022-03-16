@@ -2,7 +2,6 @@
 PDF files downloader implementation
 """
 
-
 import os
 import wget
 import fitz
@@ -10,12 +9,15 @@ import fitz
 from constants import ASSETS_PATH
 
 
+# pylint: disable=E1101
+
 class PDFRawFile:
     """
     PDF files downloader class implementation.
     Knows how to download PDF from a given URL.
     Manages PDF's text.
     """
+
     def __init__(self, journal_url: str, journal_id: int):
         self._url = journal_url
         self._id = journal_id
