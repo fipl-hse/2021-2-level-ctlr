@@ -4,5 +4,6 @@
     "title": "title",
     "date": "1999-11-16 04:56:32",
     "author": "Красивая Мама",
-    "topics": []
+    "topics": [],
+    "pos_frequencies": {"A": 1, "S": 3, "ADV": 1, "V": 1,"PR": 1, "ANUM": 1}
 }
