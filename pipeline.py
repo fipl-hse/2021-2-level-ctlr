@@ -92,13 +92,11 @@ def validate_dataset(path_to_validate):
     pass
 
 
-def main():
-    main_url = 'https://nn.rbc.ru/nn/'
-    response = requests.get(main_url)
-    soup = BeautifulSoup(response.text, 'lxml')
-    title_bs = soup.find_all('span', class_="item__title rm-cm-item-text")[0]
-    print(title_bs.text.strip())
-
-
 if __name__ == "__main__":
+    def main():
+        main_url = 'https://nn.rbc.ru/nn/'
+        response = requests.get(main_url)
+        soup = BeautifulSoup(response.text, 'lxml')
+        title_bs = soup.find_all('span', class_="item__title rm-cm-item-text")[0]
+        print(title_bs.text.strip())
     main()
