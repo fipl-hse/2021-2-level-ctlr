@@ -5,6 +5,8 @@ echo "Starting tests for student dataset"
 
 TARGET_SCORE=$(bash config/get_mark.sh pipeline)
 
+source venv/bin/activate
+
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"
   python -m pytest -m "mark4 and stage_3_5_student_dataset_validation"
