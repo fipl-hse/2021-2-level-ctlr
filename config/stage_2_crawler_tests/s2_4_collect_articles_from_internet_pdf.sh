@@ -2,6 +2,8 @@ set -ex
 
 echo "Stage: Downloading articles"
 
+source venv/bin/activate
+
 echo "Adding $(pwd) to PYTHONPATH"
 export PYTHONPATH=$(pwd):$PYTHONPATH
 
