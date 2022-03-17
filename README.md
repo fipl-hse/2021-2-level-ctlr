@@ -41,10 +41,8 @@ Instructors:
 
 |Date|Lecture topic|Important links|
 |:--:|:---|:---|
-|21.02.2022|Exceptions: built-in and custom for error handling and information exchange.|[Introduction tutorial](https://realpython.com/python-exceptions/)|
-|25.02.2022|Programming assignment: main concept and implementation details.|**N/A**|
-|04.03.2022|**Lecture:** installing external dependencies with `python -m pip install -r requirements.txt`, learning `requests` library: basics, tricks. **Practice:** downloading your website pages, working with exceptions.|[Exceptions practice](./seminars/03.04.2022/try_exceptions.py), [`requests` practice](./seminars/03.04.2022/try_requests.py)|
-|11.03.2022|**Lecture:** learning `beautifulsoup4` library: find elements and get data from them. **Practice:** parsing your website pages.|[`beautifulsoup4` practice](./seminars/03.11.2022/try_beautiful_soup.py)|
+|21.02.2022|Exceptions: built-in and custom for error handling and information exchange|[Introduction tutorial](https://realpython.com/python-exceptions/)|
+|25.02.2022|Programming assignment: main concept and implementation details|**N/A**|
 
 ## Technical solution
 
@@ -74,13 +72,13 @@ Order of handing over:
 3. a student has completed the min-task from a mentor that requires some slight code modifications.
 4. a student receives a mark:
    1. that corresponds to the expected one, if all the steps above are completed and mentor is satisfied with 
-      the answer
+      the answer;
    2. one point bigger than the expected one, if all the steps above are completed and mentor is very 
-      satisfied with the answer
+      satisfied with the answer;
    3. one point smaller than the expected one, if a lab is handed over one week later than the deadline and 
-      criteria from 4.1 are satisfied
+      criteria from 4.1 are satisfied;
    4. two points smaller than the expected one, if a lab is handed over more than one week later than 
-      the deadline and criteria from 4.1 are satisfied
+      the deadline and criteria from 4.1 are satisfied.
 
 > NOTE: a student might improve their mark for the lab, if they complete tasks of the next level after handing over
 > the lab.
