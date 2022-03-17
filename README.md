@@ -50,12 +50,13 @@ Instructors:
 
 | Module | Description | Component | I need to know them, if I want to get at least |
 |:---|:---|:---|:---|
-| [requests](https://pypi.org/project/requests/) | module for downloading web pages | scrapper | 4 |
+| [`requests`](https://pypi.org/project/requests/) | module for downloading web pages | scrapper | 4 |
 | [`BeautifulSoup4`](https://pypi.org/project/beautifulsoup4/) | module for finding information on web pages | scrapper | 4 |
+| [`PyMuPDF`](https://pymupdf.readthedocs.io//) | module for opening and reading PDF files | scrapper | 4 |
 | [`lxml`](https://pypi.org/project/lxml/) | module for parsing HTML as a structure | scrapper | 6 |
-| [pymystem3](https://pypi.org/project/pymystem3/) | module for morphological analysis | pipeline | 6 |
-| [pymorphy2](https://pypi.org/project/pymorphy2/) | module for morphological analysis | pipeline | 8 |
-| [pandas](https://pypi.org/project/pandas/) | module for table data analysis | pipeline | 10 |
+| [`pymystem3`](https://pypi.org/project/pymystem3/) | module for morphological analysis | pipeline | 6 |
+| [`pymorphy2`](https://pypi.org/project/pymorphy2/) | module for morphological analysis | pipeline | 8 |
+| [`pandas`](https://pypi.org/project/pandas/) | module for table data analysis | pipeline | 10 |
 
 Software solution is built on top of three components:
 1. [`scrapper.py`](./scrapper.py) - a module for finding articles from the given media, extracting text and

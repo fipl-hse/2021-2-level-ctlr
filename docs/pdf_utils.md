@@ -15,3 +15,9 @@ bonuses.
 > * `PDFRawFile.__init__(...)`
 > * `PDFRawFile.download(...)`
 > * `PDFRawFile.get_text(...)`
+
+> **NOTE**: `PDFRawFile` relies on `fitz` python library. 
+> However, **do not install it directly!**
+> Instead, install `PyMuPDF` library which contains all the necessary components
+> for `PDFRawFile` to function correctly.
+> Naturally, do not forget to list it in `requirements.txt`.
