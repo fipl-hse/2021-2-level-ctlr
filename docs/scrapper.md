@@ -265,6 +265,8 @@ Then you need to follow certain steps:
 3. download a file with `PDFRawFile.download` method
 4. get a text from PDF by calling `pdf_file.get_text` method
 
+> NOTE: Make sure you have installed `PyMuPDF` library (not `fitz` itself!) so that `PDFRawFile` works correctly
+
 > IMPORTANT: when retrieving text from PDF files, you SHOULD NOT include references section, which contains 
 > all related works that were cited in this article. This section is always the last section of a scientific paper
 
