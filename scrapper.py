@@ -11,7 +11,7 @@ from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
 from constants import ASSETS_PATH
-# from constants import CRAWLER_CONFIG_PATH ... idk what to do with this
+from constants import CRAWLER_CONFIG_PATH
 from constants import HEADERS
 
 
@@ -86,7 +86,7 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        #self.article.save_raw()
+        self.article.save_raw()
         return self.article
 
     def _fill_article_with_text(self, article_bs):
@@ -166,5 +166,10 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    crawler = Crawler(my_seed_urls, my_max_articles)
+    crawler.find_articles()
+
+    for art_id, art_url in enumerate(crawler.urls):
+        parser = HTMLParser(art_url, art_id)
+        parser.parse()
