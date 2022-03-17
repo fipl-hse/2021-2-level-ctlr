@@ -17,6 +17,7 @@ if [[ ${TARGET_SCORE} != 0 ]]; then
   fi
   mv *_raw.txt tmp/articles
   bash config/stage_4_pos_frequency_pipeline_tests/run_pos_frequency_pipeline.sh
+  bash config/stage_4_pos_frequency_pipeline_tests/s4_pos_frequency_pipeline.sh
   echo "Your solution is accepted! Proceed to further tasks from your lecturer."
 else
   echo "Skip stage"
