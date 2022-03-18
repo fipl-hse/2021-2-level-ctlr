@@ -1,9 +1,11 @@
 """
 Scrapper implementation
 """
-import requests
 import json
 import re
+from pathlib import Path
+import requests
+from constants import ASSETS_PATH
 
 class IncorrectURLError(Exception):
     """
@@ -29,7 +31,9 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
-        pass
+        self.seed_urls = seed_urls
+        self.max_articles = max_articles
+        self.urls = []
 
     def _extract_url(self, article_bs):
         pass
@@ -51,7 +55,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    pass
+    try:
+        Path.rmdir(base_path)
+    except FileNotFoundError:
+        Path.mkdir(base_path)
 
 
 def validate_config(crawler_path):
@@ -62,27 +69,25 @@ def validate_config(crawler_path):
         with open(crawler_path) as file:
             config = json.load(file)
 
-        seed_url = config["seed_url"]
+        seed_urls = config["seed_url"]
         max_articles = config["total_articles_to find_and_parse"]
 
-        for url in seed_url:
+        if not isinstance(seed_urls, list) or not seed_urls:
+            raise IncorrectURLError
+
+        for url in seed_urls:
             validation = re.match(r'https?://', url)
             if not validation:
                 raise IncorrectURLError
 
-        if not isinstance(max_articles, int):
+        if not isinstance(max_articles, int) or max_articles <= 0:
             raise IncorrectNumberOfArticlesError
+
         if max_articles > 300:
             raise NumberOfArticlesOutOfRangeError
-        prepare_environment(ASSETS_PATH)
-        return seed_url, max_articles
 
-    except IncorrectURLError:
-        print('IncorrectURLError')
-    except NumberOfArticlesOutOfRangeError:
-        print('NumberOfArticlesOutOfRangeError')
-    except IncorrectNumberOfArticlesError:
-        print('IncorrectNumberOfArticlesError')
+        return seed_urls, max_articles
+
 
 if __name__ == '__main__':
     # YOUR CODE HERE
