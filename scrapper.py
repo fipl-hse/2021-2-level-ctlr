@@ -47,6 +47,7 @@ class Crawler:
     def _change_the_link(link):
         if 'http://journals.tsu.ru' not in link:
             link = 'http://journals.tsu.ru' + link
+            
         return link
 
     def _extract_url(self, article_bs):
