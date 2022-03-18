@@ -82,7 +82,7 @@ def main():
         print('Unable to remove non-empty folder')
 
     # 2.4.1 Option 1: remove all files and all its contents
-    new_file_path.unlink(missing_ok=True)
+    new_file_path.unlink()
     another_folder_path.rmdir()
 
     # 2.4.2. Option 2. remove a folder completely
