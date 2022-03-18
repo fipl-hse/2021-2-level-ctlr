@@ -81,12 +81,6 @@ class ArticleParser:
         with open(f'{ASSETS_PATH}/{self.article_id}_article.html', 'w') as file:
             file.write(response.text)
 
-        article_bs = BeautifulSoup(response.text, 'lxml')
-
-        # with open('page_code.html', encoding='utf-8') as file:
-        #     response = file.read()
-        return
-
     def _fill_article_with_text(self, article_bs):
         return None
 
