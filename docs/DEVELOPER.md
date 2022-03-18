@@ -102,7 +102,8 @@ python -m pip install -r requirements.txt
    1. Stage 3.6. Student dataset validation
    
 1. Stage 4. Additional tasks
-   1. Stage 4.1. Frequency visualization
+   1. stage 4.1. `POSFrequencyPipeline` checks
+   1. Stage 4.2. Frequency visualization
    
 
 ## Synchronizing between admin and public repository
