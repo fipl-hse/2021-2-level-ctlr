@@ -4,11 +4,13 @@ Scrapper implementation
 import json
 import os
 import re
+from time import sleep
+
 import requests
-import time
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -40,57 +42,42 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        article_summaries = article_bs.find("div", class_="obj_article_summary")
+        articles = article_summaries.find("div", class_="title")
+        for link in articles:
+            self.urls.append(link.find('a')['href'])
 
     def find_articles(self):
         """
         Finds articles
         """
-        headers = {
-            'user-agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
-        }
-
         sleep_period = 5
         for url in self.seed_urls:
-            response = requests.get(url, headers=headers)
-            time.sleep(sleep_period)
+            response = requests.get(url, headers=HEADERS)
+            sleep(sleep_period)
 
             if not response.ok:
-                print("Request failed")
+                continue
 
-            with open(ASSETS_PATH / "index.html", 'w', encoding='utf-8') as file:
-                file.write(response.text)
+            soup = BeautifulSoup(response.text, 'lxml')
+            self._extract_url(soup)
 
-            with open('page_code.html', encoding='utf-8') as file:
-                response = file.read()
-
-            soup = BeautifulSoup(response, 'lxml')
-            articles = soup.find("label", id="a2021")
-            links = articles.find_all('a')
-            self.urls = ["http://www.vestnik-mslu.ru/" + link['href'] for link in links]
-
-            # articles = self._extract_url(soup)[:self.max_articles]
-            # return articles
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
-
-
-class Article:
-    def __init__(self, article):
-        self.article = article
+        return self.seed_urls
 
 
 class ArticleParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
+        self.article = Article(article_url, article_id)
 
     def parse(self):
-        response = requests.get(self.article_url)
+        response = requests.get(self.article_url, headers=HEADERS)
         with open(f'{ASSETS_PATH}/{self.article_id}_article.html', 'w') as file:
             file.write(response.text)
 
@@ -112,11 +99,13 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
+    if ASSETS_PATH.exists():
+        ASSETS_PATH.unlink()
     try:
-        os.rmdir(ASSETS_PATH)
+        os.removedirs(ASSETS_PATH)
     except FileNotFoundError:
         pass
-    os.mkdir(ASSETS_PATH)
+    os.makedirs(ASSETS_PATH)
 
 
 def validate_config(crawler_path):
@@ -127,8 +116,10 @@ def validate_config(crawler_path):
         config = json.load(file)
 
     seed_urls = config["seed_urls"]
-    total_articles = config['total_articles']
+    total_articles = config['total_articles_to_find_and_parse']
+
     pattern = re.compile(r"^https?://")
+
     if not isinstance(total_articles, int):
         raise IncorrectNumberOfArticlesError
 
@@ -143,13 +134,14 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    with open(CRAWLER_CONFIG_PATH) as file:
-        config = json.load(file)
-
-    seed_urls = config['seed_urls']
-    max_articles = config['total_articles']
-    crawler = Crawler(seed_urls=seed_urls, total_max_articles=max_articles)
-
-    crawler.find_articles()
-
-    parser = ArticleParser(article_url=full_url, article_id=i)
+    # with open(CRAWLER_CONFIG_PATH) as file:
+    #     config = json.load(file)
+    #
+    # seed_urls = config['seed_urls']
+    # max_articles = config['total_articles']
+    # crawler = Crawler(seed_urls=seed_urls, total_max_articles=max_articles)
+    #
+    # crawler.find_articles()
+    #
+    # parser = ArticleParser(article_url=full_url, article_id=i)
+    prepare_environment(ASSETS_PATH)

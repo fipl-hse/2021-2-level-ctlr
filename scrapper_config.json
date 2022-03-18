@@ -1,4 +1,25 @@
 {
-    "seed_urls": ["http://www.vestnik-mslu.ru/vestnik.asp?vest_lang=Rus&vest_type=gum"],
+    "seed_urls": [
+        "http://journal.asu.ru/urisl/issue/view/537",
+        "http://journal.asu.ru/urisl/issue/view/521",
+        "http://journal.asu.ru/urisl/issue/view/504",
+        "http://journal.asu.ru/urisl/issue/view/503",
+        "http://journal.asu.ru/urisl/issue/view/455",
+        "http://journal.asu.ru/urisl/issue/view/454",
+        "http://journal.asu.ru/urisl/issue/view/%282020%2916",
+        "http://journal.asu.ru/urisl/issue/view/%282020%2915",
+        "http://journal.asu.ru/urisl/issue/view/%282019%2914",
+        "http://journal.asu.ru/urisl/issue/view/%282019%2913",
+        "http://journal.asu.ru/urisl/issue/view/%282019%2912",
+        "http://journal.asu.ru/urisl/issue/view/%282019%2911",
+        "http://journal.asu.ru/urisl/issue/view/%282018%29910",
+        "http://journal.asu.ru/urisl/issue/view/261",
+        "http://journal.asu.ru/urisl/issue/view/151",
+        "http://journal.asu.ru/urisl/issue/view/146",
+        "http://journal.asu.ru/urisl/issue/view/145",
+        "http://journal.asu.ru/urisl/issue/view/147",
+        "http://journal.asu.ru/urisl/issue/view/148",
+        "http://journal.asu.ru/urisl/issue/view/149"
+    ],
     "total_articles_to_find_and_parse": 0
 }
