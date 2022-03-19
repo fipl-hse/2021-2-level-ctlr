@@ -41,7 +41,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        self.urls.append('http://www.elista.org/'+article_bs.find('a')['href'])
+        self.urls.append('http://www.elista.org'+article_bs.find('a')['href'])
 
     def find_articles(self):
         """
@@ -53,7 +53,7 @@ class Crawler:
             page_bs = BeautifulSoup(response.text, features='html.parser')
             class_bs = page_bs.find_all('div', class_='grid_19 omega')
             for article_bs in class_bs:
-                if len(self.urls) < 100:
+                if len(self.urls) < self.max_articles:
                     self._extract_url(article_bs)
 
     def get_search_urls(self):
