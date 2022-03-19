@@ -12,7 +12,7 @@ import requests
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, ASSETS_PATH
+from constants import HEADERS, ASSETS_PATH, HTTP_PATTERN
 
 
 class IncorrectURLError(Exception):
@@ -45,8 +45,8 @@ class Crawler:
 
     @staticmethod
     def _change_the_link(link):
-        if 'http://journals.tsu.ru' not in link:
-            link = 'http://journals.tsu.ru' + link
+        if HTTP_PATTERN not in link:
+            link = HTTP_PATTERN + link
         return link
 
     def _extract_url(self, article_bs):
@@ -83,7 +83,7 @@ class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
-        self.article = Article(article_url, article_id)
+        self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
         # title
@@ -107,8 +107,8 @@ class HTMLParser:
         date_year = int(result[0])
         self.article.date = datetime.date(date_year, 1, 1)
 
-        # url
-        self.article.url = self.article_url
+        # # url
+        # self.article.url = self.article_url
 
     def _fill_article_with_text(self, article_bs):
         article_urls_bs = article_bs.find('a', class_='file pdf')
@@ -132,9 +132,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if Path(base_path).exists():
+    path_to_base_path = Path(base_path)
+    if path_to_base_path.exists():
         shutil.rmtree(base_path)
-    Path(base_path).mkdir(parents=True, exist_ok=True)
+    path_to_base_path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
@@ -146,7 +147,7 @@ def validate_config(crawler_path):
 
     seed_urls = configuration["seed_urls"]
     total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
-    http_pattern = re.compile(r'^https?://')
+    http_pattern = re.compile(HTTP_PATTERN)
     if not seed_urls:
         raise IncorrectURLError
     for url in seed_urls:
