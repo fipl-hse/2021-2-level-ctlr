@@ -2,9 +2,10 @@
 Scrapper implementation
 """
 import json
+import shutil
 from pathlib import Path
 import requests
-
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
@@ -69,10 +70,22 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        pass
+        text_bs = article_bs.find('div', class_='fullnews_content')
+        self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        pass
+        meta_bs = article_bs.find('div', class_='news_item fullnews')
+        title_bs = meta_bs.find('h1').text
+        subtitle_bs = meta_bs.find('blockquote').text
+        title = title_bs + '. ' + subtitle_bs
+        self.article.title = title
+
+        date_bs = meta_bs.find('span', class_='date').text
+        date = datetime.strptime(date_bs, '%d.%m.%Y : %H.%M')
+        self.article.date = date
+
+        topic = article_bs.find('h4', class_='chapter_h').text
+        self.article.topics.append(topic)
 
     def parse(self):
         response = requests.get(self.article_url)
@@ -81,6 +94,7 @@ class HTMLParser:
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         self.article.save_raw()
+        return self.article
 
 
 def prepare_environment(base_path):
@@ -88,7 +102,7 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     try:
-        base_path.rmdir()
+        shutil.rmtree(base_path)
     except FileNotFoundError:
         pass
     base_path.mkdir(parents=True)
@@ -119,5 +133,6 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(urlsi, articles)
     crawler.find_articles()
-    print(len(crawler.urls))
-#    parser = ArticleParser(article_url=full_url, article_id=i)
+    print(crawler.urls)
+    for url in crawler.urls:
+        parsed_article = HTMLParser(url, crawler.urls.index(url)+1)
