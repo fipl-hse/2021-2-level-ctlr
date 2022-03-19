@@ -36,21 +36,20 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        url = 'https://vz.ru/news/'
-        reqs = requests.get(url)
-        soup = BeautifulSoup(reqs.text, 'html.parser')
-
-        try:
-            for link in soup.find_all('a', attrs={'href': re.compile("^http[s]?://")}):
-                print(link.get('href'))
-        except KeyError:
-            print('Incorrect link')
+        pass
 
     def find_articles(self):
         """
         Finds articles
         """
-        pass
+        url = 'https://vz.ru/news/'
+        reqs = requests.get(url)
+        soup = BeautifulSoup(reqs.text, 'html.parser')
+        try:
+            for link in soup.find_all('a', attrs={'href': re.compile("^http[s]?://")}):
+                print(link.get('href'))
+        except KeyError:
+            print('Incorrect link')
 
     def get_search_urls(self):
         """
