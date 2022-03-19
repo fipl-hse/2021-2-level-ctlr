@@ -1,10 +1,13 @@
 {
     "seed_urls": [
-        "https://www.pnp.ru/news/",
-        "https://www.pnp.ru/news/2/",
-        "https://www.pnp.ru/news/3/",
-        "https://www.pnp.ru/news/4/",
-        "https://www.pnp.ru/news/5/"
+        "http://www.elista.org/economy/",
+        "http://www.elista.org/economy/?p=0",
+        "http://www.elista.org/economy/?p=1",
+        "http://www.elista.org/economy/?p=2",
+        "http://www.elista.org/economy/?p=3",
+        "http://www.elista.org/economy/?p=4",
+        "http://www.elista.org/economy/?p=5",
+        "http://www.elista.org/economy/?p=6"
     ],
     "total_articles_to_find_and_parse": 100
 }
