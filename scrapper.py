@@ -43,6 +43,7 @@ class Crawler:
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
+        # i need to do that for checks
 
     def _extract_url(self, article_bs):
         """
@@ -112,8 +113,8 @@ class HTMLParser:
         """
         Fills the Article instance with meta information
         """
-        article_title = article_bs.find('div', id='articleTitle').find('h1')
-        self.article.title = article_title.get_text()
+        article_title = article_bs.find('meta', {'name': 'description'})['content']
+        self.article.title = article_title
 
         author = article_bs.find('meta', {'name': 'DC.Creator.PersonalName'})
         if not author:
@@ -171,3 +172,4 @@ if __name__ == '__main__':
         parser = HTMLParser(my_url, i + 1)
         my_article = parser.parse()
         my_article.save_raw()
+        # for checks
