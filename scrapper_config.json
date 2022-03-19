@@ -1,13 +1,13 @@
 {
     "seed_urls": [
         "http://www.elista.org/economy/",
-        "http://www.elista.org/economy/?p=0",
         "http://www.elista.org/economy/?p=1",
-        "http://www.elista.org/economy/?p=2",
-        "http://www.elista.org/economy/?p=3",
-        "http://www.elista.org/economy/?p=4",
-        "http://www.elista.org/economy/?p=5",
-        "http://www.elista.org/economy/?p=6"
+        "http://www.elista.org/incidents/",
+        "http://www.elista.org/incedents/?p=1",
+        "http://www.elista.org/socium/",
+        "http://www.elista.org/socium/?p=1",
+        "http://www.elista.org/culture/",
+        "http://www.elista.org/sport/"
     ],
     "total_articles_to_find_and_parse": 100
 }
