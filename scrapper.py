@@ -76,9 +76,7 @@ class HTMLParser:
     def _fill_article_with_meta_information(self, article_bs):
         meta_bs = article_bs.find('div', class_='news_item fullnews')
         title_bs = meta_bs.find('h1').text
-        subtitle_bs = meta_bs.find('blockquote').text
-        title = title_bs + '. ' + subtitle_bs
-        self.article.title = title
+        self.article.title = title_bs
 
         date_bs = meta_bs.find('span', class_='date').text
         date = datetime.strptime(date_bs, '%d.%m.%Y : %H.%M')
@@ -134,7 +132,9 @@ if __name__ == '__main__':
     crawler = Crawler(urlsi, articles)
     crawler.find_articles()
     print(crawler.urls)
+    id_art = 1
     for article_url_new in crawler.urls:
-        parsing_article = HTMLParser(article_url_new, crawler.urls.index(article_url_new)+1)
+        parsing_article = HTMLParser(article_url_new, id_art)
         parsed_article = parsing_article.parse()
         parsed_article.save_raw()
+        id_art+=1
