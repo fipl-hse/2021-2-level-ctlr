@@ -156,12 +156,12 @@ def validate_config(crawler_path):
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
 
