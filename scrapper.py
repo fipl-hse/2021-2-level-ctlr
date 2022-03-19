@@ -167,17 +167,17 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     print('---Preparing environment---')
-    prepare_environment(ASSETS_PATH)
     seed_urls_test, total_articles_test = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
     print('---Creating a Crawler---')
     crawler = Crawler(seed_urls_test, total_articles_test)
     crawler.find_articles()
     print('---Parsing---')
-    count = 0
+    counter_test = 0
     for article_url_test in crawler.urls:
-        count += 1
-        article_parser = HTMLParser(article_url=article_url_test, article_id=count)
+        counter_test += 1
+        article_parser = HTMLParser(article_url=article_url_test, article_id=counter_test)
         article = article_parser.parse()
         article.save_raw()
-        print(f'The {count} article is done!')
+        print(f'The {counter_test} article is done!')
     print('---Done!---')
