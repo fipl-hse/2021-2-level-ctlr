@@ -14,7 +14,6 @@ from core_utils.pdf_utils import PDFRawFile
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
 from constants import HEADERS
-# for checks
 
 
 class IncorrectURLError(Exception):
