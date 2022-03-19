@@ -11,75 +11,106 @@ on:
 
 
 jobs:
-# Stage 1. Style checks
+  # Stage 1. Style checks
+  install-dependencies:
+    name: Installing dependencies
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Confirming everything is OK
+        run: |
+          ls -la ~/.local/bin
+          ls -la venv
+
   pr-name-check:
     name: PR name check
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     timeout-minutes: 2
+    needs: [ install-dependencies ]
     env:
       PR_NAME: ${{ github.event.pull_request.title }}
       PR_AUTHOR: ${{ github.actor }}
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: PR name check
-      run: |
-        bash config/stage_1_style_tests/_stage_pr_name_check.sh "$PR_NAME" "$PR_AUTHOR"
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: PR name check
+        run: |
+          bash config/stage_1_style_tests/_stage_pr_name_check.sh "$PR_NAME" "$PR_AUTHOR"
 
   code-style:
     name: Code Style
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 1
+    needs: [ install-dependencies ]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Code Syle
-      run: |
-        bash config/stage_1_style_tests/_stage_run_lint.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Code Syle
+        run: |
+          bash config/stage_1_style_tests/_stage_run_lint.sh
 
   spellcheck:
     name: Spellcheck
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 1
+    needs: [ install-dependencies ]
     steps:
       - uses: actions/checkout@master
       - name: Install Aspell
@@ -91,19 +122,18 @@ jobs:
           python-version: 3.9
       - name: Cache pip
         uses: actions/cache@v2
+        id: cache
         with:
-          # This path is specific to Ubuntu
-          path: ~/.cache/pip
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+            ${{ runner.os }}-venv-
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install -r requirements_qa.txt
+          bash config/venv_setup.sh
       - name: Spell check
         run: |
           bash config/spellcheck/_stage_spellcheck.sh
@@ -116,29 +146,29 @@ jobs:
     timeout-minutes: 3
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Run crawler config checks
-      run: |
-        bash config/stage_2_crawler_tests/_stage_check_crawler_config.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Run crawler config checks
+        run: |
+          bash config/stage_2_crawler_tests/_stage_check_crawler_config.sh
+          ls -la ~/.local/bin
 
   checking-crawler:
     name: Crawler checks
@@ -154,19 +184,18 @@ jobs:
           python-version: 3.9
       - name: Cache pip
         uses: actions/cache@v2
+        id: cache
         with:
-          # This path is specific to Ubuntu
-          path: ~/.cache/pip
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+            ${{ runner.os }}-venv-
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements_qa.txt
-          pip install -r requirements.txt
+          bash config/venv_setup.sh
       - name: Run crawler config checks
         run: |
           bash config/stage_2_crawler_tests/_stage_crawler_checks.sh
@@ -185,19 +214,18 @@ jobs:
           python-version: 3.9
       - name: Cache pip
         uses: actions/cache@v2
+        id: cache
         with:
-          # This path is specific to Ubuntu
-          path: ~/.cache/pip
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+            ${{ runner.os }}-venv-
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements_qa.txt
-          pip install -r requirements.txt
+          bash config/venv_setup.sh
       - name: Run crawler config checks
         run: |
           bash config/stage_2_crawler_tests/_stage_parser_checks.sh
@@ -213,36 +241,35 @@ jobs:
     timeout-minutes: 10
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Crawl a raw dataset from web
-      run: |
-        bash config/stage_2_crawler_tests/_stage_collect_articles.sh
-    - name: Archive raw dataset
-      uses: actions/upload-artifact@v2
-      with:
-        name: raw-dataset
-        path: |
-          tmp/articles
-        retention-days: 5
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Crawl a raw dataset from web
+        run: |
+          bash config/stage_2_crawler_tests/_stage_collect_articles.sh
+      - name: Archive raw dataset
+        uses: actions/upload-artifact@v2
+        with:
+          name: raw-dataset
+          path: |
+            tmp/articles
+          retention-days: 5
 
   checking-articles-dataset:
     name: Validate dataset
@@ -251,75 +278,73 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: raw-dataset
-    - name: Run metadata validation
-      run: |
-        bash config/stage_2_crawler_tests/_stage_validate_metadata.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Run metadata validation
+        run: |
+          bash config/stage_2_crawler_tests/_stage_validate_metadata.sh
 
   milestone-1-crawler-is-working:
     name: Crawler is accepted!
     needs: [
-        checking-articles-dataset,
-        spellcheck
+      checking-articles-dataset,
+      spellcheck
     ]
     runs-on: ubuntu-latest
     timeout-minutes: 2
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: raw-dataset
-    - name: Congratulations
-      run: |
-        bash config/stage_2_crawler_tests/_stage_accept_dataset.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Congratulations
+        run: |
+          bash config/stage_2_crawler_tests/_stage_accept_dataset.sh
 
-# Stage 3. Pipeline tests
+  # Stage 3. Pipeline tests
   milestone-2-pipeline:
     name: Starting pipeline checks!
     needs: [ milestone-1-crawler-is-working ]
@@ -338,34 +363,33 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: raw-dataset
-    - name: Run crawler config checks
-      run: |
-        bash config/stage_3_pipeline_tests/_stage_check_raw_dataset.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Run crawler config checks
+        run: |
+          bash config/stage_3_pipeline_tests/_stage_check_raw_dataset.sh
 
   checking-corpus-manager-creates-instances-correctly:
     name: CorpusManager detects articles
@@ -381,19 +405,18 @@ jobs:
           python-version: 3.9
       - name: Cache pip
         uses: actions/cache@v2
+        id: cache
         with:
-          # This path is specific to Ubuntu
-          path: ~/.cache/pip
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+            ${{ runner.os }}-venv-
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements_qa.txt
-          pip install -r requirements.txt
+          bash config/venv_setup.sh
       - name: Download previously collected dataset
         continue-on-error: true
         uses: actions/download-artifact@v2
@@ -417,19 +440,18 @@ jobs:
           python-version: 3.9
       - name: Cache pip
         uses: actions/cache@v2
+        id: cache
         with:
-          # This path is specific to Ubuntu
-          path: ~/.cache/pip
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-
-            ${{ runner.os }}-
+            ${{ runner.os }}-venv-
       - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements_qa.txt
-          pip install -r requirements.txt
+          bash config/venv_setup.sh
       - name: Download previously collected dataset
         continue-on-error: true
         uses: actions/download-artifact@v2
@@ -446,34 +468,33 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: raw-dataset
-    - name: Run metadata validation
-      run: |
-        bash config/stage_3_pipeline_tests/_stage_check_on_admin_dataset.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Run metadata validation
+        run: |
+          bash config/stage_3_pipeline_tests/_stage_check_on_admin_dataset.sh
 
   run-student-processing:
     name: Pipe processed student data
@@ -482,42 +503,41 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: raw-dataset
-    - name: Run validation of `_processed.txt` files
-      run: |
-        bash config/stage_3_pipeline_tests/_stage_check_on_student_dataset.sh
-    - name: Archive processed dataset
-      continue-on-error: true
-      uses: actions/upload-artifact@v2
-      with:
-        name: processed-dataset
-        path: |
-          tmp/articles
-        retention-days: 5
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: raw-dataset
+      - name: Run validation of `_processed.txt` files
+        run: |
+          bash config/stage_3_pipeline_tests/_stage_check_on_student_dataset.sh
+      - name: Archive processed dataset
+        continue-on-error: true
+        uses: actions/upload-artifact@v2
+        with:
+          name: processed-dataset
+          path: |
+            tmp/articles
+          retention-days: 5
 
   checking-student-processing-works-for-student-dataset:
     name: Validate final dataset
@@ -526,37 +546,36 @@ jobs:
     timeout-minutes: 5
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: processed-dataset
-    - name: Run validation of `_processed.txt` files
-      run: |
-        bash config/stage_3_pipeline_tests/_stage_check_student_processing.sh
-
-  milestone-2-pipeline-is-working:
-    name: Pipeline is accepted!
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: processed-dataset
+      - name: Run validation of `_processed.txt` files
+        run: |
+          bash config/stage_3_pipeline_tests/_stage_check_student_processing.sh
+  
+  running-pos-pipeline-tests:
+    name: POSFrequencyPipeline tests
     needs: [
       checking-raw-dataset-before-running-pipeline,
       checking-student-processing-works-for-admin-dataset,
@@ -565,34 +584,70 @@ jobs:
       checking-morphological-token-works-correctly
     ]
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 7
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.9
-    - name: Cache pip
-      uses: actions/cache@v2
-      with:
-        # This path is specific to Ubuntu
-        path: ~/.cache/pip
-        # Look to see if there is a cache hit for the corresponding requirements file
-        key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-          ${{ runner.os }}-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements_qa.txt
-        pip install -r requirements.txt
-    - name: Download previously collected dataset
-      continue-on-error: true
-      uses: actions/download-artifact@v2
-      with:
-        name: processed-dataset
-    - name: Congratulations
-      run: |
-        bash config/stage_4_pos_frequency_pipeline_tests/_stage_check_pos_pipeline.sh
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: processed-dataset
+      - name: Congratulations
+        run: |
+          bash config/stage_4_pos_frequency_pipeline_tests/_stage_check_pos_pipeline.sh
+
+  milestone-2-pipeline-is-working:
+    name: Pipeline is accepted!
+    needs: [
+      running-pos-pipeline-tests
+    ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Cache pip
+        uses: actions/cache@v2
+        id: cache
+        with:
+          path: |
+            ./venv/
+            ~/.local/bin/mystem
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-venv-
+      - name: Install dependencies
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          bash config/venv_setup.sh
+      - name: Download previously collected dataset
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: processed-dataset
+      - name: Congratulations
+        run: |
+          echo "You have completed the assignment!"

@@ -5,6 +5,8 @@ echo "Starting tests for CorpusManager"
 
 TARGET_SCORE=$(bash config/get_mark.sh pipeline)
 
+source venv/bin/activate
+
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"
   python -m pytest -m "mark4 and stage_3_2_corpus_manager_checks"
