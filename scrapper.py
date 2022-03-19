@@ -12,7 +12,7 @@ import requests
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, ASSETS_PATH, HTTP_PATTERN, CRAWLER_CONFIG_PATH
+from constants import HEADERS, HTTP_PATTERN
 
 
 class IncorrectURLError(Exception):
