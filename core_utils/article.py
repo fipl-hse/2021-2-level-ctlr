@@ -50,13 +50,10 @@ class Article:
         with open(self.get_raw_text_path(), 'w', encoding='utf-8') as file:
             file.write(self.text)
 
-        with open(os.path.join(ASSETS_PATH, article_meta_name), "w", encoding='utf-8') as file:
-            json.dump(self._get_meta(),
-                      file,
-                      sort_keys=False,
-                      indent=4,
-                      ensure_ascii=False,
-                      separators=(',', ': '))
+        if self.author:
+            with open(os.path.join(ASSETS_PATH, article_meta_name), "w", encoding='utf-8') as file:
+                json.dump(self._get_meta(), file, sort_keys=False,
+                          indent=4, ensure_ascii=False, separators=(',', ': '))
 
     def from_meta_json(self, json_path: str):
         """
