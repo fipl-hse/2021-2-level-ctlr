@@ -170,3 +170,4 @@ if __name__ == '__main__':
         parser = HTMLParser(my_url, i + 1)
         my_article = parser.parse()
         my_article.save_raw()
+        # i just restart checks
