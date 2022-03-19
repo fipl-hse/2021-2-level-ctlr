@@ -3,9 +3,9 @@ Scrapper implementation
 """
 import json
 import shutil
-from pathlib import Path
-import requests
 from datetime import datetime
+
+import requests
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
@@ -135,6 +135,6 @@ if __name__ == '__main__':
     crawler = Crawler(urlsi, articles)
     crawler.find_articles()
     print(crawler.urls)
-    for url in crawler.urls:
-        parsed_article = HTMLParser(url, crawler.urls.index(url)+1)
+    for article_url in crawler.urls:
+        parsed_article = HTMLParser(article_url, crawler.urls.index(article_url)+1)
         parsed_article.parse()
