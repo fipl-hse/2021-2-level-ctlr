@@ -42,9 +42,11 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         class_bs = article_bs.find('div', class_="b-materials-list b-list_infinity")
-        title_bs = class_bs.find_all('p', class_="b-materials-list__title b-materials-list__title_news")
+        title_bs = class_bs.find_all("p", class_="b-materials-list__title b-materials-list__title_news")
+        # print(class_bs)
+        print(title_bs)
         for link in title_bs:
-            link = link.find('a')
+            link = link.find_all('a')
             self.urls.append('https://www.m24.ru' + link['href'])
 
     def find_articles(self):
@@ -80,8 +82,12 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def parse(self):
-        response = requests.get(self.article_url)
-        # прописать обманку для сайта!!!
+        software_names = [SoftwareName.CHROME.value]
+        operating_systems = [OperatingSystem.WINDOWS.value, OperatingSystem.LINUX.value]
+        useragent_random = UserAgent(software_names=software_names, operating_systems=operating_systems, limit=100)
+        headers = {'user-agent': useragent_random.get_random_user_agent(),
+                   'accept': '*/*', 'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
+        response = requests.get(self.article_url, headers=headers, allow_redirects=True, timeout=5)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
@@ -91,8 +97,25 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self, article_bs):
+        table_rows = article_bs.find('div', class_="b-material-body").text
+        # self.article.text = table_rows
+        self._fill_article_with_text = table_rows
+        table_rows = article_bs.find("div", class_="b-material-body").find_all("p")
+        table_rows.pop(0)
+        table_rows.pop(-1)
+        table_rows.pop(-1)
+
+        clear_text = ''
+        for t in table_rows:
+            clear_text += t.text
+        print(clear_text)
+        # self.article.save_raw() SRP - parses and does NOT saves
 
     def _fill_article_with_meta_information(self, article_bs):
+        meta_info = article_bs.find()
+        self._fill_article_with_meta_information = meta_info
+
+
 
 
 def prepare_environment(base_path):
@@ -153,6 +176,8 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=seed_urls, max_articles=max_articles)
     crawler.find_articles()
     print(crawler.urls)
+    for i, url in enumerate(crawler.urls):
+        parser = HTMLParser(url, i + 1)
+        article = parser.parse()
+        print(article)
     # article.save_raw()
-
-
