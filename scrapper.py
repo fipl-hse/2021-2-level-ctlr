@@ -132,9 +132,9 @@ if __name__ == '__main__':
     crawler = Crawler(urlsi, articles)
     crawler.find_articles()
     print(crawler.urls)
-    id_art = 1
+    article_id = 1
     for article_url_new in crawler.urls:
-        parsing_article = HTMLParser(article_url_new, id_art)
+        parsing_article = HTMLParser(article_url_new, article_id)
         parsed_article = parsing_article.parse()
         parsed_article.save_raw()
-        id_art+=1
+        article_id += 1
