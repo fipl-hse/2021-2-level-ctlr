@@ -87,6 +87,8 @@ class HTMLParser:
         topic = article_bs.find('h4', class_='chapter_h').text
         self.article.topics.append(topic)
 
+        self.article.author = 'NOT FOUND'
+
     def parse(self):
         response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'html.parser')
@@ -94,7 +96,6 @@ class HTMLParser:
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         self.article.save_raw()
-        return self.article
 
 
 def prepare_environment(base_path):
@@ -136,3 +137,4 @@ if __name__ == '__main__':
     print(crawler.urls)
     for url in crawler.urls:
         parsed_article = HTMLParser(url, crawler.urls.index(url)+1)
+        parsed_article.parse()
