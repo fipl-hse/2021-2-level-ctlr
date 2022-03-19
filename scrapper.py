@@ -2,7 +2,7 @@
 Scrapper implementation
 """
 import json
-import os
+from pathlib import Path
 import requests
 
 from bs4 import BeautifulSoup
@@ -40,23 +40,20 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        class_bs = article_bs.find_all('div', class_='title')
-        for title in class_bs:
-            self.urls.append(title.find('a')['href'])
+        self.urls.append('http://www.elista.org/'+article_bs.find('a')['href'])
 
     def find_articles(self):
         """
         Finds articles
         """
-        for urls in self.seed_urls:
-            response = requests.get(urls)
-            response.encoding = 'utf-16'
-            # with open('index2.html', 'w', encoding='utf-16') as file:
-            #     file.write(response.text)
-            # print(response.status_code)
-            # uwu
-            article_bs = BeautifulSoup(response.text, features='html.parser')
-            self._extract_url(article_bs)
+        for url in self.seed_urls:
+            response = requests.get(url)
+            response.encoding = 'utf-8'
+            page_bs = BeautifulSoup(response.text, features='html.parser')
+            class_bs = page_bs.find_all('div', class_='grid_19 omega')
+            for article_bs in class_bs:
+                if len(self.urls) < 100:
+                    self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
@@ -91,10 +88,10 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     try:
-        os.rmdir(base_path)
+        base_path.rmdir()
     except FileNotFoundError:
         pass
-    os.mkdir(base_path)
+    base_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
@@ -122,5 +119,5 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(urlsi, articles)
     crawler.find_articles()
-    print(crawler.urls)
-#  parser = ArticleParser(article_url=full_url, article_id=i)
+    print(len(crawler.urls))
+#    parser = ArticleParser(article_url=full_url, article_id=i)
