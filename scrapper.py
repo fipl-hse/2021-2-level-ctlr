@@ -114,12 +114,11 @@ class HTMLParser:
         article_title = article_bs.find('div', id='articleTitle').find('h1')
         self.article.title = article_title.get_text()
 
-        authors = article_bs.find_all('meta', {'name': 'DC.Creator.PersonalName'})
-        if not authors:
+        author = article_bs.find('meta', {'name': 'DC.Creator.PersonalName'})
+        if not author:
             self.article.author = 'NOT FOUND'
         else:
-            authors_list = [author['content'] for author in authors]
-            self.article.author = ', '.join(authors_list)
+            self.article.author = author['content']
 
         date_raw = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
         date = datetime.datetime.strptime(date_raw, '%Y-%m-%d')
