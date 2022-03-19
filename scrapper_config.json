@@ -1,4 +1,8 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": ["https://www.rbc.ru/", "https://www.rbc.ru/national",
+        "https://www.rbc.ru/trends", "https://www.rbc.ru/politics",
+        "https://www.rbc.ru/realty", "https://www.rbc.ru/auto",
+        "https://www.rbc.ru/society", "https://www.rbc.ru/economics",
+        "https://www.rbc.ru/business" ],
+    "total_articles_to_find_and_parse": 100
 }
