@@ -96,7 +96,7 @@ class HTMLParser:
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         self.article.save_raw()
-
+        return self.article
 
 def prepare_environment(base_path):
     """
