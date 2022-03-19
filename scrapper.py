@@ -3,10 +3,10 @@ Scrapper implementation
 """
 
 import json
-import os
 import re
-
 import requests
+import shutil
+
 from bs4 import BeautifulSoup
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
@@ -44,7 +44,17 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        articles_to_find = self.max_articles
+        main_block_bs = article_bs.find('div', {'class': 'two_thirds'})
+        urls_bs = main_block_bs.find_all('a')
+
+        for url in urls_bs:
+            if articles_to_find == 0:
+                break
+
+            if 'http://journals.tsu.ru' + url['href'] not in self.urls:
+                self.urls.append('http://journals.tsu.ru' + url['href'])
+                articles_to_find -= 1
 
     def find_articles(self):
         """
@@ -65,10 +75,7 @@ class Crawler:
                 print('request failed')
 
             soup = BeautifulSoup(response.text, 'lxml')
-            main_block_bs = soup.find('div', {'class': 'two_thirds'})
-            urls = main_block_bs.find_all('a')
-            for url in urls:
-                self.urls.append('http://journals.tsu.ru' + url['href'])
+            self._extract_url(soup)
 
     def get_search_urls(self):
         """
@@ -77,7 +84,7 @@ class Crawler:
         pass
 
 
-class ArticleParser:
+class HTMLParser:
     def __init__(self, full_url, i):
         self.article_url = full_url
         self.article_id = i
@@ -90,18 +97,16 @@ class ArticleParser:
         web_page = requests.get(self.article_url, headers=)"""
 
 
-class HTMLParser:
-    pass
-
-
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(base_path)
-    except FileNotFoundError:
-        os.mkdir(base_path)
+    if base_path.exists():
+        if base_path.glob('*'):
+            shutil.rmtree(base_path)
+            base_path.mkdir(parents=True)
+    else:
+        base_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
@@ -123,7 +128,10 @@ def validate_config(crawler_path):
         if not url_validation:
             raise IncorrectURLError
 
-    if not isinstance(max_articles, int) or max_articles <= 0:
+    if not isinstance(max_articles, int):
+        raise IncorrectNumberOfArticlesError
+
+    if max_articles <= 0:
         raise IncorrectNumberOfArticlesError
 
     if max_articles > 300:
