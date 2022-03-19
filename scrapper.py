@@ -95,7 +95,6 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
         return self.article
 
 def prepare_environment(base_path):
@@ -136,5 +135,6 @@ if __name__ == '__main__':
     crawler.find_articles()
     print(crawler.urls)
     for article_url_new in crawler.urls:
-        parsed_article = HTMLParser(article_url_new, crawler.urls.index(article_url_new)+1)
-        parsed_article.parse()
+        parsing_article = HTMLParser(article_url_new, crawler.urls.index(article_url_new)+1)
+        parsed_article = parsing_article.parse()
+        parsed_article.save_raw()
