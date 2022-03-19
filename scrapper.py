@@ -42,6 +42,7 @@ class Crawler:
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
+        # i need to do that for checks
 
     def _extract_url(self, article_bs):
         """
