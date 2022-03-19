@@ -3,8 +3,9 @@ Scrapper implementation
 """
 import json
 import re
-import os
+import shutil
 import requests
+import datetime
 from bs4 import BeautifulSoup
 
 from core_utils.article import Article
@@ -86,7 +87,7 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
+        # self.article.save_raw()
         return self.article
 
     def _fill_article_with_text(self, article_bs):
@@ -95,7 +96,6 @@ class HTMLParser:
         """
         fulltext = article_bs.find('div', {'class': 'fulltext'})
         page_link = fulltext.find('a')['href']  # link to a page with pdf
-        #print(page_link)
 
         response_pdf = requests.get(page_link, HEADERS)  # downloads page with pdf to find a link for download pdf
         pdf_bs = BeautifulSoup(response_pdf.text, 'html.parser')
@@ -114,28 +114,23 @@ class HTMLParser:
         """
         article_title = article_bs.find('div', id='articleTitle').find('h1')
         self.article.title = article_title.get_text()
-        #print(self.article.title)
 
-        authors = article_bs.find('div', id='authorString').find_all('a')
-        article_author = ''
-        for author in authors:
-            if author.get_text() != '...':
-                article_author = ', ' + author.get_text()  # in case if there are several authors
+        authors = article_bs.find_all('meta', {'name': 'DC.Creator.PersonalName'})
+        authors_list = [author['content'] for author in authors]
+        self.article.author = ' '.join(authors_list)
 
-        self.article.author = article_author[1:]
-        #print(self.article.author)
+        date_raw = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
+        date = datetime.datetime.strptime(date_raw, '%Y-%m-%d')
+        self.article.date = date
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if os.path.isdir(base_path):
-        files = os.listdir(base_path)
-        for file in files:
-            os.remove(os.path.join(base_path, file))
-    else:
-        os.makedirs(base_path)
+    if base_path.exists():
+        shutil.rmtree(base_path)
+    base_path.mkdir(exist_ok=True, parents=True)
 
 
 def validate_config(crawler_path):
@@ -170,6 +165,7 @@ if __name__ == '__main__':
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
 
-    for art_id, art_url in enumerate(crawler.urls):
-        parser = HTMLParser(art_url, art_id)
-        parser.parse()
+    for i, my_url in enumerate(crawler.urls):
+        parser = HTMLParser(my_url, i + 1)
+        my_article = parser.parse()
+        my_article.save_raw()
