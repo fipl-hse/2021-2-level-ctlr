@@ -4,8 +4,8 @@ Scrapper implementation
 import json
 import re
 import shutil
-import requests
 import datetime
+import requests
 from bs4 import BeautifulSoup
 
 from core_utils.article import Article
