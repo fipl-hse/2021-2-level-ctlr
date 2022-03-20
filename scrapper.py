@@ -3,12 +3,16 @@ Scrapper implementation
 """
 
 import json
-import time
-import requests
+import os
 import random
 import re
-import os
+import shutil
+import time
+
+import requests
 from bs4 import BeautifulSoup
+
+from constants import HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -38,28 +42,29 @@ class Crawler:
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
+        self.domain = ""
 
     def _extract_url(self, article_bs):
         for article_link in article_bs.find_all("a", class_="article__download button-icon"):
-            self.urls.append(''.join(["https://journals.kantiana.ru/", article_link.get("href")]))
+            self.urls.append(''.join([self.domain, article_link.get("href")]))
 
     def find_articles(self):
         """
         Finds articles
         """
-
-        headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                          '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36'}
-        sleep_period = random.randrange(3, 7)
+        domain = urlparse(self.seed_urls[0])
+        self.domain = domain.scheme + "://" + domain.netloc + "/"
 
         for url in self.seed_urls:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=HEADERS)
             if not response.ok:
                 print("Request was unsuccessful.")
+                continue
 
             article = BeautifulSoup(response.text, features="html.parser")
             self._extract_url(article)
+
+            sleep_period = random.randrange(3, 7)
             time.sleep(sleep_period)
 
     def get_search_urls(self):
@@ -73,14 +78,9 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if os.path.isdir(base_path):
-        if not os.listdir(base_path):
-            pass
-        else:
-            os.rmdir(base_path)
-            os.mkdir(base_path)
-    else:
-        os.mkdir(base_path)
+    if base_path.exists():
+        shutil.rmtree(base_path)
+    os.mkdir(base_path)
 
 
 def validate_config(crawler_path):
@@ -93,7 +93,10 @@ def validate_config(crawler_path):
 
     urls = config["seed_urls"]
     articles = config["total_articles_to_find_and_parse"]
-    http_regex = r'http[s]?://+'
+    http_regex = r'http[s]?://+\.ru/.+'
+
+    if not urls:
+        raise IncorrectURLError
 
     if not isinstance(articles, int):
         raise IncorrectNumberOfArticlesError
