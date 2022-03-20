@@ -1,4 +1,6 @@
 {
-    "seed_urls": [],
+    "seed_urls": ["https://periodical.pstgu.ru/ru/series/issue/3/69",
+        "https://periodical.pstgu.ru/ru/series/issue/3/68", "https://periodical.pstgu.ru/ru/series/issue/3/67",
+        "https://periodical.pstgu.ru/ru/series/issue/3/66"],
     "total_articles_to_find_and_parse": 0
 }
