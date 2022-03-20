@@ -99,7 +99,7 @@ def validate_config(crawler_path):
         raise IncorrectNumberOfArticlesError
     if max_articles > 100:
         raise NumberOfArticlesOutOfRangeError
-    if max_articles == 0 or max_articles < 0:
+    if max_articles <= 0:
         raise IncorrectNumberOfArticlesError
     prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
