@@ -24,6 +24,7 @@ To configure tests locally you need to perform several steps:
    
    This should run all the tests in the repository. You can inspect them by clicking through a list
    at the bottom of a screen.
+   ![](./images/pycharm_tests_report.png)
 
 6. As you have some tests failing, you want to debug them. Then, first, you need to limit
    a scope of running tests and the mark level you want to get for an assignment. For example,
@@ -32,7 +33,7 @@ To configure tests locally you need to perform several steps:
    
    ![](./images/pycharm_control_tests_scope.jpg)
    
-   You can choose any of the labels that are described in [../pyproject.toml](../pyproject.toml)
+   You can choose any of the labels that are described in [`../pyproject.toml`](../pyproject.toml)
    and combine with a mark. For example, running the aforementioned check for configuration for a
    mark 8 will look like `-m "mark8 and stage_2_1_crawler_config_check"`. 
 
