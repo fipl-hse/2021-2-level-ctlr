@@ -78,6 +78,10 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
         texts = article_bs.find('div', class_='article__text article__text_free')
+        for text in texts:
+            paragraphs = text.find_all('p')
+            for paragraph in paragraphs:
+                self.article.text += paragraph.text.strip()
 
         inner_blocks = texts.find_all('div', class_='article__text__overview')
         for inner_block in inner_blocks:
@@ -85,17 +89,13 @@ class HTMLParser:
             for overview_text in overview_texts:
                 self.article.text += overview_text.text.strip()
 
-        for text in texts:
-            paragraphs = text.find_all('p')
-            for paragraph in paragraphs:
-                self.article.text += paragraph.text.strip()
-
     def parse(self):
         response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
         self.article.save_raw()
+
         return self.article
 
 
