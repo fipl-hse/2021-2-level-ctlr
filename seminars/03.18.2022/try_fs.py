@@ -104,8 +104,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-    print(bool(Path(__file__).parent.iterdir()) is True)
-    print(bool((Path(__file__).parent / 'tmp').iterdir()) is True)
-    a = list((Path(__file__).parent).iterdir())
-    print(bool(a))
