@@ -14,7 +14,6 @@ from core_utils.pdf_utils import PDFRawFile
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
 from constants import HEADERS
-# for checks
 
 
 class IncorrectURLError(Exception):
@@ -43,7 +42,6 @@ class Crawler:
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
-        # i need to do that for checks
 
     def _extract_url(self, article_bs):
         """
@@ -116,15 +114,16 @@ class HTMLParser:
         article_title = article_bs.find('meta', {'name': 'description'})['content']
         self.article.title = article_title
 
-        author = article_bs.find('meta', {'name': 'DC.Creator.PersonalName'})
-        if not author:
-            self.article.author = 'NOT FOUND'
+        article_author = article_bs.find('meta', {'name': 'DC.Creator.PersonalName'})
+        if not article_author:
+            article_author = 'NOT FOUND'
         else:
-            self.article.author = author['content']
+            article_author = article_author['content']
+        self.article.author = article_author
 
         date_raw = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
-        date = datetime.datetime.strptime(date_raw, '%Y-%m-%d')
-        self.article.date = date
+        article_date = datetime.datetime.strptime(date_raw, '%Y-%m-%d')
+        self.article.date = article_date
 
 
 def prepare_environment(base_path):
@@ -172,4 +171,3 @@ if __name__ == '__main__':
         parser = HTMLParser(my_url, i + 1)
         my_article = parser.parse()
         my_article.save_raw()
-        # for checks
