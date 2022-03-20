@@ -124,7 +124,7 @@ class HTMLParser:
         url_of_pdf = table_rows_bs['data-src']
         pdf_raw_file = PDFRawFile(url_of_pdf, self.article_id)
         pdf_raw_file.download()
-        self.article.text = pdf_raw_file.text
+        self.article.text = pdf_raw_file.get_text()
         if 'Литература' in self.article.text:
             new_list = self.article.text.split('Литература')
             new_list_without_literature = ''.join(new_list[:-1])
