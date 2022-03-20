@@ -78,16 +78,24 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
         texts = article_bs.find('div', class_='article__text article__text_free')
-        for text in texts:
-            paragraphs = text.find_all('p')
-            for paragraph in paragraphs:
-                self.article.text += paragraph.text.strip()
 
-        inner_blocks = texts.find_all('div', class_='article__text__overview')
-        for inner_block in inner_blocks:
-            overview_texts = inner_block.find_all('span')
+        inner_blocks_1 = texts.find_all('div', class_='article__text__overview')
+        for inner_block_1 in inner_blocks_1:
+            overview_texts = inner_block_1.find_all('span')
             for overview_text in overview_texts:
                 self.article.text += overview_text.text.strip()
+
+        for text in texts:
+            paragraphs_1 = text.find_all('p')
+            for paragraph_1 in paragraphs_1:
+                self.article.text += paragraph_1.text.strip()
+
+        additional_blocks = article_bs.find('div', class_='l-col-center-590 article__content')
+        inner_blocks_2 = additional_blocks.find_all('div', class_='article__text')
+        for inner_block_2 in inner_blocks_2:
+            paragraphs_2 = inner_block_2.find_all('p')
+            for paragraph_2 in paragraphs_2:
+                self.article.text += paragraph_2.text.strip()
 
     def parse(self):
         response = requests.get(self.article_url)
