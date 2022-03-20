@@ -2,11 +2,13 @@
 Scrapper implementation
 """
 import json
+import random
 import re
 import shutil
 import datetime
 import requests
 from bs4 import BeautifulSoup
+from time import sleep
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
@@ -61,6 +63,8 @@ class Crawler:
         """
         for url in self.seed_urls:
             response = requests.get(url, HEADERS)  # get html code
+            sleep(random.randrange(2, 5))
+
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
             self._extract_url(article_bs)
 
