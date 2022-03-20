@@ -49,22 +49,23 @@ Instructors:
 
 ## Technical solution
 
-| Module | Description | Component | I need to know them, if I want to get at least |
-|:---|:---|:---|:---|
-| [`requests`](https://pypi.org/project/requests/) | module for downloading web pages | scrapper | 4 |
-| [`BeautifulSoup4`](https://pypi.org/project/beautifulsoup4/) | module for finding information on web pages | scrapper | 4 |
-| [`PyMuPDF`](https://pymupdf.readthedocs.io//) | module for opening and reading PDF files | scrapper | 4 |
-| [`lxml`](https://pypi.org/project/lxml/) | module for parsing HTML as a structure | scrapper | 6 |
-| [`pymystem3`](https://pypi.org/project/pymystem3/) | module for morphological analysis | pipeline | 6 |
-| [`pymorphy2`](https://pypi.org/project/pymorphy2/) | module for morphological analysis | pipeline | 8 |
-| [`pandas`](https://pypi.org/project/pandas/) | module for table data analysis | pipeline | 10 |
+| Module                                                       | Description                                           | Component | I need to know them, if I want to get at least |
+|:-------------------------------------------------------------|:------------------------------------------------------|:---|:---|
+| [`requests`](https://pypi.org/project/requests/)             | module for downloading web pages                      | scrapper | 4 |
+| [`BeautifulSoup4`](https://pypi.org/project/beautifulsoup4/) | module for finding information on web pages           | scrapper | 4 |
+| [`PyMuPDF`](https://pymupdf.readthedocs.io//)                | **Optional** module for opening and reading PDF files | scrapper | 4 |
+| [`lxml`](https://pypi.org/project/lxml/)                     | **Optional** module for parsing HTML as a structure                | scrapper | 6 |
+| [`wget`](https://pypi.org/project/wget/)                     | **Optional** module for parsing HTML as a structure                | scrapper | 6 |
+| [`pymystem3`](https://pypi.org/project/pymystem3/)           | module for morphological analysis                     | pipeline | 6 |
+| [`pymorphy2`](https://pypi.org/project/pymorphy2/)           | module for morphological analysis                     | pipeline | 8 |
+| [`pandas`](https://pypi.org/project/pandas/)                 | module for table data analysis                        | pipeline | 10 |
 
 Software solution is built on top of three components:
 1. [`scrapper.py`](./scrapper.py) - a module for finding articles from the given media, extracting text and
    dumping it to the file system. Students need to implement it.
 1. [`pipeline.py`](./pipeline.py) - a module for processing text: point-of-speech tagging and 
    basic morphological analysis. Students need to implement it.
-1. [`article.py`](core_utils/article.py) - a module for article abstraction to incapsulate low-level
+1. [`article.py`](core_utils/article.py) - a module for article abstraction to encapsulate low-level
    manipulations with the article
    
 ## Handing over your work
@@ -101,3 +102,4 @@ A lab work is accepted for oral presentation if all the criteria below are satis
 1. Media websites list: [link](https://docs.google.com/spreadsheets/d/1GUBSxwZwrIOotQGDYD0Om7NKY0oui8Wn/edit?usp=sharing&ouid=105662922636302712328&rtpof=true&sd=true)
 1. Python programming course from previous semester: [link](https://github.com/fipl-hse/2021-2-level-labs)
 1. Scrapping tutorials: [YouTube series (russian)](https://youtu.be/7hn1_t2ZtJQ)
+1. [HOWTO: Running tests](./docs/tests.md)

@@ -7,7 +7,6 @@ Dmitry
 getter
 getters
 HTMl
-incapsulate
 inplace
 instantiation
 JSON
