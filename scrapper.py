@@ -42,24 +42,26 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        class_bs = article_bs.find('div', class_='view-content view-rows')
-        title_bs = class_bs.find_all('td', class_="views-field views-field-title table__cell")
-        for link_bs in title_bs:
-            if len(self.urls) >= self.max_articles:
-                break
-            link_bs = link_bs.find('a')
-            self.urls.append(ROOT_URL + link_bs['href'])
-
+        link_bs = article_bs.find('a')
+        return ROOT_URL + link_bs['href']
 
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self.seed_urls:
+            if len(self.urls) >= self.max_articles:
+                break
             response = requests.get(seed_url, HEADERS)
             time.sleep(1)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
+            class_bs = article_bs.find('div', class_='view-content view-rows')
+            title_bs = class_bs.find_all('td', class_="views-field views-field-title table__cell")
+            for link_bs in title_bs:
+                if len(self.urls) >= self.max_articles:
+                    break
+                self.urls.append(self._extract_url(link_bs))
 
     def get_search_urls(self):
         """
@@ -97,7 +99,7 @@ def validate_config(crawler_path):
         raise IncorrectNumberOfArticlesError
     if max_articles > 100:
         raise NumberOfArticlesOutOfRangeError
-    if max_articles == 0 or max_articles < 0:
+    elif max_articles == 0 or max_articles < 0:
         raise IncorrectNumberOfArticlesError
     prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
@@ -115,7 +117,6 @@ class HTMLParser:
         article_bs = BeautifulSoup(response.text, 'html.parser')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
         return self.article
 
     def _fill_article_with_text(self, article_bs):
@@ -123,7 +124,7 @@ class HTMLParser:
         url_of_pdf = table_rows_bs['data-src']
         pdf_raw_file = PDFRawFile(url_of_pdf, self.article_id)
         pdf_raw_file.download()
-        self.article.text = pdf_raw_file.get_text()
+        self.article.text = pdf_raw_file.text
         if 'Литература' in self.article.text:
             new_list = self.article.text.split('Литература')
             new_list_without_literature = ''.join(new_list[:-1])
@@ -154,3 +155,4 @@ if __name__ == '__main__':
     for identifier, url in enumerate(crawler.urls):
         number = HTMLParser(url, identifier + 1)
         article = number.parse()
+        article.save_raw()
