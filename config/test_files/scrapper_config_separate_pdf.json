@@ -1,8 +1,0 @@
-{
-    "seed_urls": [
-        "https://vja.ruslang.ru/ru/archive/2021-3",
-        "https://vja.ruslang.ru/ru/archive/2022-1",
-        "https://vestnik.philol.msu.ru"
-    ],
-    "total_articles_to_find_and_parse": 7
-}
