@@ -49,6 +49,8 @@ class Crawler:
         """
         content = article_bs.find_all('div', {'class': 'issueArticle flex'})
         for article in content:
+            if len(self.urls) >= self.max_articles:
+                break
             link = article.find('a')
             href = link['href']
             self.urls.append(href)
