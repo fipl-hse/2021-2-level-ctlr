@@ -32,7 +32,6 @@ class PDFRawFile:
         Gets text from the PDF file downloaded.
         """
         text = ""
-        # pylint: disable=E1101
         with fitz.open(os.path.join(ASSETS_PATH, f"{self._id}_raw.pdf")) as pdf:
             for page in pdf:
                 text += page.get_text()

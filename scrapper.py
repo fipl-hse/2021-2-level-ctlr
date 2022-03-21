@@ -12,7 +12,7 @@ import requests
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, HTTP_PATTERN
+from constants import HEADERS, HTTP_PATTERN, ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 
 class IncorrectURLError(Exception):
@@ -144,15 +144,18 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         configuration = json.load(file)
 
-    seed_urls = configuration["seed_urls"]
-    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
     http_pattern = re.compile(HTTP_PATTERN)
-    if not seed_urls:
-        raise IncorrectURLError
-    for url in seed_urls:
+    for url in configuration["seed_urls"]:
         result = http_pattern.search(url)
         if not result:
             raise IncorrectURLError
+
+    seed_urls = configuration["seed_urls"]
+    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
+
+    if not seed_urls:
+        raise IncorrectURLError
+
     if not isinstance(total_articles_to_find_and_parse, int):
         raise IncorrectNumberOfArticlesError
 
@@ -166,4 +169,21 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    pass
+    print('---Preparing environment---')
+    seed_urls_test, total_articles_test = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+
+    print('---Creating a Crawler---')
+    crawler = Crawler(seed_urls_test, total_articles_test)
+    crawler.find_articles()
+
+    print('---Parsing---')
+    id_of_article = 0
+    for article_url_test in crawler.urls:
+        id_of_article += 1
+        article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article)
+        article = article_parser.parse()
+        article.save_raw()
+        print(f'The {id_of_article} article is done!')
+
+    print('---Done!---')
