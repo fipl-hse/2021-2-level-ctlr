@@ -3,9 +3,11 @@ Scrapper implementation
 """
 import datetime
 import json
+import random
 from pathlib import Path
 import re
 import shutil
+from time import sleep
 
 from bs4 import BeautifulSoup
 import requests
@@ -60,6 +62,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
+            sleep(random.randint(1, 5))
             response = requests.get(url=seed_url, headers=HEADERS)
 
             if not response.ok:

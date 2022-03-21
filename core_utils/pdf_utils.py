@@ -15,7 +15,6 @@ class PDFRawFile:
     Knows how to download PDF from a given URL.
     Manages PDF's text.
     """
-
     def __init__(self, journal_url: str, journal_id: int):
         self._url = journal_url
         self._id = journal_id
