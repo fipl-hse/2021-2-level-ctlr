@@ -16,6 +16,9 @@ elif [[ ${TARGET_SCORE} == 6 ]]; then
 elif [[ ${TARGET_SCORE} == 8 ]]; then
   echo "Running score eight checks"
   python -m pytest -m "mark8 and stage_2_3_HTML_parser_check"
+elif [[ ${TARGET_SCORE} == 10 ]]; then
+  echo "Running score ten checks"
+  python -m pytest -m "mark10 and stage_2_3_HTML_parser_check"
 fi
 
 echo "HTMLParser is checked. Done"

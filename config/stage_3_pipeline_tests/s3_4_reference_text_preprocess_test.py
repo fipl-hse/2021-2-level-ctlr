@@ -1,6 +1,5 @@
 import re
 from string import punctuation
-import os
 import unittest
 
 import pytest
@@ -19,15 +18,15 @@ class ReferenceTextPreprocessTestSimplified(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         validate_dataset(ASSETS_PATH)
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_raw.txt"), os.path.join(ASSETS_PATH, "0_raw.txt"))
+        shutil.copyfile(TEST_FILES_FOLDER / "0_raw.txt", ASSETS_PATH / "0_raw.txt")
         corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
         pipe = TextProcessingPipeline(corpus_manager)
         pipe.run()
 
     def setUp(self) -> None:
-        with open(os.path.join(TEST_FILES_FOLDER, 'reference_score_four_test.txt'), 'r', encoding='utf-8') as rf:
+        with (TEST_FILES_FOLDER / 'reference_score_four_test.txt').open('r', encoding='utf-8') as rf:
             self.reference = rf.read()
-        with open(os.path.join(ASSETS_PATH, "0_cleaned.txt"), "r", encoding='utf-8') as pr:
+        with (ASSETS_PATH / "0_cleaned.txt").open("r", encoding='utf-8') as pr:
             self.processed = pr.read()
 
     @pytest.mark.mark4
@@ -60,35 +59,35 @@ class ReferenceTextPreprocessTestSimplified(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(os.path.join(ASSETS_PATH, "0_raw.txt"))
-        os.remove(os.path.join(ASSETS_PATH, "0_cleaned.txt"))
-        if os.path.exists(os.path.join(ASSETS_PATH, "0_single_tagged.txt")):
-            os.remove(os.path.join(ASSETS_PATH, "0_single_tagged.txt"))
-            if os.path.exists(os.path.join(ASSETS_PATH, "0_multiple_tagged.txt")):
-                os.remove(os.path.join(ASSETS_PATH, "0_multiple_tagged.txt"))
+        (ASSETS_PATH / "0_raw.txt").unlink()
+        (ASSETS_PATH / "0_cleaned.txt").unlink()
+        if (ASSETS_PATH / "0_single_tagged.txt").exists():
+            (ASSETS_PATH / "0_single_tagged.txt").unlink()
+            if (ASSETS_PATH / "0_multiple_tagged.txt").exists():
+                (ASSETS_PATH / "0_multiple_tagged.txt").unlink()
 
 
 class ReferenceTextPreprocessTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         validate_dataset(ASSETS_PATH)
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_meta.json"), os.path.join(ASSETS_PATH, "0_meta.json"))
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_raw.txt"), os.path.join(ASSETS_PATH, "0_raw.txt"))
+        shutil.copyfile(TEST_FILES_FOLDER / "0_meta.json", ASSETS_PATH / "0_meta.json")
+        shutil.copyfile(TEST_FILES_FOLDER / "0_raw.txt", ASSETS_PATH / "0_raw.txt")
         corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
         pipe = TextProcessingPipeline(corpus_manager)
         pipe.run()
 
     def setUp(self) -> None:
-        with open(os.path.join(TEST_FILES_FOLDER, 'reference_test.txt'), 'r', encoding='utf-8') as rf:
+        with (TEST_FILES_FOLDER / 'reference_test.txt').open('r', encoding='utf-8') as rf:
             self.single_tagged_reference = rf.read()
-        with open(os.path.join(ASSETS_PATH, "0_single_tagged.txt"), "r", encoding='utf-8') as pr:
+        with (ASSETS_PATH / "0_single_tagged.txt").open("r", encoding='utf-8') as pr:
             self.single_tagged_processed = pr.read()
         self.mystem_tag_pattern = r"[а-яa-z]+<"
 
-        if os.path.exists(os.path.join(ASSETS_PATH, "0_multiple_tagged.txt")):
-            with open(os.path.join(ASSETS_PATH, "0_multiple_tagged.txt"), "r", encoding='utf-8') as pr:
+        if (ASSETS_PATH / "0_multiple_tagged.txt").exists():
+            with (ASSETS_PATH / "0_multiple_tagged.txt").open("r", encoding='utf-8') as pr:
                 self.multiple_tagged_processed = pr.read()
-            with open(os.path.join(TEST_FILES_FOLDER, 'reference_score_eight_test.txt'), 'r', encoding='utf-8') as rf:
+            with (TEST_FILES_FOLDER / 'reference_score_eight_test.txt').open('r', encoding='utf-8') as rf:
                 self.multiple_tagged_reference = rf.read()
         self.pymorphy_tag_pattern = r"\w+<*>\(*\)"
 
@@ -228,9 +227,9 @@ class ReferenceTextPreprocessTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(os.path.join(ASSETS_PATH, "0_meta.json"))
-        os.remove(os.path.join(ASSETS_PATH, "0_raw.txt"))
-        os.remove(os.path.join(ASSETS_PATH, "0_cleaned.txt"))
-        os.remove(os.path.join(ASSETS_PATH, "0_single_tagged.txt"))
-        if os.path.isfile(os.path.join(ASSETS_PATH, "0_multiple_tagged.txt")):
-            os.remove(os.path.join(ASSETS_PATH, "0_multiple_tagged.txt"))
+        (ASSETS_PATH / "0_meta.json").unlink()
+        (ASSETS_PATH / "0_raw.txt").unlink()
+        (ASSETS_PATH / "0_cleaned.txt").unlink()
+        (ASSETS_PATH / "0_single_tagged.txt").unlink()
+        if (ASSETS_PATH / "0_multiple_tagged.txt").is_file():
+            (ASSETS_PATH / "0_multiple_tagged.txt").unlink()
