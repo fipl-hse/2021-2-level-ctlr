@@ -1,4 +1,3 @@
-import os
 import json
 import unittest
 
@@ -12,7 +11,7 @@ class CrawlerTest(unittest.TestCase):
 
     def setUp(self) -> None:
         validate_config(CRAWLER_CONFIG_PATH)
-        with open(CRAWLER_CONFIG_PATH, encoding='utf-8') as file:
+        with CRAWLER_CONFIG_PATH.open(encoding='utf-8') as file:
             data = json.load(file)
             self.total_number = data['total_articles_to_find_and_parse']
             self.seed = data['seed_urls']
