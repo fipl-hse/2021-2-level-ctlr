@@ -96,9 +96,8 @@ class HTMLParser:
         self.article.author = author_list_bs.find('td').text
 
         # topics
-        header2_bs = article_bs.find('h2')
-        topics_bs = header2_bs.find_next_siblings('a')
-        self.article.topics = [topic.text for topic in topics_bs]
+        meta_info = article_bs.find_all('meta')
+        self.article.topics = meta_info[2]['content']
 
         # date
         big_title = article_bs.find('h1')
