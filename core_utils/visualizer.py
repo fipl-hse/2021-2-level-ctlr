@@ -1,11 +1,13 @@
 """
 Visualizer module for visualizing PosFrequencyPipeline results
 """
+
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visualize(statistics: dict, path_to_save: str):
+def visualize(statistics: dict, path_to_save: Path):
     """
     param: statistics is a dictionary with keys:POS tags, values:frequencies
     """
