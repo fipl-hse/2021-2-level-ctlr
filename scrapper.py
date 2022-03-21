@@ -2,14 +2,15 @@
 Scrapper implementation
 """
 import datetime
-import os.path
 import json
+import pathlib
 import re
+import shutil
 
 from bs4 import BeautifulSoup
 import requests
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN_NAME
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -53,7 +54,6 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
 
         return self.article
 
@@ -70,7 +70,7 @@ class HTMLParser:
             if not table_datas:
                 continue
 
-            if "Загрузить статью" in table_datas[0].get_text():
+            if "Загрузить статью" in table_datas[0].text:
                 pdf_url = table_datas[1].find('a')
 
                 pdf_raw_file = PDFRawFile(pdf_url['href'], self.article_id)
@@ -81,7 +81,7 @@ class HTMLParser:
                 parts_of_article = text.split('Список литературы')
 
                 self.article.text = ''.join(parts_of_article[:-1])
-                return
+                break
 
     def _fill_article_with_meta_information(self, article_bs):
         """
@@ -90,17 +90,17 @@ class HTMLParser:
 
         self.article.title = article_bs.find('h3').get_text()
 
-        tables = article_bs.find_all('table', {"class": "unntable"})
+        tables_bs = article_bs.find_all('table', {"class": "unntable"})
 
-        for table in tables:
-            table_datas = table.find_all('td')
+        for table_bs in tables_bs:
+            table_datas_bs = table_bs.find_all('td')
 
-            if table_datas[0].get_text() != 'Авторы':
+            if table_datas_bs[0].text != 'Авторы':
                 continue
 
-            link_to_author = table_datas[1].find('a')
+            link_to_author_bs = table_datas_bs[1].find('a')
 
-            self.article.author = link_to_author.get_text()
+            self.article.author = link_to_author_bs.text
 
         text_date = re.search(r'Поступила в редакцию\s+\d{2}\.\d{2}\.\d{4}', self.article.text)
 
@@ -118,43 +118,48 @@ class Crawler:
         self._seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
-        self._article_count = 0
 
     def _extract_url(self, article_bs):
         """
         Finds urls from the given article_bs
         """
-        table_rows = article_bs.find_all('tr', {"class": "unnrow"})
+        table_rows_bs = article_bs.find_all('tr', {"class": "unnrow"})
 
-        for table_row in table_rows:
-            if self._article_count + 1 > self.max_articles:
+        urls = []
+        overall_urls_count = len(self.urls)
+
+        links_bs = []
+
+        for table_row_bs in table_rows_bs:
+            links_bs.extend(table_row_bs.find_all('a'))
+
+        for link_bs in links_bs:
+            if overall_urls_count > self.max_articles:
                 break
 
-            links = table_row.find_all('a')
+            # Checks if the link leads to an article
+            match = re.match(r'^\?anum', link_bs['href'])
 
-            for link in links:
-                if self._article_count + 1 > self.max_articles:
-                    break
+            if not match:
+                continue
 
-                match = re.match(r'^\?anum', link['href'])
+            urls.append(''.join([DOMAIN_NAME, link_bs['href']]))
+            overall_urls_count += 1
 
-                if not match:
-                    continue
-
-                self.urls.append(''.join(["http://www.vestnik.unn.ru/ru/nomera", link['href']]))
-                self._article_count += 1
+        return urls
 
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self._seed_urls:
-            if self._article_count + 1 > self.max_articles:
+            if len(self.urls) + 1 > self.max_articles:
                 break
 
             response = requests.get(seed_url)
             article_bs = BeautifulSoup(response.text, features="html.parser")
-            self._extract_url(article_bs)
+
+            self.urls.extend(self._extract_url(article_bs))
 
     def get_search_urls(self):
         """
@@ -167,13 +172,12 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if os.path.isdir(base_path):
-        file_names = os.listdir(base_path)
+    path = pathlib.Path(base_path)
 
-        for file_name in file_names:
-            os.remove(os.path.join(base_path, file_name))
-    else:
-        os.makedirs(base_path)
+    if path.exists():
+        shutil.rmtree(path)
+
+    path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
@@ -183,27 +187,33 @@ def validate_config(crawler_path):
     with open(crawler_path, 'r') as crawler_file:
         crawler_config = json.load(crawler_file)
 
-        max_articles = crawler_config['total_articles_to_find_and_parse']
+    if 'total_articles_to_find_and_parse' not in crawler_config:
+        raise IncorrectNumberOfArticlesError
 
-        if not isinstance(max_articles, int):
-            raise IncorrectNumberOfArticlesError
+    if 'seed_urls' not in crawler_config:
+        raise IncorrectURLError
 
-        if max_articles <= 0:
-            raise IncorrectNumberOfArticlesError
+    max_articles = crawler_config['total_articles_to_find_and_parse']
 
-        if max_articles > 100:
-            raise NumberOfArticlesOutOfRangeError
+    if not isinstance(max_articles, int):
+        raise IncorrectNumberOfArticlesError
 
-        seed_urls = crawler_config['seed_urls']
+    if max_articles <= 0:
+        raise IncorrectNumberOfArticlesError
 
-        if not isinstance(seed_urls, list) or not seed_urls:
+    if max_articles > 100:
+        raise NumberOfArticlesOutOfRangeError
+
+    seed_urls = crawler_config['seed_urls']
+
+    if not isinstance(seed_urls, list) or not seed_urls:
+        raise IncorrectURLError
+
+    for seed_url in seed_urls:
+        match = re.match(r'(^http://|^https://)', seed_url)
+
+        if not match or DOMAIN_NAME not in seed_url:
             raise IncorrectURLError
-
-        for seed_url in seed_urls:
-            match = re.match(r'(^http://|^https://)', seed_url)
-
-            if not match:
-                raise IncorrectURLError
 
     prepare_environment(ASSETS_PATH)
 
@@ -218,3 +228,4 @@ if __name__ == '__main__':
     for i, url in enumerate(crawler.urls):
         parser = HTMLParser(url, i + 1)
         article = parser.parse()
+        article.save_raw()
