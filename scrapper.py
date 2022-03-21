@@ -178,12 +178,12 @@ if __name__ == '__main__':
     crawler.find_articles()
 
     print('---Parsing---')
-    id_of_article = 0
+    ID_OF_ARTICLE = 0
     for article_url_test in crawler.urls:
-        id_of_article += 1
-        article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article)
+        ID_OF_ARTICLE += 1
+        article_parser = HTMLParser(article_url=article_url_test, article_id=ID_OF_ARTICLE)
         article = article_parser.parse()
         article.save_raw()
-        print(f'The {id_of_article} article is done!')
+        print(f'The {ID_OF_ARTICLE} article is done!')
 
     print('---Done!---')
