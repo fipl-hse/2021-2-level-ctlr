@@ -82,8 +82,6 @@ class RawMediumDataValidator(unittest.TestCase):
                                 metadata[1]['url']))
 
             html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
-            if metadata[1]['title'] not in html_source:
-                print(metadata[1]['url'])
             print(metadata[1]['title'])
             self.assertTrue(metadata[1]['title'] in
                             html_source,
