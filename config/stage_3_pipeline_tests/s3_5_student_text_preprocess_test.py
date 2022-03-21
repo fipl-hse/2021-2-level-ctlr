@@ -1,5 +1,4 @@
 import re
-import os
 import unittest
 
 import pytest
@@ -17,10 +16,10 @@ PUNCTUATION_MARKS = [',', '.', '-', ';', ':', '!', '?', '<']
 class StudentTextBasicPreprocessTest(unittest.TestCase):
     def setUp(self) -> None:
         self.articles = dict()
-        for article in os.listdir(ASSETS_PATH):
-            if article.endswith("_cleaned.txt"):
-                with open(os.path.join(ASSETS_PATH, article), "r", encoding="utf-8") as txt:
-                    self.articles[int(article[:-12])] = txt.read()
+        for article in ASSETS_PATH.iterdir():
+            if article.name.endswith("_cleaned.txt"):
+                with article.open("r", encoding="utf-8") as txt:
+                    self.articles[int(article.name[:-12])] = txt.read()
 
     @pytest.mark.mark4
     @pytest.mark.mark6
@@ -39,10 +38,10 @@ class StudentTextBasicPreprocessTest(unittest.TestCase):
 class StudentTextAdvancedPreprocessTest(unittest.TestCase):
     def setUp(self) -> None:
         self.articles = dict()
-        for article in os.listdir(ASSETS_PATH):
-            if article.endswith("_multiple_tagged.txt"):
-                with open(os.path.join(ASSETS_PATH, article), "r", encoding="utf-8") as txt:
-                    self.articles[int(article[:-20])] = txt.read()
+        for article in ASSETS_PATH.iterdir():
+            if article.name.endswith("_multiple_tagged.txt"):
+                with article.open("r", encoding="utf-8") as txt:
+                    self.articles[int(article.name[:-20])] = txt.read()
 
     @staticmethod
     def custom_split(string) -> list:
@@ -86,10 +85,10 @@ class StudentTextAdvancedPreprocessTest(unittest.TestCase):
 class StudentTextMediumPreprocessTest(unittest.TestCase):
     def setUp(self) -> None:
         self.articles = dict()
-        for article in os.listdir(ASSETS_PATH):
-            if article.endswith("_single_tagged.txt"):
-                with open(os.path.join(ASSETS_PATH, article), "r", encoding="utf-8") as txt:
-                    self.articles[int(article[0])] = txt.read()
+        for article in ASSETS_PATH.iterdir():
+            if article.name.endswith("_single_tagged.txt"):
+                with article.open("r", encoding="utf-8") as txt:
+                    self.articles[int(article.name[0])] = txt.read()
 
     @pytest.mark.mark6
     @pytest.mark.mark8
