@@ -88,7 +88,7 @@ class HTMLParser:
     def _fill_article_with_meta_information(self, article_bs):
         # title
         title_bs = article_bs.find_all('h1')[-1]
-        self.article.title = title_bs.text
+        self.article.title = str(title_bs)[4:-5]
 
         # author
         table_with_authors = article_bs.find('table', class_='content_table otvet_list')
