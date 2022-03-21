@@ -14,7 +14,7 @@ class HTMLParserTest(unittest.TestCase):
 
     def setUp(self) -> None:
         validate_config(CRAWLER_CONFIG_PATH)
-        with open(CRAWLER_CONFIG_PATH, encoding='utf-8') as file:
+        with CRAWLER_CONFIG_PATH.open(encoding='utf-8') as file:
             data = json.load(file)
 
         if not ASSETS_PATH.exists():
