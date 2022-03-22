@@ -1,8 +1,7 @@
 {
     "seed_urls": [
-        "https://alp.iling.spb.ru/issues/xvii1.ru.html",
-        "https://alp.iling.spb.ru/issues/xvii2.ru.html",
-        "https://alp.iling.spb.ru/issues/xvii3.ru.html"
+        "https://alp.iling.spb.ru/issues/xvii1.ru.html"
     ],
-    "total_articles_to_find_and_parse": 16
+    "total_articles_to_find_and_parse": 16,
+    "max_number_articles_to_get_from_one_seed": 16
 }
