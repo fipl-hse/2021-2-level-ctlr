@@ -5,12 +5,11 @@ import json
 import os
 import pathlib
 import shutil
-
-import requests
 import re
+import datetime
+import requests
 from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
-from pathlib import Path
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -46,7 +45,7 @@ class Crawler:
 
     def _extract_url(self, article_bs):  # I don't understand if I need to collect seed urls (from main to year)
         # or just put it in scrapper_config.
-        articles_code_stored_here = article_bs.find_all('div', {'class':'articles'})
+        articles_code_stored_here = article_bs.find_all('div', {'class': 'articles'})
         for article_code in articles_code_stored_here:
             links_articles = article_code.find_all('a')
             for link in links_articles:
@@ -73,26 +72,26 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        return seed_urls
+        return self.seed_urls
 
 
 class HTMLWithPDFParser:
     def __init__(self, article_url, article_id):
         self.url = article_url
-        self.id = article_id
+        self.article_id = article_id
         self.article = Article(article_url, article_id)
 
     def parse(self):
         article_page = requests.get(self.url)
         article_bs = BeautifulSoup(article_page.text, 'html.parser')
         self._fill_article_with_text(article_bs)
-        return self.article
+        self._fill_article_with_meta_information(article_bs)
 
     def _fill_article_with_text(self, article_bs):
         list_of_possible_l = ['Список литературы', 'ЛИТЕРАТУРА', 'Список использованных источников и литературы',
                               'Источники']
 
-        class_of_link = article_bs.find('div', {'class':"articles-item-more"})
+        class_of_link = article_bs.find('div', {'class': "articles-item-more"})
         if class_of_link:
             link_to_save = class_of_link.find('a')
             link_to_pdf = 'https://periodical.pstgu.ru' + link_to_save['href']
@@ -100,12 +99,11 @@ class HTMLWithPDFParser:
             final_page_bs = BeautifulSoup(final_page.text, 'html.parser')
         else:
             final_page_bs = article_bs
-        url_pattern = re.compile(r"var DEFAULT_URL = '(.*?)'", re.MULTILINE | re.DOTALL)
+        url_pattern = re.compile(r"var DEFAULT_URL = '(.*?)'")
         final_link = final_page_bs.find(string=url_pattern)
         final_link = 'https://periodical.pstgu.ru' + \
                      str(final_link).replace('var DEFAULT_URL = ', '').replace("'", '').replace(';', '').strip()
-        raw_pdf = PDFRawFile(final_link, self.id)
-        print(raw_pdf._url)
+        raw_pdf = PDFRawFile(final_link, self.article_id)
         raw_pdf.download()
         text_from_pdf = raw_pdf.get_text()
         for refs_maker in list_of_possible_l:
@@ -116,9 +114,29 @@ class HTMLWithPDFParser:
         self.article.text = text_from_pdf
 
     def _fill_article_with_meta_information(self, article_bs):
-        author = article_bs.find('p', {"class": "articles-item-author"}).find('b')
-
-
+        issue_number = []
+        month_dict = {2: '03', 3: '06', 0: '09', 1: '12'}
+        try:
+            author = article_bs.find('p', {"class": "articles-item-author"}).find('b')
+            self.article.author = author.text
+        except AttributeError:
+            self.article.author = 'No data'
+        title = article_bs.find('h2', {"class": "articles-item-name"})
+        self.article.title = title.text
+        topics = article_bs.find('div', {"class": "articles"}).find_all('p')
+        try:
+            self.article.topics = topics[2].text
+        except IndexError:
+            self.article.topics = 'No data'
+        year = article_bs.find('meta', {'name': 'citation_publication_date'})['content']
+        issue_title = article_bs.find('meta', {'name': 'citation_journal_title'})['content']
+        for letter in issue_title:
+            if letter.isdigit():
+                issue_number.append(letter)
+        month = month_dict[int(''.join(issue_number)) % 4]
+        text_date = month + '.' + year
+        date = datetime.datetime.strptime(text_date, '%m.%Y')
+        self.article.date = date
 
 
 def prepare_environment(base_path):
@@ -162,15 +180,15 @@ def save_raw(article: Article, path):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    id_for_article = 0
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    i_for_article = 0
+    s_urls, max_as = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls, max_articles)
+    crawler = Crawler(s_urls, max_as)
     crawler.find_articles()
-    print(len(crawler.article_urls))
-    for article_url in crawler.article_urls:
-        id_for_article += 1
-        print(id_for_article)
-        parser = HTMLWithPDFParser(article_url, id_for_article)
+    for art_url in crawler.article_urls:
+        i_for_article += 1
+        print(i_for_article)
+        print(art_url)
+        parser = HTMLWithPDFParser(art_url, i_for_article)
         parser.parse()
         save_raw(parser.article, ASSETS_PATH)
