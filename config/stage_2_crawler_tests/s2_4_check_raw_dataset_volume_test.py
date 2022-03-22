@@ -2,7 +2,6 @@
 Checks raw dataset volume
 """
 
-import os
 import unittest
 
 import pytest
@@ -21,7 +20,7 @@ class VolumeBasicCheckTest(unittest.TestCase):
     @pytest.mark.mark10
     @pytest.mark.stage_2_4_dataset_volume_check
     def test_folder_is_appropriate(self):
-        self.assertTrue(os.listdir(ASSETS_PATH),
+        self.assertTrue(any(ASSETS_PATH.iterdir()),
                         msg="ASSETS_PATH directory is empty")
 
 
@@ -36,10 +35,10 @@ class VolumeCheckTest(unittest.TestCase):
     @pytest.mark.stage_2_4_dataset_volume_check
     def test_folder_is_appropriate(self):
         metas, raws = 0, 0
-        for file in os.listdir(ASSETS_PATH):
-            if file.endswith("_raw.txt"):
+        for file in ASSETS_PATH.iterdir():
+            if file.name.endswith("_raw.txt"):
                 raws += 1
-            if file.endswith("_meta.json"):
+            if file.name.endswith("_meta.json"):
                 metas += 1
 
         self.assertEqual(metas, raws,
