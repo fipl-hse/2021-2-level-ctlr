@@ -1,21 +1,22 @@
 """
 Scrapper implementation
 """
-import os
+from datetime import datetime
 import json
-import re
 from pathlib import Path
+import re
 import shutil
-import datetime
 
-import requests
 from bs4 import BeautifulSoup
+import requests
 
-from constants import CRAWLER_CONFIG_PATH
-from constants import HEADERS
-from constants import ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
+
+
+HEADERS = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                         '(KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
 
 
 class IncorrectURLError(Exception):
