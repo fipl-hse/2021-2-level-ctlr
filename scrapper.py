@@ -46,7 +46,7 @@ class PDFCrawler:
         self.max_articles = max_articles
         self.urls = []
 
-    def _extract_url(self, article_bs):
+    def _extract_url(article_bs):
 
         urls = []
         for article_link in article_bs.find_all("a", class_="article_title"):
@@ -59,14 +59,14 @@ class PDFCrawler:
         Finds articles
         """
 
-        for url in self.seed_urls:
-            response = requests.get(url, headers=HEADERS)
+        for seed_url in self.seed_urls:
+            response = requests.get(seed_url, headers=HEADERS)
             if not response.ok:
                 print("Request was unsuccessful.")
                 continue
 
-            article = BeautifulSoup(response.text, features="html.parser")
-            self._extract_url(article)
+            article_text = BeautifulSoup(response.text, features="html.parser")
+            self._extract_url(article_text)
 
             sleep_period = random.randrange(3, 7)
             time.sleep(sleep_period)
