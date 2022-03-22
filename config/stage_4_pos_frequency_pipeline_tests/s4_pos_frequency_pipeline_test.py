@@ -21,8 +21,8 @@ class PosFrequencyPipelineTests(unittest.TestCase):
     def setUpClass(cls) -> None:
         validate_dataset(ASSETS_PATH)
         shutil.copytree(ASSETS_PATH, TEST_TMP)  # cash ASSETS_PATH state before modifying it for testing
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_raw.txt"), os.path.join(ASSETS_PATH, "0_raw.txt"))
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_meta.json"), os.path.join(ASSETS_PATH, "0_meta.json"))
+        shutil.copyfile(TEST_FILES_FOLDER / "0_raw.txt", ASSETS_PATH / "0_raw.txt")
+        shutil.copyfile(TEST_FILES_FOLDER / "0_meta.json", ASSETS_PATH / "0_meta.json")
 
         cls.corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
         with open(cls.corpus_manager.get_articles()[0].get_meta_file_path(), 'r', encoding='utf-8') as meta_file:
