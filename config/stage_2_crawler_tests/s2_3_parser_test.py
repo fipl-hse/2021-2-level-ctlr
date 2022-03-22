@@ -24,7 +24,7 @@ class HTMLParserTest(unittest.TestCase):
                                data['total_articles_to_find_and_parse'])
         self.crawler.find_articles()
         self.parser = HTMLParser(random.choice(self.crawler.urls), 1)
-        self.return_value = self.parser.parse
+        self.return_value = self.parser.parse()
 
     def tearDown(self) -> None:
         for pdf_file in ASSETS_PATH.glob('*.pdf'):
