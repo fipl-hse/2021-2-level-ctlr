@@ -168,8 +168,8 @@ if __name__ == '__main__':
 
     ID = 0
     for url in crawler.urls:
-        id += 1
-        article_parser = HTMLParser(article_url=url, article_id=id)
+        ID += 1
+        article_parser = HTMLParser(article_url=url, article_id=ID)
         article = article_parser.parse()
         article.save_raw()
-        print(f'The {id} article is done!')
+        print(f'The {ID} article is done!')
