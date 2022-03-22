@@ -2,12 +2,12 @@
 Scrapper implementation
 """
 
-from bs4 import BeautifulSoup
 from datetime import datetime
 import json
 from pathlib import Path
-import requests
 import shutil
+from bs4 import BeautifulSoup
+import requests
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
