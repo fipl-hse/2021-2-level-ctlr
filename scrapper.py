@@ -9,7 +9,7 @@ import shutil
 
 from bs4 import BeautifulSoup
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils import article
 
 
@@ -44,38 +44,31 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        articles_to_find = self.max_articles
         main_block_bs = article_bs.find('div', {'class': 'two_thirds'})
         urls_bs = main_block_bs.find_all('a')
-
-        for url in urls_bs:
-            if articles_to_find == 0:
-                break
-
-            if 'http://journals.tsu.ru' + url['href'] not in self.urls:
-                self.urls.append('http://journals.tsu.ru' + url['href'])
-                articles_to_find -= 1
+        return urls_bs
 
     def find_articles(self):
         """
         Finds articles
         """
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
-                          '(KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36 Edg/99.0.1150.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,'
-                      'image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Accept-Encoding': 'gzip, deflate',
-            'Accept-Language': 'ru,en-GB;q=0.9,en;q=0.8,en-US;q=0.7'
-        }
+        articles_to_find = self.max_articles
 
         for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url, headers=headers)
+            response = requests.get(url=seed_url, headers=HEADERS)
             if not response.ok:
                 print('request failed')
 
             soup = BeautifulSoup(response.text, 'lxml')
-            self._extract_url(soup)
+            urls_bs = self._extract_url(soup)
+
+            for url_bs in urls_bs:
+                if articles_to_find == 0:
+                    break
+
+                if 'http://journals.tsu.ru' + url_bs['href'] not in self.urls:
+                    self.urls.append('http://journals.tsu.ru' + url_bs['href'])
+                    articles_to_find -= 1
 
     def get_search_urls(self):
         """
@@ -88,13 +81,14 @@ class HTMLParser:
     def __init__(self, full_url, i):
         self.article_url = full_url
         self.article_id = i
-        self.article = article.Article
+        self.article = article.Article(self.article_url, self.article_id)
 
     def _fill_article_with_text(self, article_bs):
         pass
 
-    """def parse(self):
-        web_page = requests.get(self.article_url, headers=)"""
+    def parse(self):
+        web_page = requests.get(self.article_url, headers=HEADERS)
+        pass
 
 
 def prepare_environment(base_path):
@@ -121,10 +115,12 @@ def validate_config(crawler_path):
 
     if not isinstance(seed_urls, list):
         raise IncorrectURLError
+
     if not seed_urls:
         raise IncorrectURLError
+
     for url in seed_urls:
-        url_validation = re.match(r'https?://', url)
+        url_validation = re.match(ROOT_URL, url)
         if not url_validation:
             raise IncorrectURLError
 
