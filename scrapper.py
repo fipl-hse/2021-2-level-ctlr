@@ -154,7 +154,7 @@ class HTMLParser:
         self.article.title = title_bs
 
         date_raw = article_bs.find("meta", {"name": "DC.Date.dateSubmitted"})['content']
-        article_date = datetime.datetime.strptime(date_raw, '%Y-%m-%d')
+        article_date = datetime.strptime(date_raw, '%Y-%m-%d')
         self.article.date = article_date
 
 
