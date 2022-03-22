@@ -153,12 +153,12 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
+    given_seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
 
-    crawler = Crawler(seed_urls, total_articles)
+    crawler = Crawler(given_seed_urls, total_articles)
     crawler.find_articles()
 
-    for i, url in enumerate(crawler.urls):
-        parser = HTMLParser(url, i + 1)
-        my_article = parser.parse()
-        my_article.save_raw()
+    for i, current_url in enumerate(crawler.urls):
+        parser = HTMLParser(current_url, i + 1)
+        article = parser.parse()
+        article.save_raw()
