@@ -10,7 +10,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, HEADERS
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -80,7 +80,7 @@ class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
         self.article_id = article_id
-        self.article = Article(article_url, article_id)
+        self.article = Article(url=article_url, article_id=article_id)
 
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
@@ -88,6 +88,7 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
+
         return self.article
 
     def _fill_article_with_text(self, article_bs):
