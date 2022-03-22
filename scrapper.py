@@ -180,7 +180,7 @@ def validate_config(crawler_path):
 
         if max_articles > 100000:
             raise NumberOfArticlesOutOfRangeError
-        # если статей для парсинга больше 100
+        # если статей для парсинга больше 100000
 
         if max_articles == 0 or max_articles < 0:
             raise IncorrectNumberOfArticlesError
