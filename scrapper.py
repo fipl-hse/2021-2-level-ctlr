@@ -1,11 +1,11 @@
 """
 Scrapper implementation
 """
-import requests
-from bs4 import BeautifulSoup
 import json
 import re
 import shutil
+import requests
+from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
@@ -38,7 +38,6 @@ class Crawler:
     def _extract_url(self, article_bs):
         self.urls.append('https://gazeta.ru' + article_bs.find('a')['href'])
 
-
     def find_articles(self):
         """
         Finds articles
@@ -67,7 +66,6 @@ class HTMLParser:
     def _fill_article_with_text(self, article_bs):
         text_bs = article_bs.find('div', class_='b_article-text')
         self.article.text = text_bs.text
-
 
     def _fill_article_with_meta_information(self, article_bs):
         title_bs = article_bs.find('div', class_='headline')
@@ -112,19 +110,17 @@ def validate_config(crawler_path):
         correct_url = re.match(r'https://', url)
         if not correct_url:
             raise IncorrectURLError
-    prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
 
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
-    crawler = Crawler(seed_urls, max_articles)
+    my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
-
-    for i, url in enumerate(crawler.urls):
-        parser = HTMLParser(url, i+1)
+    for i, my_url in enumerate(crawler.urls):
+        parser = HTMLParser(my_url, i+1)
         article = parser.parse()
         article.save_raw()
-
