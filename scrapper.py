@@ -2,15 +2,19 @@
 Scrapper implementation
 """
 
+import datetime
 import json
-import os
+import random
 import re
+import shutil
+import time
 
 from bs4 import BeautifulSoup
 import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
 
 
 class IncorrectURLError(Exception):
@@ -41,18 +45,15 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        content = article_bs.find_all('div', id='main-content')
-        for article in content:
-            all_links = article.find_all('a')
+        content = article_bs.find('div', id='main-content')
+        urls = content.find_all('a')
 
-        for link in all_links:
-            try:
-                if link['href'][:4] == 'http':
-                    self.urls.append(link['href'])
-                else:
-                    self.urls.append('https://vja.ruslang.ru' + link['href'])
-            except KeyError:
-                print('Incorrect link')
+        for url in urls:
+            if len(self.urls) < self.max_articles:
+                if 'https://vja.ruslang.ru' + url['href'] not in self.urls:
+                    self.urls.append('https://vja.ruslang.ru' + url['href'])
+            else:
+                break
 
     def find_articles(self):
         """
@@ -61,21 +62,16 @@ class Crawler:
 
         for url in self.seed_urls:
             response = requests.get(url, headers=HEADERS)
+            time.sleep(random.randrange(2, 6))
 
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
-
-            '''
-            with open(ASSETS_PATH, 'w', encoding='utf-8') as file:
-                file.write(response.text)
-            self.urls.append(url)
-            '''
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
 class HTMLParser:
@@ -88,20 +84,42 @@ class HTMLParser:
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        pass
+        link = article_bs.find('iframe', class_='pdf')['data-src']
+        pdf = PDFRawFile(link, self.article_id)
+        pdf.download()
+        full_article = pdf.get_text()
+
+        split_article = full_article.split('СПИСОК ЛИТЕРАТУРЫ / REFERENCES')
+        self.article.text = ''.join(split_article[:-1])
+
+    def _fill_article_with_meta_information(self, article_bs):
+        article_title = article_bs.find('title').text
+        self.article.title = article_title
+
+        article_author = article_bs.find('strong').text
+        self.article.author = article_author
+
+        meta_inf = re.findall(r'\d.+', article_bs.find('link', rel='alternate')['href'])[0]
+        year = meta_inf[:4]
+        volume = meta_inf[5]
+        months_dict = {'1': '01', '2': '03', '3': '05', '4': '07', '5': '09', '6': '11'}
+        month = months_dict[volume]
+        date_raw = f'{year}-{month}'
+        article_date = datetime.datetime.strptime(date_raw, '%Y-%m')
+        self.article.date = article_date
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(base_path)
-    except FileNotFoundError:
-        os.mkdir(base_path)
+    if base_path.exists():
+        shutil.rmtree(base_path)
+    base_path.mkdir(exist_ok=True, parents=True)
 
 
 def validate_config(crawler_path):
@@ -117,7 +135,7 @@ def validate_config(crawler_path):
     if not isinstance(total_articles, int) or total_articles <= 0:
         raise IncorrectNumberOfArticlesError
 
-    if total_articles > 100:
+    if total_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
     pattern = re.compile(r"^https?://")
@@ -129,9 +147,18 @@ def validate_config(crawler_path):
     if not seed_urls:
         raise IncorrectURLError
 
+    prepare_environment(ASSETS_PATH)
+
     return seed_urls, total_articles
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
+
+    crawler = Crawler(seed_urls, total_articles)
+    crawler.find_articles()
+
+    for i, url in enumerate(crawler.urls):
+        parser = HTMLParser(url, i + 1)
+        my_article = parser.parse()
+        my_article.save_raw()
