@@ -2,11 +2,11 @@
 Scrapper implementation
 """
 import json
-import os
+from datetime import datetime
 import requests
-import shutil
-from pathlib import Path
 from bs4 import BeautifulSoup
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from core_utils.article import Article
 
 class IncorrectURLError(Exception):
     """
@@ -35,36 +35,17 @@ class Crawler:
         self.max_articles = max_articles
         self.urls = []
 
-    def _link_formatting(link):
-        if 'https://www.kommersant.ru' not in link:
-            link = 'https://www.kommersant.ru' + link
-        return link
-
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.findall(class_="uho__link uho__link--overlay")
-        urls_bs_full = [self._link_formatting(url_bs['href']) for url_bs in urls_bs]
-        return urls_bs_full
-
+        self.urls.append('https://www.kommersant.ru'+article_bs.findall(class_="uho__link uho__link--overlay"))
 
     def find_articles(self):
         """
         Finds articles
         """
         for url in self.seed_urls:
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:97.0) Gecko/20100101 Firefox/97.0',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-                'Accept-Encoding': 'gzip, deflate, br'
-                'Accept-Language': 'en-US,en;q=0.5'
-            }
             for seed_url_index, seed_url in enumerate(self.seed_urls):
                 response = requests.get(url=seed_url)
-            with open(f'{ASSETS_PATH}/{seed_url_index}_seed_url.html', 'w', encoding='utf-8') as file:
-                file.write(response.text)
-            with open(f'{ASSETS_PATH}/{seed_url_index}_seed_url.html', encoding='utf-8') as file:
-                response = file.read()
             soup = BeautifulSoup(response.text, features="lxml")
-
             articles_urls_bs = self._extract_url(soup)
             list_of_urls = [url_bs for url_bs in articles_urls_bs if len(self.urls) < self.max_articles]
             for full_url in list_of_urls:
@@ -75,8 +56,35 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(article_url, article_id)
+
+    def _fill_article_with_text(self, article_bs):
+        text_bs = article_bs.findall(class_='doc__text')
+        self.article.text = text_bs.text
+
+    def _fill_article_with_meta_information(self, article_bs):
+        title_bs = article_bs.find(class_="doc_header__name js-search-mark").text
+        self.article.title = title_bs
+
+        date_bs = article_bs.find(class_="doc_header__publish_time").text
+        date = datetime.strptime(date_bs, '%Y.%m.%dT%H:%M:%S%z')
+        self.article.date = date
+
+        author_bs = article.bs.find(class_='doc__text document_authors')
+        self.article.author = author_bs
+
+    def parse(self):
+        response = requests.get(self.article_url)
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        return self.article
 
 def prepare_environment(base_path):
     """
@@ -99,14 +107,25 @@ def validate_config(crawler_path):
     seed_urls = configuration["seed_urls"]
     total_articles = configuration["total_articles_to_find_and_parse"]
 
-    if not isinstance(total_articles, int):
+    if not isinstance(max_articles, int) or max_articles <= 0:
         raise IncorrectNumberOfArticlesError
-    if total_articles > 200:
+    if not isinstance(seed_urls, list) or not seed_urls:
+        raise IncorrectURLError
+    if max_articles > 100:
         raise NumberOfArticlesOutOfRangeError
 
     return seed_urls, total_articles
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    urls, articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(urls, articles)
+    crawler.find_articles()
+    print(crawler.urls)
+    A_ID = 1
+    for article_url_new in crawler.urls:
+        parsing_article = HTMLParser(article_url_new, A_ID)
+        parsed_article = parsing_article.parse()
+        parsed_article.save_raw()
+        A_ID += 1
