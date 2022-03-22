@@ -6,8 +6,8 @@ from bs4 import BeautifulSoup
 import re
 import json
 import os
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
-from core_utils import article
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -38,7 +38,13 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        urls_bs = article_bs.find_all('a', class_='table')
+
+        for article in urls_bs:
+            if len(self.urls) < self.max_articles:
+                link = article.find('a')
+                href = link['href']
+                self.urls.append(href)
 
     def find_articles(self):
         """
@@ -53,11 +59,13 @@ class Crawler:
         except KeyError:
             print('Incorrect link')
 
+        self._extract_url(soup)
+
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.urls
 
 
 class HTMLParser:
@@ -67,6 +75,17 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
+        text_bs = article_bs.find('div', class_='text')
+        self.article.text = text_bs.text
+
+    def parse(self):
+        response = requests.get(self.article_url)
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_text(article_bs)
+
+        return self.article
 
 
 def prepare_environment(base_path):
