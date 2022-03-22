@@ -230,8 +230,9 @@ of extracting all necessary data from the article web page. It should do the fol
    (more details in the next sections).
 
 `parse` method usage is straightforward:
+
 ```py
-article = parser.parse()
+article = parser.parse
 ```
 
 As you can see, `parse` method returns the instance of `Article` that is stored in 
