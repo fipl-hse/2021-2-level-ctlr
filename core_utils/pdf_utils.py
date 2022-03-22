@@ -3,7 +3,6 @@ PDF files downloader implementation
 """
 
 
-import os
 import wget
 import fitz
 
@@ -25,14 +24,14 @@ class PDFRawFile:
         """
         Downloads PDF file by the URL given.
         """
-        wget.download(self._url, os.path.join(ASSETS_PATH, f"{self._id}_raw.pdf"))
+        wget.download(self._url, str(ASSETS_PATH / f"{self._id}_raw.pdf"))
 
     def get_text(self):
         """
         Gets text from the PDF file downloaded.
         """
         text = ""
-        with fitz.open(os.path.join(ASSETS_PATH, f"{self._id}_raw.pdf")) as pdf:
+        with fitz.open(ASSETS_PATH / f"{self._id}_raw.pdf") as pdf:
             for page in pdf:
                 text += page.get_text()
         return text
