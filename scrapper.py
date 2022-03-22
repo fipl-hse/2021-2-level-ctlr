@@ -2,13 +2,13 @@
 Scrapper implementation
 """
 
+import datetime
 import json
 import re
 import shutil
-import datetime
 
-import requests
 from bs4 import BeautifulSoup
+import requests
 
 from constants import ASSETS_PATH, HEADERS
 from core_utils.article import Article
@@ -88,6 +88,7 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
+        self.article.save_raw()
 
         return self.article
 
@@ -100,9 +101,9 @@ class HTMLParser:
         self.article.text = pdf.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
-        self.article.title = article_bs.find('h1', {'class': 'entry-title'})
+        self.article.title = article_bs.find('h1', {'class': 'entry-title'}).text
 
-        article_authors = article_bs.find('div', {'class': 'entry-content'}).find_all('p')[1]
+        article_authors = article_bs.find('div', {'class': 'entry-content'}).find_all('p')[1].text
         if ',' in article_authors:
             self.article.author = article_authors.split(', ')[0]
         else:
