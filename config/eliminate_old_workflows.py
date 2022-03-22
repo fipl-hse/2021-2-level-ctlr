@@ -8,6 +8,7 @@ if __name__ == '__main__':
 
     owner = 'fipl-hse'
     repo = '2021-2-level-ctlr-admin'
+    expiration_days = 3
 
     per_page = 100
     _ = api.actions.list_workflow_runs_for_repo(owner, repo, per_page=per_page)
@@ -17,14 +18,14 @@ if __name__ == '__main__':
     for page_idx in range(max_page_idx + 1):
         runs = api.actions.list_workflow_runs_for_repo(owner, repo, per_page=per_page, page=page_idx)
         for run in runs.workflow_runs:
-            if run.head_branch == 'main':
-                print(f'Skipping #{run.id} as it was for main branch')
+            if run.event == 'push' and run.head_branch == 'main':
+                print(f'Skipping #{run.id} as it was run for main branch')
                 continue
 
             delta = datetime.utcnow() - datetime.strptime(run.updated_at, '%Y-%m-%dT%H:%M:%SZ')
 
-            if delta.days > 5:
-                print(f'Removing workflow run #{run.id}')
+            if delta.days > expiration_days:
+                print(f'Removing workflow run #{run.id}. Author: {run.actor.login}')
                 api.actions.delete_workflow_run(owner, repo, run.id)
             else:
-                print(f'Skipping #{run.id} as it was {delta.days} days ago')
+                print(f'Skipping #{run.id} as it was run earlier than {delta.days} days ago')
