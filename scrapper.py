@@ -2,11 +2,16 @@
 Scrapper implementation
 """
 import json
+import pathlib
 import re
-import os
+import shutil
+
 import requests
 from bs4 import BeautifulSoup
-# from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
+from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
 
 
 class IncorrectURLError(Exception):
@@ -38,58 +43,123 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        """
+        Extract URL
+        """
+        sections_bs = article_bs.find('div', {'class': 'sections'})
+        urls_bs = sections_bs.find_all('a')
+        for url_bs in urls_bs:
+            if len(self.urls) < self.max_articles:
+                if url_bs['href'] not in self.urls:
+                    self.urls.append(url_bs['href'])
 
     def find_articles(self):
         """
         Finds articles
         """
-        # html = "https://languagejournal.spbu.ru/issue/view/682"
-        user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) " \
-                     "Gecko/20100101 Firefox/99.0"
-        accept = "*/*"
-        accept_encoding = "gzip, deflate, br"
-        accept_language = "en-US,en;q=0.5"
-        headers = \
-            {
-                'User-Agent': user_agent,
-                'Accept': accept,
-                'Accept-Encoding': accept_encoding,
-                'Accept-Language': accept_language
-            }
+
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers=headers)
+            response = requests.get(seed_url, headers=HEADERS)
             if not response.ok:
                 print("Failed")
 
-        soup = BeautifulSoup(response.text, 'lxml')
-        sections_bs = soup.find('div', {'class': 'sections'})
-        urls = sections_bs.find_all('a')
-        for url in urls:
-            self.urls.append(url['href'])
+            article_bs = BeautifulSoup(response.text, 'lxml')
+            self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
-class ArticleParser:
-    def __init__(self, full_url, identification):
-        self.article_url = full_url
-        self.article_id = identification
-        self.article = ''
+class HTMLParser:
+    """
+    HTMLWithPDFParser implementation
+    """
+
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(self.article_url, self.article_id)
+
+    def _fill_article_with_text(self, article_bs):
+        """
+        Extract text
+        """
+        body_bs = article_bs.find('body')
+        links_bs = body_bs.find_all('a')
+        print(links_bs)
+        # print(article_bs)
+        # galley = article_bs.find('div', {'class': 'item galleys'})
+        # print(galley)
+        pdf_link = ''
+        try:
+            for link_bs in links_bs:
+                try:
+                    # if 'obj_galley_link pdf' in link_bs['href']:
+                    find_link = re.findall(r'article/view/\d+/\d+', link_bs['href'])
+                    if find_link:
+                        pdf_link = link_bs['href']
+                except KeyError:
+                    print("Key Error")
+                    continue
+            if not pdf_link:
+                print('Error')
+            response_pdf = requests.get(pdf_link, HEADERS)
+            # print(response_pdf)
+            # print("ЗДЕСЬ КОНЕЦ СТАТЬИИИИИИИИИИИИИИИИИИИИИ")
+            pdf_bs = BeautifulSoup(response_pdf.text, 'lxml')
+
+            download_pdf = pdf_bs.find('a', {'class': 'download'})['href']
+
+            pdf = PDFRawFile(download_pdf, self.article_id)
+
+            pdf.download()
+            self.article.text = pdf.get_text()
+        except requests.exceptions.MissingSchema:
+            print(article_bs)
+
+    def _fill_article_with_meta_information(self, article_bs):
+        """
+        Extract Meta information
+        """
+        try:
+            article_author_bs = article_bs.find('span', {'class': 'name'})
+        except AssertionError:
+            article_authors_bs = article_bs.find('ul', {'class': 'item authors'})
+            article_authors_list_bs = article_authors_bs.findall('span', {'class': 'name'})
+            article_author_bs = ' '.join(article_authors_list_bs)
+        if not article_author_bs:
+            article_author_bs = 'Not Found'
+        self.article.author = article_author_bs
+
+        article_title_bs = article_bs.find('h1', {'class': 'page_title'})
+        if not article_title_bs:
+            article_title_bs = 'Not Found'
+        self.article.title = article_title_bs
+
+        date_holder_bs = article_bs.find('div', {'class': 'item published'})
+        article_date_bs = date_holder_bs.find('div', {'class': 'value'})
+        if not article_date_bs:
+            article_date_bs = 'Not Found'
+        self.article.date = article_date_bs
+
+    def parse(self):
+        response = requests.get(self.article_url, HEADERS)
+        article_bs = BeautifulSoup(response.text, 'lxml')
+        self._fill_article_with_text(article_bs)
+        return self.article
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(base_path)
-    except FileNotFoundError:
-        os.mkdir(base_path)
+    path = pathlib.Path(base_path)
+    if path.exists():
+        shutil.rmtree(base_path)
+    path.mkdir(exist_ok=True, parents=True)
 
 
 def validate_config(crawler_path):
@@ -99,8 +169,13 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         config = json.load(file)
 
+    if "total_articles_to_find_and_parse" not in config:
+        raise IncorrectNumberOfArticlesError
+
+    if "seed_urls" not in config:
+        raise IncorrectURLError
+
     seed_urls = config["seed_urls"]
-    total_articles = config["total_articles_to_find_and_parse"]
 
     if not isinstance(seed_urls, list):
         raise IncorrectURLError
@@ -112,11 +187,15 @@ def validate_config(crawler_path):
         if not re.match(r'https?://', seed_url):
             raise IncorrectURLError
 
+    total_articles = config["total_articles_to_find_and_parse"]
+
     if not isinstance(total_articles, int) or total_articles <= 0:
         raise IncorrectNumberOfArticlesError
 
     if total_articles > 300:
         raise NumberOfArticlesOutOfRangeError
+
+    prepare_environment(ASSETS_PATH)
 
     return seed_urls, total_articles
 
