@@ -1,11 +1,12 @@
 """
 Scrapper implementation
 """
-
+import re
 from datetime import datetime
 import json
 from pathlib import Path
 import shutil
+import re
 from bs4 import BeautifulSoup
 import requests
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
@@ -92,16 +93,20 @@ class HTMLParser:
         self.article.text = pdf.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
-        article_title = article_bs.find('h1', class_='page_title')
+        article_title = article_bs.find('h1', class_='page_title').text
+        article_title = article_title.strip()
         self.article.title = article_title
         article_author = article_bs.find('ul', class_='item authors')
+        article_author = article_author.find('span', class_='name')
         if not article_author:
             article_author = 'NOT FOUND'
         else:
-            article_author = article_author.find_all('span', class_='name')
+            article_author = article_author.text
+            article_author = article_author.strip()
         self.article.author = article_author
         article_date = article_bs.find('div', class_='item published').find('div', class_='value')
-        article_date = datetime.strptime(article_date, '%Y-%m-%d')
+        article_date = re.search(r'\d{4}-\d{2}-\d{2}', article_date.text)
+        article_date = datetime.strptime(article_date.group(0), '%Y-%m-%d')
         self.article.date = article_date
 
 def prepare_environment(base_path):
@@ -146,7 +151,6 @@ def validate_config(crawler_path):
 
     if not 0 < max_articles <= 100:
         raise NumberOfArticlesOutOfRangeError
-
 
     return seed_urls, max_articles
 
