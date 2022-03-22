@@ -104,8 +104,8 @@ class HTMLParser:
             article_author = article_author.strip()
         self.article.author = article_author
         article_date = article_bs.find('div', class_='item published').find('div', class_='value')
-        article_date = re.search(r'\d{4}-\d{2}-\d{2}', article_date.text)
-        article_date = datetime.strptime(article_date.group(0), '%Y-%m-%d')
+        article_date = article_date.text.strip()
+        article_date = datetime.strptime(article_date, '%Y-%m-%d')
         self.article.date = article_date
 
 def prepare_environment(base_path):
