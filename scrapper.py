@@ -36,7 +36,12 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        self.urls.append('https://gazeta.ru' + article_bs.find('a')['href'])
+        article_url = article_bs.find('a')['href']
+        pattern = 'https://gazeta.ru'
+        if pattern in article_url:
+            self.urls.append(article_url)
+        else:
+            self.urls.append(pattern + article_url)
 
     def find_articles(self):
         """
@@ -45,7 +50,7 @@ class Crawler:
         for url in self.seed_urls:
             response = requests.get(url)
             response.encoding = 'utf-8'
-            page_bs = BeautifulSoup(response.text, features='html.parser')
+            page_bs = BeautifulSoup(response.text, 'lxml')
             content_bs = page_bs.find_all('div', class_='b_ear-title')
             for article_bs in content_bs:
                 if len(self.urls) < self.max_articles:
@@ -68,20 +73,18 @@ class HTMLParser:
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find('div', class_='headline')
+        title_bs = article_bs.find('div', class_='headline').text
         self.article.title = title_bs
 
-        author_bs = article_bs.find('div', class_='author')
+        author_bs = article_bs.find('div', class_='author').text
         self.article.author = author_bs
 
     def parse(self):
         response = requests.get(self.article_url)
-        response.encoding = 'utf-8'
-        article_bs = BeautifulSoup(response.text, 'html.parser')
+        article_bs = BeautifulSoup(response.text, 'lxml')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         return self.article
-
 
 def prepare_environment(base_path):
     """
