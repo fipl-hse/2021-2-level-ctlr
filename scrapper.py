@@ -104,6 +104,7 @@ class HTMLParser:
         material_body_bs = article_bs.find('div', class_='b-material-body')
         paragraphs_bs = material_body_bs.find_all('p', class_=None)
 
+        # text = ''
         text = ''
 
         for paragraph_bs in paragraphs_bs:
