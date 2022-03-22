@@ -180,15 +180,15 @@ def save_raw(article: Article, path):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    i_for_article = 0
+    i = 0
     s_urls, max_as = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(s_urls, max_as)
     crawler.find_articles()
     for art_url in crawler.article_urls:
-        i_for_article += 1
-        print(i_for_article)
+        i += 1
+        print(i)
         print(art_url)
-        parser = HTMLWithPDFParser(art_url, i_for_article)
+        parser = HTMLWithPDFParser(art_url, i)
         parser.parse()
         save_raw(parser.article, ASSETS_PATH)
