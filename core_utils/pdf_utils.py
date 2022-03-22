@@ -34,7 +34,6 @@ class PDFRawFile:
         with fitz.open(ASSETS_PATH / f"{self._id}_raw.pdf") as pdf:
             for page in pdf:
                 text += page.get_text()
-        print(text)
         return text
 
     @property

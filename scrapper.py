@@ -166,13 +166,10 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls_test, total_articles_test)
     crawler.find_articles()
 
-    ID_OF_ARTICLE = 0
-    for article_url_test in crawler.urls:
-        ID_OF_ARTICLE += 1
-        article_parser = HTMLParser(article_url=article_url_test, article_id=ID_OF_ARTICLE)
+    article_id = 0
+    for article_url in crawler.urls:
+        article_id += 1
+        article_parser = HTMLParser(article_url=article_url, article_id=article_id)
         article = article_parser.parse()
         article.save_raw()
-        print(f'The {ID_OF_ARTICLE} article is done!')
-
-    print('---Done!---')
-    pass
+        print(f'The {article_id} article is done!')
