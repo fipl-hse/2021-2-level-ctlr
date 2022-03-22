@@ -192,7 +192,7 @@ def validate_config(crawler_path):
                 raise IncorrectURLError
         # если протокол не соответствует стандратному паттерну
 
-        prepare_environment(ASSETS_PATH) # пока не починили тесты
+        prepare_environment(ASSETS_PATH)  # пока не починили тесты
 
         return seed_urls, max_articles
         # возвращает список urls и число статей
