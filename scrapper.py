@@ -75,7 +75,7 @@ class Crawler:
         return self.seed_urls
 
 
-class HTMLWithPDFParser:
+class HTMLParser:
     def __init__(self, article_url, article_id):
         self.url = article_url
         self.article_id = article_id
@@ -189,6 +189,6 @@ if __name__ == '__main__':
         i += 1
         print(i)
         print(art_url)
-        parser = HTMLWithPDFParser(art_url, i)
+        parser = HTMLParser(art_url, i)
         parser.parse()
         save_raw(parser.article, ASSETS_PATH)
