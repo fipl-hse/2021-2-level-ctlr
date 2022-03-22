@@ -1,10 +1,10 @@
 {
-    "seed_urls": ["http://www.vestnik.vsu.ru/content/lingvo/2019/04/toc_ru.asp",
-    "http://www.vestnik.vsu.ru/content/lingvo/2019/03/toc_ru.asp",
-    "http://www.vestnik.vsu.ru/content/lingvo/2019/02/toc_ru.asp",
-    "http://www.vestnik.vsu.ru/content/lingvo/2019/01/toc_ru.asp",
-    "http://www.vestnik.vsu.ru/content/lingvo/2018/04/toc_ru.asp",
-    "http://www.vestnik.vsu.ru/content/lingvo/2018/03/toc_ru.asp",
-    "http://www.vestnik.vsu.ru/content/lingvo/2018/02/toc_ru.asp"],
+    "seed_urls": ["https://journals.vsu.ru/lic/issue/view/230",
+        "https://journals.vsu.ru/lic/issue/view/235",
+    "https://journals.vsu.ru/lic/issue/view/241",
+    "https://journals.vsu.ru/lic/issue/view/251",
+    "https://journals.vsu.ru/lic/issue/view/260",
+    "https://journals.vsu.ru/lic/issue/view/269",
+    "https://journals.vsu.ru/lic/issue/view/279"],
     "total_articles_to_find_and_parse": 100
 }
