@@ -210,15 +210,12 @@ def get_random_headers():
 
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(crawler_path=CRAWLER_CONFIG_PATH)
-    # prepare_environment(base_path=ASSETS_PATH)
-    # for tests
-    crawler = Crawler(seed_urls=seed_urls, max_articles=max_articles)
+    seed_urls_run, max_articles_run = validate_config(crawler_path=CRAWLER_CONFIG_PATH)
+    #  prepare_environment(base_path=ASSETS_PATH)
+    crawler = Crawler(seed_urls=seed_urls_run, max_articles=max_articles_run)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
         parser = HTMLParser(url, i + 1)
         parser.parse()
         parser.article.save_raw()
-
-
