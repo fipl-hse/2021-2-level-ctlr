@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 beautifulsoup4==4.10.0
 lxml==4.8.0
 requests==2.27.1
-=======
 
->>>>>>> 52abc7a3d1e76b8bd54bccb531558a2200012abe
