@@ -5,7 +5,6 @@ from datetime import datetime
 import json
 from pathlib import Path
 import shutil
-import re
 from bs4 import BeautifulSoup
 import requests
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
