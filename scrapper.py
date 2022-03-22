@@ -3,8 +3,8 @@ Scrapper implementation
 """
 import json
 import re
-import shutil
 import requests
+import shutil
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
