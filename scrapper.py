@@ -6,11 +6,12 @@ import datetime
 import json
 import re
 import shutil
+from time import sleep
 
 from bs4 import BeautifulSoup
 import requests
 
-from constants import ASSETS_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN_NAME, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -43,7 +44,14 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        articles = article_bs.find('div', {'class': 'entry-content'})
+        all_links = articles.find_all('a')[1:]
+        for link in all_links:
+            if len(self.urls) < self.max_articles:
+                if re.match(r'https?://vestnik\.lunn\.ru/', link['href']):
+                    self.urls.append(link['href'])
+                else:
+                    self.urls.append(DOMAIN_NAME + link['href'])
 
     def find_articles(self):
         """
@@ -51,29 +59,20 @@ class Crawler:
         """
         for url in self.seed_urls:
             response = requests.get(url, headers=HEADERS)
+            sleep(4)
 
             if not response.ok:
                 break
 
-            soup = BeautifulSoup(response.text, 'lxml')
+            article_bs = BeautifulSoup(response.text, 'lxml')
 
-            articles = soup.find('div', class_='entry-content')
-            all_links = articles.find_all('a')[1:]
-            link_pattern = re.compile(r'https?://vestnik\.lunn\.ru/')
-            for link in all_links:
-                try:
-                    if re.match(link_pattern, link['href']):
-                        self.urls.append(link['href'])
-                    else:
-                        self.urls.append('https://vestnik.lunn.ru/' + link['href'])
-                except KeyError:
-                    print('Found incorrect link')
+            self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.urls
 
 
 class HTMLParser:
@@ -88,7 +87,6 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self.article.save_raw()
 
         return self.article
 
@@ -98,7 +96,14 @@ class HTMLParser:
         pdf = PDFRawFile(download_pdf, self.article_id)
 
         pdf.download()
-        self.article.text = pdf.get_text()
+        full_article = pdf.get_text()
+
+        reference = 'Список литературы / References'
+        if reference in full_article:
+            split_article = full_article.split(reference)
+            self.article.text = ''.join(split_article[:-1])
+
+        self.article.text = full_article
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.title = article_bs.find('h1', {'class': 'entry-title'}).text
@@ -157,11 +162,17 @@ def validate_config(crawler_path):
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    prepare_environment(ASSETS_PATH)
-
     return seed_urls, max_articles
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    new_seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+
+    crawler = Crawler(new_seed_urls, total_articles)
+    crawler.find_articles()
+
+    for i, article_url in enumerate(crawler.urls):
+        parser = HTMLParser(article_url, i + 1)
+        article = parser.parse()
+        article.save_raw()
