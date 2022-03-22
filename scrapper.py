@@ -1,8 +1,8 @@
 """
 Scrapper implementation
 """
-import re
 import json
+import re
 import shutil
 import requests
 from bs4 import BeautifulSoup
