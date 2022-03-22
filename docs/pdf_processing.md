@@ -22,17 +22,17 @@ to HTML articles processing.
 To crawl a hybrid PDF file, you need to implement the following crawler abstraction:
 
 ```python
-class PDFCrawler(HTMLCrawler):
+class PDFCrawler(Crawler):
     pass
 ```
 
 > **Note:** The `PDFCrawler` class should return links to HTML pages 
 > where hybrid PDF files and their metadata are located.
 
-To parse a hybrid PDF file, you need to implement the following parser abstraction:
+To parse a page with a PDF file, you need to implement the following parser abstraction:
 
 ```python
-class HTMLWithPDFParser(HTMLParser):
+class HTMLParser:
     pass
 ```
 
@@ -46,7 +46,7 @@ class HTMLWithPDFParser(HTMLParser):
 To crawl a monolithic PDF file, you need to implement the following crawler abstraction:
 
 ```python
-class PDFCrawler(HTMLCrawler):
+class PDFCrawler(Crawler):
     pass
 ```
 
@@ -56,7 +56,7 @@ class PDFCrawler(HTMLCrawler):
 To parse a monolithic PDF file, you need to implement the following parser abstraction:
 
 ```python
-class PDFParser(HTMLWithPDFParser):
+class PDFParser(HTMLParser):
     pass
 ```
 
@@ -72,7 +72,7 @@ Some sources may contain both hybrid and monolithic PDF files.
 In this case, the `PDFCrawler` class should be able to crawl
 links of both types: hybrid and monolithic.
 
-Both parsers `HTMLWithPDFParser` and `PDFParser` should be implemented.
+Both parsers `HTMLParser` and `PDFParser` should be implemented.
 The call of parser class should depend on the type of the URL that is crawled by the `PDFCrawler`.
 For URLs with the `.pdf` extension (monolithic PDF URLs), 
 the `PDFParser` class implementation should be called.
