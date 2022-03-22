@@ -3,13 +3,14 @@ Scrapper implementation
 """
 
 import json
-import os
 import re
+import shutil
+import datetime
 
 import requests
 from bs4 import BeautifulSoup
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -48,28 +49,20 @@ class Crawler:
         """
         Finds articles
         """
-        headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/'
-                          '537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/'
-                      'avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'accept-encoding': 'gzip, deflate, br',
-            'accept-language': 'ru,ru-RU;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6'}
-
         for url in self.seed_urls:
-            response = requests.get(url, headers=headers)
+            response = requests.get(url, headers=HEADERS)
 
             if not response.ok:
-                print("Request failed")
+                break
 
             soup = BeautifulSoup(response.text, 'lxml')
 
             articles = soup.find('div', class_='entry-content')
             all_links = articles.find_all('a')[1:]
+            link_pattern = re.compile(r'https?://vestnik\.lunn\.ru/')
             for link in all_links:
                 try:
-                    if (('https://vestnik.lunn.ru/' in link['href']) or
-                            ('http://vestnik.lunn.ru/' in link['href'])):
+                    if re.match(link_pattern, link['href']):
                         self.urls.append(link['href'])
                     else:
                         self.urls.append('https://vestnik.lunn.ru/' + link['href'])
@@ -90,35 +83,52 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def parse(self):
-        self.article = Article(self.article_url, self.article_id)
-
-        headers = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/'
-                          '537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36',
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/'
-                      'avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'accept-encoding': 'gzip, deflate, br',
-            'accept-language': 'ru,ru-RU;q=0.9,en-US;q=0.8,en;q=0.7,la;q=0.6'}
-
-        response = requests.get(self.article_url, headers)
+        response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
-        # self._fill_article_with_text(article_bs)
-        # self.article.save_raw()
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        pass
+        download_pdf = article_bs.find('a', {'class': 'aligncenter download-button'})['href']
+
+        pdf = PDFRawFile(download_pdf, self.article_id)
+
+        pdf.download()
+        self.article.text = pdf.get_text()
+
+    def _fill_article_with_meta_information(self, article_bs):
+        self.article.title = article_bs.find('h1', {'class': 'entry-title'})
+
+        article_authors = article_bs.find('div', {'class': 'entry-content'}).find_all('p')[1]
+        if ',' in article_authors:
+            self.article.author = article_authors.split(', ')[0]
+        else:
+            self.article.author = article_authors
+
+        quarter_dict = {
+            'I квартал': '01-01',
+            'II квартал': '01-04',
+            'III квартал': '01-07',
+            'IV квартал': '01-10'
+        }
+        article_issue = article_bs.find_all('a', {'rel': 'v:url'})[3].text
+        date_raw = article_issue[article_issue.find("(") + 1:article_issue.find(")")]
+        for quarter in quarter_dict.keys():
+            if quarter in date_raw:
+                dm_date = date_raw.replace(quarter, quarter_dict[quarter])
+
+        self.article.date = datetime.datetime.strptime(dm_date, '%d-%m %Y г')
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(base_path)
-    except FileNotFoundError:
-        os.mkdir(base_path)
+    if base_path.exists():
+        shutil.rmtree(base_path)
+    base_path.mkdir(exist_ok=True, parents=True)
 
 
 def validate_config(crawler_path):
@@ -144,6 +154,8 @@ def validate_config(crawler_path):
 
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
+
+    prepare_environment(ASSETS_PATH)
 
     return seed_urls, max_articles
 
