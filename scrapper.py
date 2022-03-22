@@ -10,7 +10,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
+from constants import ASSETS_PATH, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
