@@ -165,6 +165,8 @@ def validate_config(crawler_path):
         raise NumberOfArticlesOutOfRangeError
     if not isinstance(seed_urls, list):
         raise IncorrectURLError
+    if len(seed_urls) <= 1:
+        raise IncorrectURLError
     for seed_url in seed_urls:
         if not (isinstance(seed_url, str) or seed_url.startswith('https://')):
             raise IncorrectURLError
