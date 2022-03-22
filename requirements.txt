@@ -1,6 +1,4 @@
-<<<<<<< HEAD
 requests==2.27.1
 beautifulsoup4==4.10.0
-=======
-requests
->>>>>>> be5f2c06851e594c4f22a80a69852bcd4cde2fd4
+pymupdf==1.19.6
+wget==3.2
