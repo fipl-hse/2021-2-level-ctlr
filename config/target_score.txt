@@ -1,6 +1,5 @@
 # Target score for scrapper.py:
 8
 
-
 # Target score for pipeline.py:
 0
