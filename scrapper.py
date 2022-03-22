@@ -10,7 +10,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
+from constants import ASSETS_PATH, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -115,7 +115,7 @@ class HTMLParser:
         }
         article_issue = article_bs.find_all('a', {'rel': 'v:url'})[3].text
         date_raw = article_issue[article_issue.find("(") + 1:article_issue.find(")")]
-        for quarter in quarter_dict.keys():
+        for quarter in quarter_dict:
             if quarter in date_raw:
                 dm_date = date_raw.replace(quarter, quarter_dict[quarter])
 
@@ -135,14 +135,14 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    with open(crawler_path, 'r', encoding='utf-8') as f:
-        config = json.load(f)
+    with open(crawler_path, 'r', encoding='utf-8') as file:
+        config = json.load(file)
 
     seed_urls = config["seed_urls"]
     max_articles = config["total_articles_to_find_and_parse"]
 
     for url in seed_urls:
-        right_url = re.match(r'https?://', url)
+        right_url = re.match(r'https?://vestnik\.lunn\.ru/arhiv-zhurnala/', url)
         if not right_url:
             raise IncorrectURLError
 
