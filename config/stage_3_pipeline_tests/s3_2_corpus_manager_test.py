@@ -1,4 +1,3 @@
-import os
 import json
 import unittest
 
@@ -16,7 +15,7 @@ class ArticleInstanceCreationBasicTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         validate_dataset(ASSETS_PATH)
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_raw.txt"), os.path.join(ASSETS_PATH, "0_raw.txt"))
+        shutil.copyfile(TEST_FILES_FOLDER / "0_raw.txt", ASSETS_PATH / "0_raw.txt")
 
     def setUp(self) -> None:
         self.corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
@@ -53,7 +52,7 @@ class ArticleInstanceCreationBasicTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(os.path.join(ASSETS_PATH, "0_raw.txt"))
+        (ASSETS_PATH / "0_raw.txt").unlink()
 
 
 class ArticleInstanceCreationAdvancedTest(unittest.TestCase):
@@ -61,12 +60,12 @@ class ArticleInstanceCreationAdvancedTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         validate_dataset(ASSETS_PATH)
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_meta.json"), os.path.join(ASSETS_PATH, "0_meta.json"))
-        shutil.copyfile(os.path.join(TEST_FILES_FOLDER, "0_raw.txt"), os.path.join(ASSETS_PATH, "0_raw.txt"))
+        shutil.copyfile(TEST_FILES_FOLDER / "0_meta.json", ASSETS_PATH / "0_meta.json")
+        shutil.copyfile(TEST_FILES_FOLDER / "0_raw.txt", ASSETS_PATH / "0_raw.txt")
 
     def setUp(self) -> None:
         self.corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
-        with open(os.path.join(TEST_FILES_FOLDER, '0_meta.json'), encoding='utf-8') as f:
+        with (TEST_FILES_FOLDER / '0_meta.json').open(encoding='utf-8') as f:
             self.meta = json.load(f)
 
     @pytest.mark.mark6
@@ -79,5 +78,5 @@ class ArticleInstanceCreationAdvancedTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        os.remove(os.path.join(ASSETS_PATH, "0_raw.txt"))
-        os.remove(os.path.join(ASSETS_PATH, "0_meta.json"))
+        (ASSETS_PATH / "0_raw.txt").unlink()
+        (ASSETS_PATH / "0_meta.json").unlink()
