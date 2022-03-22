@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 import re
 import json
 import os
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from core_utils import article
 
 
 class IncorrectURLError(Exception):
@@ -56,6 +58,15 @@ class Crawler:
         Returns seed_urls param
         """
         pass
+
+
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(article_url, article_id)
+
+    def _fill_article_with_text(self, article_bs):
 
 
 def prepare_environment(base_path):
