@@ -7,13 +7,11 @@ from pathlib import Path
 import shutil
 from bs4 import BeautifulSoup
 import requests
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
 
-headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, '
-                         'like Gecko) Chrome/99.0.4844.74 Safari/537.36'}
 
 class IncorrectURLError(Exception):
     """
@@ -56,7 +54,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers=headers)
+            response = requests.get(seed_url, headers=HEADERS)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
 
@@ -73,19 +71,17 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def parse(self):
-        response = requests.get(self.article_url, headers=headers)
+        response = requests.get(self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        fulltext = article_bs.find('ul', class_='value galleys_links')
-        page_link = fulltext.find('a')['href']
-        response_pdf = requests.get(page_link, headers=headers)
+        page_link = article_bs.find('ul', class_='value galleys_links').find('a')['href']
+        response_pdf = requests.get(page_link, headers=HEADERS)
         pdf_bs = BeautifulSoup(response_pdf.text, 'html.parser')
-        container = pdf_bs.find('header', class_='header_view')
-        download_link = container.find('a', class_='download')['href']
+        download_link = pdf_bs.find('header', class_='header_view').find('a', class_='download')['href']
         pdf = PDFRawFile(download_link, self.article_id)
         pdf.download()
         self.article.text = pdf.get_text()
