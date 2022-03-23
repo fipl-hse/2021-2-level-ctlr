@@ -170,14 +170,3 @@ if __name__ == '__main__':
         parser = HTMLParser(current_url, i + 1)
         article = parser.parse()
         article.save_raw()
-'''
-
-html = 'https://vja.ruslang.ru/ru/archive/2019-6/51-67'
-response = requests.get(html, HEADERS)
-soup = BeautifulSoup(response.text, 'html.parser')
-article_author = soup.find('strong').text
-if '\n' in article_author:
-    article_author = article_author.split('\n')[0]
-
-print(article_author)
-'''
