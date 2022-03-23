@@ -133,8 +133,8 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
 
-        table_rows = article_bs.find('div', class_="fulltext")
-        link = table_rows.find('a')['href']
+        table_bs = article_bs.find('div', class_="fulltext")
+        link = table_bs.find('a')['href']
         new_link = re.sub(r'(?i)view(?=\W)', 'download', link)
         pdf_file = PDFRawFile(new_link, self.article_id)
 
