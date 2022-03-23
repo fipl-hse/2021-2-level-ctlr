@@ -63,7 +63,8 @@ class Crawler:
             for link_bs in title_bs:
                 if len(self.urls) >= self.max_articles:
                     break
-                self.urls.append(self._extract_url(link_bs))
+                if link_bs.find('em').text:
+                    self.urls.append(self._extract_url(link_bs))
 
     def get_search_urls(self):
         """
@@ -154,6 +155,7 @@ class HTMLParser:
 
 if __name__ == '__main__':
     another_seed_urls, total_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
     crawler = Crawler(another_seed_urls, total_articles)
     crawler.find_articles()
     for identifier, url in enumerate(crawler.urls):
