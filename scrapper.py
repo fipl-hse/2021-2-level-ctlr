@@ -5,9 +5,9 @@ import datetime
 import re
 import shutil
 
-import requests
-import json
 from pathlib import Path
+import json
+import requests
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
@@ -82,24 +82,29 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        self.article.title = article_bs.find('h1').text
+        article_title = article_bs.find('h1').text
+        self.article.title = article_title.strip()
 
         self.article.author = 'NOT FOUND'
 
         date_epoch = article_bs.dateformat['time']
         self.article.date = datetime.datetime.fromtimestamp(int(date_epoch))
 
-        if article_bs.find('a', class_='tags__item'):
-            self.article.topic = article_bs.find('a', class_='tags__item').text
+        topic = article_bs.find('a', class_='tags__item')
+        if not topic:
+            topic = 'NOT FOUND'
+        else:
+            topic = topic.text
+        self.article.topics = topic
 
     def _fill_article_with_text(self, article_bs):
         text_content = article_bs.find('div', class_="text-content")
         divs = text_content.find_all('div', class_="text-block")
         self.article.text = ''
         for div in divs:
-            ps = div.find_all('p')
-            for p in ps:
-                self.article.text += p.text.strip()
+            p_tags = div.find_all('p')
+            for p_tag in p_tags:
+                self.article.text += p_tag.text.strip()
 
     def parse(self):
         response = requests.get(url=self.article_url)
@@ -149,10 +154,10 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    seed_urls_test, max_articles_test = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
 
-    crawler = Crawler(seed_urls, max_articles)
+    crawler = Crawler(seed_urls_test, max_articles_test)
     crawler.find_articles()
 
     ID = 0
