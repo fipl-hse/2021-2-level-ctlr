@@ -3,12 +3,12 @@ Scrapper implementation
 """
 import json
 import re
-import requests
 import shutil
+from pathlib import Path
+import requests
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
-from pathlib import Path
 
 
 class IncorrectURLError(Exception):
@@ -81,8 +81,8 @@ class HTMLParser:
         texts = article_bs.find('div', class_='article__body')
         paragraphs = texts.find_all('p', class_=None)
         self.article.text = ''
-        for p in paragraphs:
-            self.article.text += p.text
+        for paragraphs in paragraphs:
+            self.article.text += paragraphs.text
 
     def parse(self):
         response = requests.get(self.article_url)
