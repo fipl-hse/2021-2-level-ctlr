@@ -2,7 +2,13 @@
 Scrapper implementation
 """
 
+import re
+import json
+
 import requests
+from bs4 import BeautifulSoup
+
+from constants import CRAWLER_CONFIG_PATH
 
 class IncorrectURLError(Exception):
     """
@@ -26,6 +32,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         pass
 
@@ -57,22 +64,29 @@ def validate_config(crawler_path):
     Validates given config
     """
     pass
+    with open(crawler_path) as file:
+        config = json.load(file)
+    seed_urls = config['seed_urls']
+    max_articles = config['total_articles_to_find_and_parse']
 
+    for url in seed_urls:
+        if url[:8] != "https://" and url[:7] != "http://":
+            raise IncorrectURLError
 
-def main():
-    response = requests.get('https://russkayarech.ru/ru')
-    if response:
-        print(f'Response code is: {response.status_code}')
-    if response.ok:
-        print('Response is OK')
-    with open('index.html', 'w', encoding='utf-8') as f:
-        f.write(response.text)
-    response = requests.get('https://russkayarech.ru/images/topsite2.png')
-    with open('logo.png', 'wb') as f:
-        f.write(response.content)
+    if not seed_urls:
+        raise IncorrectURLError
+
+    if not isinstance(max_articles, int):
+        raise IncorrectNumberOfArticlesError
+
+    if max_articles <= 0:
+        raise IncorrectNumberOfArticlesError
+
+    if max_articles > 200:
+        raise NumberOfArticlesOutOfRangeError
+
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
-    main()
+    seed_urlsi, articles = validate_config(CRAWLER_CONFIG_PATH)
