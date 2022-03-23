@@ -41,7 +41,7 @@ class Crawler:
         self.max_articles = max_articles
         self.seed_urls = seed_urls
         self.count_articles = 0
-        self.article_urls = []
+        self.urls = []
 
     def _extract_url(self, article_bs):  # I don't understand if I need to collect seed urls (from main to year)
         # or just put it in scrapper_config.
@@ -54,7 +54,7 @@ class Crawler:
                 try:
                     art_link = link["href"]
                     if art_link.startswith('/') and 'pdf' not in art_link:
-                        self.article_urls.append('https://periodical.pstgu.ru' + link["href"])
+                        self.urls.append('https://periodical.pstgu.ru' + link["href"])
                         self.count_articles += 1
                 except KeyError:
                     continue
@@ -190,7 +190,7 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(s_urls, max_as)
     crawler.find_articles()
-    for art_url in crawler.article_urls:
+    for art_url in crawler.urls:
         i += 1
         print(i)
         print(art_url)
