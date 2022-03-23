@@ -1,5 +1,5 @@
 beautifulsoup4==4.9.3
-lxml=4.8.0
+lxml==4.8.0
 PyMuPDF==1.19.6
 pytest==7.1.0
 requests==2.27.1
