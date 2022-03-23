@@ -10,7 +10,7 @@ import shutil
 from bs4 import BeautifulSoup
 import requests
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN_NAME
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN_URL, ROOT_URL
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -134,7 +134,7 @@ class Crawler:
             links_bs.extend(table_row_bs.find_all('a'))
 
         for link_bs in links_bs:
-            if overall_urls_count > self.max_articles:
+            if overall_urls_count + 1 > self.max_articles - pre_scrapped_url_count:
                 break
 
             # Checks if the link leads to an article
@@ -143,8 +143,11 @@ class Crawler:
             if not match:
                 continue
 
-            urls.append(''.join([DOMAIN_NAME, link_bs['href']]))
-            overall_urls_count += 1
+            link_url = ''.join([DOMAIN_URL, link_bs['href']])
+
+            if link_url not in pre_scrapped_urls:
+                urls.append(link_url)
+                overall_urls_count += 1
 
         return urls
 
@@ -153,7 +156,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self._seed_urls:
-            if len(self.urls) + 1 > self.max_articles:
+            if len(self.urls) + 1 > self.max_articles - pre_scrapped_url_count:
                 break
 
             response = requests.get(seed_url)
@@ -166,6 +169,38 @@ class Crawler:
         Returns seed_urls param
         """
         return self._seed_urls
+
+
+class CrawlerRecursive(Crawler):
+    """
+    CrawlerRecursive implementation
+    """
+
+    def find_articles(self):
+        """
+        Finds articles
+        """
+        response = requests.get(self._seed_urls[0])
+        article_bs = BeautifulSoup(response.text, features="html.parser")
+        content_bs = article_bs.find('div', {'id': 'content'})
+
+        back_link = (''.join([ROOT_URL, content_bs.find('a')['href']]))
+
+        root_response = requests.get(back_link)
+        root_bs = BeautifulSoup(root_response.text, features="html.parser")
+        root_content_bs = root_bs.find('div', {'id': 'content'})
+        root_table_bs = root_content_bs.find_all('table')[8]
+
+        links_bs = root_table_bs.find_all('a')
+
+        seed_urls = []
+
+        for link_bs in links_bs:
+            seed_urls.append(''.join([DOMAIN_URL, link_bs['href']]))
+
+        self._seed_urls = seed_urls
+
+        super().find_articles()
 
 
 def prepare_environment(base_path):
@@ -212,20 +247,48 @@ def validate_config(crawler_path):
     for seed_url in seed_urls:
         match = re.match(r'(^http://|^https://)', seed_url)
 
-        if not match or DOMAIN_NAME not in seed_url:
+        if not match or DOMAIN_URL not in seed_url:
             raise IncorrectURLError
-
-    prepare_environment(ASSETS_PATH)
 
     return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
-    crawler = Crawler(outer_seed_urls, outer_max_articles)
+    pre_scrapped_urls = []
+    pre_scrapped_url_count = 0
+
+    scrapper_mode_input = input('Should the environment be reset? Press R. '
+                                'If you want to continue running the scrapper, press C')
+
+    if scrapper_mode_input == 'R':
+        prepare_environment(ASSETS_PATH)
+    elif scrapper_mode_input == 'C':
+        metadata = []
+        assets_pathlib_path = pathlib.Path(ASSETS_PATH)
+
+        for file_name in assets_pathlib_path.iterdir():
+            if file_name.suffix == '.json':
+                with open(file_name, encoding='utf-8') as f:
+                    config = json.load(f)
+
+                stem = file_name.stem
+                number = stem[0]
+
+                pdf_path = ASSETS_PATH / f'{number}_raw.pdf'
+
+                if pdf_path.is_file():
+                    pre_scrapped_urls.append(config['url'])
+
+        pre_scrapped_url_count = len(pre_scrapped_urls)
+    else:
+        print('Incorrect input')
+        raise KeyboardInterrupt
+
+    crawler = CrawlerRecursive(outer_seed_urls, outer_max_articles)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
-        parser = HTMLParser(url, i + 1)
+        parser = HTMLParser(url, i + pre_scrapped_url_count + 1)
         article = parser.parse()
         article.save_raw()
