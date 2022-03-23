@@ -176,6 +176,7 @@ def validate_config(crawler_path):
 
     return seed_urls, max_articles
 
+
 if __name__ == '__main__':
     # YOUR CODE HERE
     i = 0
@@ -183,6 +184,7 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(s_urls, max_as)
     crawler.find_articles()
+    print(len(crawler.urls))
     for art_url in crawler.urls:
         i += 1
         print(i)
