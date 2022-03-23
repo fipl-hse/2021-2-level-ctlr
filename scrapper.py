@@ -110,12 +110,12 @@ class HTMLParser:
         """
         Fills the Article instance with meta information
         """
+        journal_title = article_bs.find('span',
+                                        class_="field field--name-title field--type-string field--label-hidden")
+        self.article.title = journal_title.text
         article_title = article_bs.find_all('div', class_="clearfix text-formatted")[1]
         links_bs = article_title.find_all('li')
         for link in links_bs:
-            title = link.find('a').text
-            self.article.title = title
-
             author_bald = link.find('b')
             author_strong = link.find('strong')
 
