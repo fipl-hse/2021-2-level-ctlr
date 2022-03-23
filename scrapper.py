@@ -89,6 +89,7 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
         link = article_bs.find('iframe', {'class': 'pdf'})['data-src']
+
         pdf = PDFRawFile(link, self.article_id)
         pdf.download()
         full_article = pdf.get_text()
