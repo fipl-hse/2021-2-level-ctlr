@@ -168,8 +168,11 @@ def validate_config(crawler_path):
     if len(seed_urls) <= 1:
         raise IncorrectURLError
     for seed_url in seed_urls:
-        if not (isinstance(seed_url, str) or seed_url.startswith('https://')):
+        if not isinstance(seed_url, str):
             raise IncorrectURLError
+        if not seed_url.startswith('https://'):
+            raise IncorrectURLError
+
     return seed_urls, max_articles
 
 
