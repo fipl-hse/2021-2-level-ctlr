@@ -101,7 +101,6 @@ def prepare_environment(base_path):
         shutil.rmtree(base_path)
     path.mkdir(parents=True, exist_ok=True)
 
-
 def validate_config(crawler_path):
     """
     Validates given config
@@ -112,6 +111,8 @@ def validate_config(crawler_path):
     seed_urls = config["seed_urls"]
 
     if not seed_urls:
+        raise IncorrectURLError
+    if not isinstance(seed_urls, list):
         raise IncorrectURLError
     for article_url in seed_urls:
         correct_url = re.match(r'https://', article_url)
