@@ -41,7 +41,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        self.urls.append('http://www.elista.org'+article_bs.find('a')['href'])
+        self.urls.append('http://www.elista.org' + article_bs.find('a')['href'])
 
     def find_articles(self):
         """
@@ -94,6 +94,7 @@ class HTMLParser:
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         return self.article
+
 
 def prepare_environment(base_path):
     """
