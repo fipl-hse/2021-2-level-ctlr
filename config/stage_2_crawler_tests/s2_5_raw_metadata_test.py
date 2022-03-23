@@ -6,18 +6,19 @@ import unittest
 import pytest
 import requests
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from scrapper import get_random_headers
 
 
 class RawBasicDataValidator(unittest.TestCase):
     def setUp(self) -> None:
         # open and prepare texts
         self.texts = []
-        for file_name in ASSETS_PATH.iterdir():
-            if file_name.name.endswith("_raw.txt"):
-                with file_name.open(encoding='utf-8') as f:
+        for file_name in os.listdir(ASSETS_PATH):
+            if file_name.endswith("_raw.txt"):
+                with open(os.path.join(ASSETS_PATH, file_name), encoding='utf-8') as f:
                     file = f.read()
                     print(file_name)
-                    self.texts.append((int(file_name.name.split('_')[0]), file))
+                    self.texts.append((int(file_name.split('_')[0]), file))
         self.texts = tuple(self.texts)
 
     @pytest.mark.mark4
@@ -48,13 +49,13 @@ class RawMediumDataValidator(unittest.TestCase):
         # check metadata is created under ./tmp/articles directory
         error_message = """Articles were not created in the ./tmp/articles directory after running scrapper.py
                                         Check where you create articles"""
-        self.assertTrue(ASSETS_PATH.exists(), msg=error_message)
+        self.assertTrue(os.path.exists(ASSETS_PATH), msg=error_message)
 
         # open and prepare metadata
         self.metadata = []
-        for file_name in ASSETS_PATH.iterdir():
-            if file_name.name.endswith(".json"):
-                with file_name.open(encoding='utf-8') as f:
+        for file_name in os.listdir(ASSETS_PATH):
+            if file_name.endswith(".json"):
+                with open(os.path.join(ASSETS_PATH, file_name), encoding='utf-8') as f:
                     config = json.load(f)
                     self.metadata.append((config['id'], config))
         self.metadata = tuple(self.metadata)
@@ -78,11 +79,11 @@ class RawMediumDataValidator(unittest.TestCase):
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
-            self.assertTrue(requests.get(metadata[1]['url']),
+            self.assertTrue(requests.get(metadata[1]['url'], headers=get_random_headers()),
                             msg="Can not open URL: <{}>. Check how you collect URLs".format(
                                 metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=get_random_headers()).text
 
             print(metadata[1]['title'])
             self.assertTrue(metadata[1]['title'] in
@@ -105,9 +106,9 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
     def test_texts_are_not_empty(self):
-        for file_name in ASSETS_PATH.iterdir():
-            if file_name.name.endswith("_raw.txt"):
-                with file_name.open(encoding='utf-8') as f:
+        for file_name in os.listdir(ASSETS_PATH):
+            if file_name.endswith("_raw.txt"):
+                with open(os.path.join(ASSETS_PATH, file_name), encoding='utf-8') as f:
                     self.assertTrue(len(f.read()) > 50,
                                     msg="""File {} seems to be empty (less than 50 characters).
                                      Check if you collected article correctly""".format(file_name))
@@ -118,16 +119,16 @@ class RawAdvancedDataValidator(unittest.TestCase):
         # check metadata is created under ./tmp/articles directory
         error_message = """Articles were not created in the ./tmp/articles directory after running scrapper.py
                                         Check where you create articles"""
-        self.assertTrue(ASSETS_PATH.exists(), msg=error_message)
+        self.assertTrue(os.path.exists(ASSETS_PATH), msg=error_message)
 
         # datetime pattern
         self.data_pattern = r"\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d"
 
         # open and prepare metadata
         self.metadata = []
-        for file_name in ASSETS_PATH.iterdir():
-            if file_name.name.endswith(".json"):
-                with file_name.open(encoding='utf-8') as f:
+        for file_name in os.listdir(ASSETS_PATH):
+            if file_name.endswith(".json"):
+                with open(os.path.join(ASSETS_PATH, file_name), encoding='utf-8') as f:
                     config = json.load(f)
                     self.metadata.append((config['id'], config))
         self.metadata = tuple(self.metadata)
@@ -137,10 +138,10 @@ class RawAdvancedDataValidator(unittest.TestCase):
     @pytest.mark.stage_2_5_dataset_validation
     def test_match_requested_volume_sample(self):
         metas, raws = 0, 0
-        for file in ASSETS_PATH.iterdir():
-            if file.name.endswith("_raw.txt"):
+        for file in os.listdir(ASSETS_PATH):
+            if file.endswith("_raw.txt"):
                 raws += 1
-            if file.name.endswith("_meta.json"):
+            if file.endswith("_meta.json"):
                 metas += 1
         self.assertEqual(metas, raws, msg="""Resulted number of meta.json files is not equal 
         to num_articles param specified in config - not in range(2, 8)""")
@@ -154,7 +155,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=get_random_headers()).text
 
             # is a date in given format?
             self.assertTrue(re.search(self.data_pattern, metadata[1]['date']),
@@ -174,9 +175,9 @@ class RawAdvancedDataValidator(unittest.TestCase):
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
     def test_texts_are_not_empty(self):
-        for file_name in ASSETS_PATH.iterdir():
-            if file_name.name.endswith("_raw.txt"):
-                with file_name.open(encoding='utf-8') as f:
+        for file_name in os.listdir(ASSETS_PATH):
+            if file_name.endswith("_raw.txt"):
+                with open(os.path.join(ASSETS_PATH, file_name), encoding='utf-8') as f:
                     self.assertTrue(len(f.read()) > 50,
                                     msg="""File {} seems to be empty (less than 50 characters).
                                      Check if you collected article correctly""".format(file_name))
