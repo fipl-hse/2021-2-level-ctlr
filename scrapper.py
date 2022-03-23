@@ -178,7 +178,7 @@ def validate_config(crawler_path):
 
 
 def save_raw(article: Article, path):
-    id_article = str(article.article_id) + '.txt'
+    id_article = str(article.article_id) + '_raw.txt'
     path_to_file = pathlib.Path(path / id_article)
     with open(path_to_file, 'w', encoding="utf-8") as file:
         file.write(article.text)
