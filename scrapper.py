@@ -49,15 +49,17 @@ class Crawler:
         title_bs = class_bs.find_all('p', class_="b-materials-list__title")
 
         extracted_urls = []
+        extracted_url_count = 0
 
         for link_bs in title_bs:
-            if len(self.urls) >= self.max_articles:
+            if len(self.urls) + extracted_url_count >= self.max_articles:
                 break
 
             extracted_url = 'https://www.m24.ru' + link_bs.find('a')['href']
 
             if extracted_url not in self.urls and extracted_url not in extracted_urls:
                 extracted_urls.append(extracted_url)
+                extracted_url_count += 1
 
         return extracted_urls
 
@@ -117,8 +119,7 @@ class HTMLParser:
         material_before_body = article_bs.find('div', class_='b-material-before-body')
 
         title_bs = material_before_body.find('h1')
-        title_text = title_bs.text.replace('"', '&quot;')
-        self.article.title = title_text
+        self.article.title = title_bs.text.replace('"', '&quot;')
 
         topic_bs = material_before_body.find('div', class_='b-material__rubrics').find('a')
         self.article.topics = [topic_bs.text]
