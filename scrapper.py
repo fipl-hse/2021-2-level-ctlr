@@ -83,9 +83,8 @@ class HTMLParser:
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find('h1', class_='headline')
-        print(str(title_bs)[41:-5])
-        self.article.title = str(title_bs)[41:-5]
+        title_bs = article_bs.find('h1', class_='headline').text
+        self.article.title = str(title_bs)
 
         author_bs = article_bs.find('div', class_='author')
         if not author_bs.find('a'):
