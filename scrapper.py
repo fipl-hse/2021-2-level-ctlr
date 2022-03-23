@@ -77,6 +77,9 @@ class HTMLParser:
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
+        """
+        fills article instance with title, date and topics
+        """
         meta_bs = article_bs.find('div', class_='news_item fullnews')
         title_bs = meta_bs.find('h1').text
         self.article.title = title_bs
