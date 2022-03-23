@@ -126,6 +126,7 @@ class HTMLParser:
             else:
                 self.article.author = 'NOT FOUND'
 
+            self.article.url = f'https:{link.find("a")["href"]}'
         date_raw = article_bs.find('span',
                                    class_="field field--name-created field--type-created field--label-hidden").text[4:]
         article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y - %H:%M')
