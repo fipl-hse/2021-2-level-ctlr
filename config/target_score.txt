@@ -1,4 +1,4 @@
-Н# Target score for scrapper.py:
+# Target score for scrapper.py:
 8
 
 # Target score for pipeline.py:
