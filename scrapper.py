@@ -176,14 +176,6 @@ def validate_config(crawler_path):
 
     return seed_urls, max_articles
 
-
-def save_raw(article: Article, path):
-    id_article = str(article.article_id) + '_raw.txt'
-    path_to_file = pathlib.Path(path / id_article)
-    with open(path_to_file, 'w', encoding="utf-8") as file:
-        file.write(article.text)
-
-
 if __name__ == '__main__':
     # YOUR CODE HERE
     i = 0
@@ -196,5 +188,5 @@ if __name__ == '__main__':
         print(i)
         print(art_url)
         parser = HTMLParser(art_url, i)
-        parser.parse()
-        save_raw(parser.article, ASSETS_PATH)
+        article = parser.parse()
+        article.save_raw()
