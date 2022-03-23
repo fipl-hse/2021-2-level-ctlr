@@ -158,10 +158,8 @@ def validate_config(crawler_path):
     for url in seed_urls:
         if not re.match(http_pattern, url):
             raise IncorrectURLError
-    
     if not isinstance(max_articles, int) or max_articles <= 0:
         raise IncorrectNumberOfArticlesError
-    
     if max_articles > 15:
         raise NumberOfArticlesOutOfRangeError
 
