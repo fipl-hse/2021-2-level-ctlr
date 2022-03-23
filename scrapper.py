@@ -1,17 +1,17 @@
 """
 Scrapper implementation
 """
-import json
-import re
-import shutil
-from datetime import datetime
-from random import randint
-from time import sleep
-import requests
-from pathlib import Path
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
+from datetime import datetime
+import json
+from pathlib import Path
+from random import randint
+import re
+import requests
+import shutil
+from time import sleep
 
 class IncorrectURLError(Exception):
     """
@@ -52,11 +52,6 @@ class Crawler:
             else:
                 new_urls.append(url)
         return new_urls
-
-        # wrong_pattern = re.compile('https://img.gazeta.ru')
-        # wrong_url = wrong_pattern.search(article_url)
-        # if wrong_url:
-        #     return
 
     def find_articles(self):
         """
@@ -135,7 +130,9 @@ def validate_config(crawler_path):
         config = json.load(file)
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
-    if not isinstance(max_articles, int) or max_articles <= 0:
+    if not isinstance(max_articles, int):
+        raise IncorrectNumberOfArticlesError
+    if max_articles <= 0:
         raise IncorrectNumberOfArticlesError
     if not isinstance(seed_urls, list) or not seed_urls:
         raise IncorrectURLError
