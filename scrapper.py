@@ -135,4 +135,3 @@ if __name__ == '__main__':
 
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
-
