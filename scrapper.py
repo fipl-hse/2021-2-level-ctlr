@@ -6,8 +6,8 @@ import pathlib
 import re
 import shutil
 
-import requests
 from bs4 import BeautifulSoup
+import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
@@ -161,7 +161,7 @@ def validate_config(crawler_path):
         raise IncorrectURLError
 
     for seed_url in seed_urls:
-        if not re.match(r'https?://', seed_url):
+        if not re.match(r'.*https:\/\/languagejournal\.spbu\.ru', seed_url):
             raise IncorrectURLError
 
     total_articles = config["total_articles_to_find_and_parse"]
