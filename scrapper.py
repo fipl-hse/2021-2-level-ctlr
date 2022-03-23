@@ -1,11 +1,11 @@
 """
 Scrapper implementation
 """
-import requests
-from bs4 import BeautifulSoup
 import re
 import json
 import os
+import requests
+from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 
