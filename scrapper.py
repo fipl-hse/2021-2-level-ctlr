@@ -6,9 +6,9 @@ import random
 import re
 import shutil
 import datetime
+from time import sleep
 import requests
 from bs4 import BeautifulSoup
-from time import sleep
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
@@ -51,11 +51,10 @@ class Crawler:
         """
         content = article_bs.find_all('div', {'class': 'issueArticle flex'})
         for article in content:
-            if len(self.urls) >= self.max_articles:
-                break
-            link = article.find('a')
-            href = link['href']
-            self.urls.append(href)
+            if len(self.urls) < self.max_articles:
+                link = article.find('a')
+                href = link['href']
+                self.urls.append(href)
 
     def find_articles(self):
         """
