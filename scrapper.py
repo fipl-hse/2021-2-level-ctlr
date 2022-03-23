@@ -4,11 +4,14 @@ Scrapper implementation
 from pathlib import Path
 import datetime
 import json
+import random
 import re
 import shutil
 import time
+
 from bs4 import BeautifulSoup
 import requests
+
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
@@ -53,9 +56,8 @@ class Crawler:
             if len(self.urls) >= self.max_articles:
                 break
             response = requests.get(seed_url, HEADERS)
-            time.sleep(1)
+            time.sleep(1 + random.uniform(0.0, 1.0))
             article_bs = BeautifulSoup(response.text, 'html.parser')
-            self._extract_url(article_bs)
             class_bs = article_bs.find('div', class_='view-content view-rows')
             title_bs = class_bs.find_all('td', class_="views-field views-field-title table__cell")
             for link_bs in title_bs:
@@ -75,9 +77,10 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     path = Path(base_path)
-    if path.is_dir():
-        shutil.rmtree(path)
-    path.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        if path.is_dir():
+            shutil.rmtree(path)
+        path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
@@ -87,6 +90,10 @@ def validate_config(crawler_path):
     with open(crawler_path, 'r', encoding='utf-8') as file:
         config = json.load(file)
     seed_urls = config['seed_urls']
+    if 'seed_urls' not in config:
+        raise IncorrectURLError
+    if 'total_articles_to_find_and_parse' not in config:
+        raise IncorrectNumberOfArticlesError
     max_articles = config['total_articles_to_find_and_parse']
     for seed_url in seed_urls:
         if not re.match(r'https?://', seed_url) or ROOT_URL not in seed_url:
@@ -101,7 +108,6 @@ def validate_config(crawler_path):
         raise NumberOfArticlesOutOfRangeError
     if max_articles <= 0:
         raise IncorrectNumberOfArticlesError
-    prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
 
@@ -127,8 +133,7 @@ class HTMLParser:
         self.article.text = pdf_raw_file.get_text()
         if 'Литература' in self.article.text:
             new_list = self.article.text.split('Литература')
-            new_list_without_literature = ''.join(new_list[:-1])
-            self.article.text = new_list_without_literature
+            self.article.text = ''.join(new_list[:-1])
 
     def _fill_article_with_meta_information(self, article_bs):
         author_bs = article_bs.find('span', class_='field__item-wrapper')
@@ -136,9 +141,8 @@ class HTMLParser:
         title_of_the_article_bs = article_bs.find('title')
         title_of_the_article_bs = title_of_the_article_bs.text
         data_bs = article_bs.find('div', class_='node__content clearfix')
-        data = data_bs.find('div',
-                            {'style':'text-align: left; font-weight: bold; margin-bottom: 10px;'})
-        full_data_string = data.text
+        data = data_bs.find_all('div', class_=None)
+        full_data_string = data[2].text
         data_year_string = re.search(r'\s+\d{4}', full_data_string)
         data_year = data_year_string.group(0)[-4:]
         volume_number = re.search(r'-\d/', self.article_url).group(0)[1]
