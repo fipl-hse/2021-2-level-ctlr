@@ -2,9 +2,9 @@
 Scrapper implementation
 """
 import json
+import pathlib
 import re
 import shutil
-from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
@@ -94,40 +94,39 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    path = Path(base_path)
-    if path.is_dir():
+    path = pathlib.Path(base_path)
+    if path.exists():
         shutil.rmtree(path)
-
     path.mkdir(parents=True, exist_ok=True)
 
 def validate_config(crawler_path):
     """
     Validates given config
     """
-    with open(crawler_path) as file:
+    with open(crawler_path, 'r', encoding='utf-8') as file:
         config = json.load(file)
-    max_articles = config["total_articles_to_find_and_parse"]
-    seed_urls = config["seed_urls"]
+        max_articles = config["total_articles_to_find_and_parse"]
+        seed_urls = config["seed_urls"]
 
-    if not seed_urls:
-        raise IncorrectURLError
-    if not isinstance (seed_urls, list):
-        raise IncorrectURLError
-    for article_url in seed_urls:
-        correct_url = re.match(r'https://', article_url)
-        if not correct_url:
+        if not seed_urls:
             raise IncorrectURLError
+        if not isinstance (seed_urls, list):
+            raise IncorrectURLError
+        for article_url in seed_urls:
+            correct_url = re.match(r'https://', article_url)
+            if not correct_url:
+                raise IncorrectURLError
 
-    if not isinstance (max_articles, int):
-        raise IncorrectNumberOfArticlesError
+        if not isinstance (max_articles, int):
+            raise IncorrectNumberOfArticlesError
 
-    if max_articles <= 0:
-        raise IncorrectNumberOfArticlesError
+        if max_articles <= 0:
+            raise IncorrectNumberOfArticlesError
 
-    if max_articles > 200:
-        raise NumberOfArticlesOutOfRangeError
+        if max_articles > 200:
+            raise NumberOfArticlesOutOfRangeError
 
-    return seed_urls, max_articles
+        return seed_urls, max_articles
 
 if __name__ == '__main__':
     # YOUR CODE HERE
