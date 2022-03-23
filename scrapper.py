@@ -94,6 +94,9 @@ class HTMLParser:
         self.article.author = 'NOT FOUND'
 
     def parse(self):
+        """
+        does all the work
+        """
         response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
