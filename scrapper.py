@@ -40,6 +40,7 @@ class HTMLParser:
     """
     Parser implementation
     """
+
     def __init__(self, article_url, article_id):
         """
         Init
@@ -117,6 +118,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self._seed_urls = seed_urls
         self.max_articles = max_articles
@@ -259,8 +261,11 @@ def validate_config(crawler_path):
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
 
-    scrapper_mode_input = input('Should the environment be reset? Press R. '
-                                'If you want to continue running the scrapper, press C')
+    try:
+        scrapper_mode_input = input('Should the environment be reset? Press R. '
+                                    'If you want to continue running the scrapper, press C')
+    except EOFError:
+        scrapper_mode_input = 'R'
 
     if scrapper_mode_input == 'R':
         prepare_environment(ASSETS_PATH)
