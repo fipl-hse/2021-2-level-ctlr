@@ -86,6 +86,7 @@ class HTMLParser:
         article_bs = BeautifulSoup(article_page.text, 'html.parser')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
+        return self.article
 
     def _fill_article_with_text(self, article_bs):
         list_of_possible_l = ['Список литературы', 'ЛИТЕРАТУРА', 'Список использованных источников и литературы',
