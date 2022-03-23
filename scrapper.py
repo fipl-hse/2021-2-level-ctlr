@@ -126,6 +126,7 @@ class HTMLParser:
         article_bs = BeautifulSoup(response.text, 'lxml')
         # print(article_bs)
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
         return self.article
 
 
