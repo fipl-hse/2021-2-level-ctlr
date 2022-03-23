@@ -87,7 +87,7 @@ class HTMLParser:
             'сентября':'09',
             'октября':'10',
             'ноября':'11',
-            'декабря':'12',
+            'декабря':'12'
         }
         for key, value in months.items():
             date_bs = date_bs.replace(key, value)
