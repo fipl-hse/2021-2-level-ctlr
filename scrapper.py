@@ -45,7 +45,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        content = article_bs.find('div', id='main-content')
+        content = article_bs.find('div', {'class': 'node__container'})
         urls = content.find_all('a')
 
         for url in urls:
@@ -88,7 +88,7 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        link = article_bs.find('iframe', class_='pdf')['data-src']
+        link = article_bs.find('iframe', {'class': 'pdf'})['data-src']
         pdf = PDFRawFile(link, self.article_id)
         pdf.download()
         full_article = pdf.get_text()
@@ -101,6 +101,8 @@ class HTMLParser:
         self.article.title = article_title
 
         article_author = article_bs.find('strong').text
+        if not article_author:
+            article_author = 'NOT FOUND'
         self.article.author = article_author
 
         meta_inf = re.findall(r'\d.+', article_bs.find('link', rel='alternate')['href'])[0]
