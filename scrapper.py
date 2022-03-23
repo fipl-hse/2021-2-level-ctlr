@@ -88,27 +88,15 @@ class HTMLParser:
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find('h1', class_='headline').text
-        # title_bs = article_bs.find('h1', class_='headline')
-        # title_bs = BeautifulSoup(title_bs, 'lxml')
-        needless_thing = ' <sup class="asterisk_mark s_asterisk_banned_orgs" data-banned-name="исламское государство">*</sup>'
-        # if needless_thing in title_bs:
-        result_title = str(title_bs)
-        # # result_title = result_title[2:-3]
-        #  #  title_bs = BeautifulSoup(result_title, 'lxml').text
-        # result_title = result_title.replace(u'\xa0', u' ')
-        # result_title = title_bs.replace('\xa0', ' ')
-        # result_title = title_bs.prettify(formatter='html')
-        print(result_title)
-        self.article.title = result_title
+        title_bs = article_bs.find('h1', class_='headline')
+        print(str(title_bs)[41:-5])
+        self.article.title = str(title_bs)[41:-5]
 
         author_bs = article_bs.find('div', class_='author')
         if not author_bs.find('a'):
             self.article.author = 'NOT FOUND'
-            # print('NOT FOUND')
         else:
             self.article.author = author_bs.find('a').text
-            # print(author_bs.find('a').text)
 
         self.article.topics = 'NOT FOUND'
 
