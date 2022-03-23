@@ -1,15 +1,15 @@
 """
 Scrapper implementation
 """
-from bs4 import BeautifulSoup
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
-from core_utils.article import Article
-from datetime import datetime
 import json
 from pathlib import Path
 from random import randint
+from bs4 import BeautifulSoup
 import re
 import requests
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from core_utils.article import Article
+from datetime import datetime
 import shutil
 from time import sleep
 
@@ -34,6 +34,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
@@ -62,9 +63,9 @@ class Crawler:
             response = requests.get(url)
             page_bs = BeautifulSoup(response.text, 'lxml')
             urls = self._extract_url(page_bs)
-            for url in urls:
+            for the_url in urls:
                 if len(self.urls) < self.max_articles:
-                    self.urls.append(url)
+                    self.urls.append(the_url)
 
     def get_search_urls(self):
         """
@@ -83,8 +84,8 @@ class HTMLParser:
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find('h1', class_='headline').text
-        self.article.title = str(title_bs)
+        title_bs = article_bs.find('h1', class_='headline').prettify(formatter='html')
+        self.article.title = title_bs
 
         author_bs = article_bs.find('div', class_='author')
         if not author_bs.find('a'):
