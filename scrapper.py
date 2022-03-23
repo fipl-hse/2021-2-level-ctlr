@@ -5,10 +5,9 @@ import datetime
 import json
 import random
 import re
-import requests
 import shutil
-
 from time import sleep
+import requests
 from bs4 import BeautifulSoup
 
 from core_utils.article import Article
