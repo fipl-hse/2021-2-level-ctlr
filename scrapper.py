@@ -90,6 +90,9 @@ class HTMLParser:
         """
         Extract text
         """
+        list_of_references = ['Источники', 'Справочная литература и учебные пособия',
+                              'Литература', 'References', 'Словари', 'Словари и справочники']
+
         pdf_link = article_bs.find('a', {'class': 'obj_galley_link pdf'})['href']
         response_pdf = requests.get(pdf_link, HEADERS)
         pdf_bs = BeautifulSoup(response_pdf.text, 'lxml')
@@ -98,7 +101,13 @@ class HTMLParser:
         pdf = PDFRawFile(download_pdf, self.article_id)
 
         pdf.download()
-        self.article.text = pdf.get_text()
+        pdf_text = pdf.get_text()
+
+        for reference in list_of_references:
+            if reference + '\n' in pdf_text:
+                split_pdf = pdf_text.split(reference)
+                pdf_text = ''.join(split_pdf[0])
+        self.article.text = pdf_text
 
     def _fill_article_with_meta_information(self, article_bs):
         """
