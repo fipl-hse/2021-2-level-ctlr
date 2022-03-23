@@ -3,12 +3,12 @@ Scrapper implementation
 """
 import json
 import re
-import shutil
 import requests
-from pathlib import Path
+import shutil
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
+from pathlib import Path
 
 
 class IncorrectURLError(Exception):
@@ -79,20 +79,17 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
         texts = article_bs.find('div', class_='article__body')
-        paragraphs = texts.find_all('p')
+        paragraphs = texts.find_all('p', class_=None)
         self.article.text = ''
         for p in paragraphs:
             self.article.text += p.text
 
     def parse(self):
-        response = requests.get(url=self.article_url)
+        response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
-        self.article.save_raw()
-
         return self.article
-
 
 def prepare_environment(base_path):
     """
@@ -138,3 +135,7 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(seed_urls=seed_links, max_articles=maximum_articles)
     crawler.find_articles()
+    for i, url in enumerate(crawler.urls):
+        parser = HTMLParser(url, i + 1)
+        article = parser.parse()
+        article.save_raw()
