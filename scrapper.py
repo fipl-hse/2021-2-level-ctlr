@@ -7,7 +7,7 @@ import pathlib
 import re
 import shutil
 
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
@@ -112,10 +112,13 @@ class HTMLParser:
             article_author_bs = ' '.join(article_authors_list_bs)
         if not article_author_bs:
             article_author_bs = 'Not Found'
-        self.article.author = article_author_bs
+        if isinstance(article_author_bs, Tag):
+            self.article.author = article_author_bs.text.strip()
+        else:
+            self.article.author = article_author_bs.strip()
 
         article_title_bs = article_bs.find('h1', {'class': 'page_title'})
-        self.article.title = article_title_bs
+        self.article.title = article_title_bs.text.strip()
 
         date_raw_bs = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
         article_date_bs = datetime.datetime.strptime(date_raw_bs, '%Y-%m-%d')
