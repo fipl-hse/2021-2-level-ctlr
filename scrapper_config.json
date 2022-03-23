@@ -1,8 +1,6 @@
 {
-    "seed_urls": ["https://nauka.tass.ru/" ,
-        "https://tass.ru/kosmos" ,
-        "https://tass.ru/kultura" ,
-        "https://tass.ru/politika" ,
+    "seed_urls": ["https://tass.ru/kosmos" ,
+        "https://tass.ru/kultura",
         "https://tass.ru/ekonomika" ,
         "https://tass.ru/v-strane" ,
         "https://tass.ru/sport" ,

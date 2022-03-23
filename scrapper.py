@@ -1,12 +1,16 @@
 """
 Scrapper implementation
 """
-import os
+import datetime
 import re
+import shutil
+
 import requests
 import json
 from pathlib import Path
 from bs4 import BeautifulSoup
+
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
@@ -39,12 +43,16 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.find_all('a', class_="flatCard_link__RANjL")
-        the_beginning = 'https://nauka.tass.ru/'
+        urls_bs = article_bs.find_all('a', class_="cardWrap_link__2AN_X")
+        the_beginning = 'https://tass.ru'
         urls_bs_full = []
         for url_bs in urls_bs:
             the_end = url_bs['href']
-            urls_bs_full.append(f'{the_beginning}{the_end}')
+            url_select = f'{the_beginning}{the_end}'
+            urls_bs_full.append(url_select)
+        for full_url in urls_bs_full:
+            if len(self.urls) < self.max_articles:
+                self.urls.append(full_url)
 
         return urls_bs_full
 
@@ -53,14 +61,12 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url)
+            response = requests.get(url=seed_url)
             if not response.ok:
                 continue
 
             soup = BeautifulSoup(response.text, 'lxml')
-            article_urls = self._extract_url(soup)
-            for article_url in article_urls:
-                self.urls.append(article_url)
+            self._extract_url(soup)
 
     def get_search_urls(self):
         """
@@ -75,33 +81,44 @@ class HTMLParser:
         self.article_id = article_id
         self.article = Article(article_url, article_id)
 
+    def _fill_article_with_meta_information(self, article_bs):
+        self.article.title = article_bs.find('h1').text
+
+        self.article.author = 'NOT FOUND'
+
+        date_epoch = article_bs.dateformat['time']
+        self.article.date = datetime.datetime.fromtimestamp(int(date_epoch))
+
+        if article_bs.find('a', class_='tags__item'):
+            self.article.topic = article_bs.find('a', class_='tags__item').text
+
     def _fill_article_with_text(self, article_bs):
         text_content = article_bs.find('div', class_="text-content")
         divs = text_content.find_all('div', class_="text-block")
+        self.article.text = ''
         for div in divs:
             ps = div.find_all('p')
             for p in ps:
                 self.article.text += p.text.strip()
 
     def parse(self):
-        response = requests.get(self.article_url)
-
+        response = requests.get(url=self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
-        self.article.save_raw()
+        self._fill_article_with_meta_information(article_bs)
+
         return self.article
+
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.removedirs(base_path)
-    except FileNotFoundError:
-        pass
-    finally:
-        os.makedirs(base_path, )
+    path = Path(base_path)
+    if path.exists():
+        shutil.rmtree(base_path)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
@@ -130,6 +147,17 @@ def validate_config(crawler_path):
 
     return seed_urls, max_articles
 
+
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+
+    crawler = Crawler(seed_urls, max_articles)
+    crawler.find_articles()
+
+    ID = 0
+    for article_url_text in crawler.urls:
+        ID += 1
+        article_parser = HTMLParser(article_url_text, ID)
+        article = article_parser.parse()
+        article.save_raw()
