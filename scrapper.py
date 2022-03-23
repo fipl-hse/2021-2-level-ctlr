@@ -89,7 +89,6 @@ class HTMLParser:
         """
         Extract text
         """
-
         pdf_link = article_bs.find('a', {'class': 'obj_galley_link pdf'})['href']
         response_pdf = requests.get(pdf_link, HEADERS)
         pdf_bs = BeautifulSoup(response_pdf.text, 'lxml')
