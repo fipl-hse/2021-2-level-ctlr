@@ -14,6 +14,9 @@ from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN_URL, ROOT_URL
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
+pre_scrapped_urls = []
+PRE_SCRAPPED_URL_COUNT = 0
+
 
 class IncorrectURLError(Exception):
     """
@@ -255,7 +258,6 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
-    pre_scrapped_urls = []
 
     scrapper_mode_input = input('Should the environment be reset? Press R. '
                                 'If you want to continue running the scrapper, press C')
