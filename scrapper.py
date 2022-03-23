@@ -47,9 +47,10 @@ class Crawler:
     def _extract_url(self, article_bs):
         articles = article_bs.find('div', {'class': 'entry-content'})
         all_links = articles.find_all('a')[1:]
+        domain_for_match = re.findall(r'.*(:.*)', DOMAIN_NAME)[0]
         for link in all_links:
             if len(self.urls) < self.max_articles:
-                if re.match(DOMAIN_NAME, link['href']):
+                if re.match(r'https?' + domain_for_match, link['href']):
                     self.urls.append(link['href'])
                 else:
                     self.urls.append(DOMAIN_NAME + link['href'])
