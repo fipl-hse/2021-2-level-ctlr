@@ -6,17 +6,14 @@ import json
 from pathlib import Path
 import re
 import shutil
+import time
 
 from bs4 import BeautifulSoup
 import requests
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS, URL_PATTERN
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-
-
-HEADERS = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                         '(KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'}
 
 
 class IncorrectURLError(Exception):
@@ -61,6 +58,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
+            time.sleep(1)
             response = requests.get(seed_url, HEADERS)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
@@ -97,7 +95,7 @@ def validate_config(crawler_path):
     if not seed_urls:
         raise IncorrectURLError
     for seed_url in seed_urls:
-        if not re.match('https://', seed_url):
+        if URL_PATTERN not in seed_url:
             raise IncorrectURLError
 
     if not isinstance(max_articles, int) or max_articles <= 0:
