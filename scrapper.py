@@ -262,14 +262,14 @@ if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
 
     try:
-        scrapper_mode_input = input('Should the environment be reset? Press R. '
+        SCRAPPER_MODE_INPUT = input('Should the environment be reset? Press R. '
                                     'If you want to continue running the scrapper, press C')
     except EOFError:
-        scrapper_mode_input = 'R'
+        SCRAPPER_MODE_INPUT = 'R'
 
-    if scrapper_mode_input == 'R':
+    if SCRAPPER_MODE_INPUT == 'R':
         prepare_environment(ASSETS_PATH)
-    elif scrapper_mode_input == 'C':
+    elif SCRAPPER_MODE_INPUT == 'C':
         metadata = []
         assets_pathlib_path = pathlib.Path(ASSETS_PATH)
 
