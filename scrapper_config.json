@@ -1,8 +1,9 @@
 {
     "seed_urls": ["https://www.m24.ru/rubrics/society",
-    "https://www.m24.ru/rubrics/economy",
-    "https://www.m24.ru/rubrics/world",
-    "https://www.m24.ru/rubrics/city",
-    "https://www.m24.ru/rubrics/accidents"],
+        "https://www.m24.ru/rubrics/economy",
+        "https://www.m24.ru/rubrics/world",
+        "https://www.m24.ru/rubrics/city",
+        "https://www.m24.ru/rubrics/show-business/",
+        "https://www.m24.ru/rubrics/science/"],
     "total_articles_to_find_and_parse": 10
 }
