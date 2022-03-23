@@ -5,5 +5,5 @@
         "https://www.m24.ru/rubrics/city",
         "https://www.m24.ru/rubrics/show-business/",
         "https://www.m24.ru/rubrics/science/"],
-    "total_articles_to_find_and_parse": 10
+    "total_articles_to_find_and_parse": 100
 }
