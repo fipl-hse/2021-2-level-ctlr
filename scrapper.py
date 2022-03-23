@@ -3,9 +3,9 @@ Scrapper implementation
 """
 import datetime
 import json
-import random
 from pathlib import Path
 import re
+import random
 import shutil
 from time import sleep
 
@@ -14,7 +14,7 @@ import requests
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, HTTP_PATTERN, ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import HEADERS, HTTP_PATTERN, ASSETS_PATH, CRAWLER_CONFIG_PATH, MONTHS_DICT
 
 
 class IncorrectURLError(Exception):
@@ -104,13 +104,18 @@ class HTMLParser:
 
         # date
         big_title = article_bs.find('h1')
+
+        month = 1
+        number_of_article = big_title.text.split('.')[-3].strip()
+        for list_with_numbers in MONTHS_DICT:
+            if number_of_article in list_with_numbers:
+                month = MONTHS_DICT[list_with_numbers]
+
         pattern_of_date = r'\d{4}'
         result = re.findall(pattern_of_date, big_title.text)
         date_year = int(result[0])
-        self.article.date = datetime.date(date_year, 1, 1)
-
-        # # url
-        # self.article.url = self.article_url
+        full_date = datetime.datetime.strptime(f'{date_year}.{month}','%Y.%m')
+        self.article.date = full_date
 
     def _fill_article_with_text(self, article_bs):
         article_urls_bs = article_bs.find('a', class_='file pdf')
@@ -180,12 +185,10 @@ if __name__ == '__main__':
     crawler.find_articles()
 
     print('---Parsing---')
-    ID_OF_ARTICLE = 0
-    for article_url_test in crawler.urls:
-        ID_OF_ARTICLE += 1
-        article_parser = HTMLParser(article_url=article_url_test, article_id=ID_OF_ARTICLE)
+    for id_of_article, article_url_test in enumerate(crawler.urls):
+        article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article+1)
         article = article_parser.parse()
         article.save_raw()
-        print(f'The {ID_OF_ARTICLE} article is done!')
+        print(f'The {id_of_article} article is done!')
 
     print('---Done!---')
