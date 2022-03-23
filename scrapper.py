@@ -1,6 +1,7 @@
 """
 Scrapper implementation
 """
+from datetime import datetime
 from pathlib import Path
 import json
 import random
@@ -14,7 +15,7 @@ from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
-from core_utils.article import Article, date_from_meta
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -144,7 +145,8 @@ class HTMLParser:
         time_match = re.search(r'\d{2}:\d{2}', time_bs.text)
         date_time_string = ' '.join([date_time_string, time_match.group(0)])
 
-        date_time = date_from_meta(date_time_string)
+        # date_time = date_from_meta(date_time_string)
+        date_time = datetime.strptime(date_time_string, '%d.%m.%Y %H:%M')
         self.article.date = date_time
 
 
