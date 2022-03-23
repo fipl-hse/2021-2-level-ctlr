@@ -50,8 +50,10 @@ class Crawler:
         urls_bs = sections_bs.find_all('a')
         for url_bs in urls_bs:
             if len(self.urls) < self.max_articles:
-                if url_bs['href'] not in self.urls:
-                    self.urls.append(url_bs['href'])
+                if re.fullmatch(r'.*https:\/\/languagejournal\.spbu\.ru\/'
+                                r'article\/view\/[0-9]*\/?(?![0-9])', url_bs['href']):
+                    if url_bs['href'] not in self.urls:
+                        self.urls.append(url_bs['href'])
 
     def find_articles(self):
         """
@@ -87,38 +89,16 @@ class HTMLParser:
         """
         Extract text
         """
-        body_bs = article_bs.find('body')
-        links_bs = body_bs.find_all('a')
-        print(links_bs)
-        # print(article_bs)
-        # galley = article_bs.find('div', {'class': 'item galleys'})
-        # print(galley)
-        pdf_link = ''
-        try:
-            for link_bs in links_bs:
-                try:
-                    # if 'obj_galley_link pdf' in link_bs['href']:
-                    find_link = re.findall(r'article/view/\d+/\d+', link_bs['href'])
-                    if find_link:
-                        pdf_link = link_bs['href']
-                except KeyError:
-                    print("Key Error")
-                    continue
-            if not pdf_link:
-                print('Error')
-            response_pdf = requests.get(pdf_link, HEADERS)
-            # print(response_pdf)
-            # print("ЗДЕСЬ КОНЕЦ СТАТЬИИИИИИИИИИИИИИИИИИИИИ")
-            pdf_bs = BeautifulSoup(response_pdf.text, 'lxml')
 
-            download_pdf = pdf_bs.find('a', {'class': 'download'})['href']
+        pdf_link = article_bs.find('a', {'class': 'obj_galley_link pdf'})['href']
+        response_pdf = requests.get(pdf_link, HEADERS)
+        pdf_bs = BeautifulSoup(response_pdf.text, 'lxml')
+        download_pdf = pdf_bs.find('a', {'class': 'download'})['href']
 
-            pdf = PDFRawFile(download_pdf, self.article_id)
+        pdf = PDFRawFile(download_pdf, self.article_id)
 
-            pdf.download()
-            self.article.text = pdf.get_text()
-        except requests.exceptions.MissingSchema:
-            print(article_bs)
+        pdf.download()
+        self.article.text = pdf.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
         """
@@ -144,6 +124,7 @@ class HTMLParser:
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
+        # print(article_bs)
         self._fill_article_with_text(article_bs)
         return self.article
 
