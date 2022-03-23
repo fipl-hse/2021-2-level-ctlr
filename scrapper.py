@@ -93,8 +93,12 @@ class HTMLParser:
         pdf.download()
         full_article = pdf.get_text()
 
-        split_article = full_article.split('СПИСОК ЛИТЕРАТУРЫ / REFERENCES')
-        self.article.text = ''.join(split_article[:-1])
+        if 'СПИСОК ЛИТЕРАТУРЫ' in full_article:
+            full_article = full_article.split('СПИСОК ЛИТЕРАТУРЫ')[0]
+        elif 'REFERENCES' in full_article:
+            full_article = full_article.split('REFERENCES')[0]
+
+        self.article.text = full_article
 
     def _fill_article_with_meta_information(self, article_bs):
         article_title = article_bs.find('title').text
@@ -103,7 +107,9 @@ class HTMLParser:
         article_author = article_bs.find('strong').text
         if not article_author:
             article_author = 'NOT FOUND'
-        self.article.author = article_author
+        if '\n' in article_author:
+            article_author = article_author.split('\n')[0]
+        self.article.author = article_author.strip()
 
         meta_inf = re.findall(r'\d.+', article_bs.find('link', rel='alternate')['href'])[0]
         year = meta_inf[:4]
@@ -163,3 +169,14 @@ if __name__ == '__main__':
         parser = HTMLParser(current_url, i + 1)
         article = parser.parse()
         article.save_raw()
+'''
+
+html = 'https://vja.ruslang.ru/ru/archive/2019-6/51-67'
+response = requests.get(html, HEADERS)
+soup = BeautifulSoup(response.text, 'html.parser')
+article_author = soup.find('strong').text
+if '\n' in article_author:
+    article_author = article_author.split('\n')[0]
+
+print(article_author)
+'''
