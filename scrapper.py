@@ -75,7 +75,7 @@ class Crawler:
         pass
 
 
-class HTMLWithPDFParser:
+class HTMLParser:
     """
     Parser implementation
     """
@@ -175,6 +175,6 @@ if __name__ == '__main__':
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
     for i, my_url in enumerate(crawler.urls):
-        parser = HTMLWithPDFParser(my_url, i + 1)
+        parser = HTMLParser(my_url, i + 1)
         my_article = parser.parse()
         my_article.save_raw()
