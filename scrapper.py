@@ -70,7 +70,6 @@ class Crawler:
         """
         return self.seed_urls
 
-
 class HTMLParser:
     def __init__(self, article_url, article_id):
         self.article_url = article_url
