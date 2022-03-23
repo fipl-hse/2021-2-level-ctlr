@@ -63,7 +63,7 @@ class Crawler:
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers=HEADERS)
             if not response.ok:
-                print("Failed")
+                break
 
             article_bs = BeautifulSoup(response.text, 'lxml')
             self._extract_url(article_bs)
@@ -123,7 +123,7 @@ class HTMLParser:
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
-        # print(article_bs)
+
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         return self.article
