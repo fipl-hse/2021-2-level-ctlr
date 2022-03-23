@@ -128,9 +128,9 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    urlsi, articles = validate_config(CRAWLER_CONFIG_PATH)
+    sites, articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(urlsi, articles)
+    crawler = Crawler(sites, articles)
     crawler.find_articles()
     print(crawler.urls)
     A_ID = 1
