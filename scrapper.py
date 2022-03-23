@@ -4,10 +4,13 @@ Scrapper implementation
 from datetime import datetime
 import json
 from pathlib import Path
+import re
 import shutil
+
 from bs4 import BeautifulSoup
 import requests
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
+
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS, URL
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -54,6 +57,8 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
+            if len(self.urls) >= self.total_max_articles:
+                break
             response = requests.get(seed_url, headers=HEADERS)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
@@ -108,11 +113,9 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     path_to_base_path = Path(base_path)
-    try:
+    if path_to_base_path.exists():
         shutil.rmtree(base_path)
-    except FileNotFoundError:
-        pass
-    path_to_base_path.mkdir(parents=True)
+    path_to_base_path.mkdir(parents=True, exist_ok=True)
 
 def validate_config(crawler_path):
     """
@@ -135,6 +138,12 @@ def validate_config(crawler_path):
 
     for seed_url in seed_urls:
         if not isinstance(seed_url, str):
+            raise IncorrectURLError
+
+        if not re.match(r"https?://", seed_url):
+            raise IncorrectURLError
+
+        if URL not in seed_url:
             raise IncorrectURLError
 
     if not isinstance(max_articles, int):
