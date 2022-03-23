@@ -1,7 +1,7 @@
 """
 Scrapper implementation
 """
-import datetime
+from datetime import datetime
 import json
 import pathlib
 import re
@@ -62,18 +62,18 @@ class HTMLParser:
         Fills self.article with text from article_bs
         """
 
-        table_rows = article_bs.find_all('tr', {"class": "unnrow"})
+        table_rows_bs = article_bs.find_all('tr', {"class": "unnrow"})
 
-        for table_row in table_rows:
-            table_datas = table_row.find_all('td')
+        for table_row_bs in table_rows_bs:
+            table_datas_bs = table_row_bs.find_all('td')
 
-            if not table_datas:
+            if not table_datas_bs:
                 continue
 
-            if "Загрузить статью" in table_datas[0].text:
-                pdf_url = table_datas[1].find('a')
+            if "Загрузить статью" in table_datas_bs[0].text:
+                pdf_url_bs = table_datas_bs[1].find('a')
 
-                pdf_raw_file = PDFRawFile(pdf_url['href'], self.article_id)
+                pdf_raw_file = PDFRawFile(pdf_url_bs['href'], self.article_id)
 
                 pdf_raw_file.download()
                 text = pdf_raw_file.get_text()
@@ -107,7 +107,7 @@ class HTMLParser:
         if text_date:
             date_re = re.search(r'\d{2}\.\d{2}\.\d{4}', text_date.group(0))
 
-            self.article.date = datetime.datetime.strptime(date_re.group(0), '%d.%m.%Y')
+            self.article.date = datetime.strptime(date_re.group(0), '%d.%m.%Y')
 
 
 class Crawler:
@@ -134,7 +134,7 @@ class Crawler:
             links_bs.extend(table_row_bs.find_all('a'))
 
         for link_bs in links_bs:
-            if overall_urls_count + 1 > self.max_articles - pre_scrapped_url_count:
+            if overall_urls_count + 1 > self.max_articles - PRE_SCRAPPED_URL_COUNT:
                 break
 
             # Checks if the link leads to an article
@@ -156,7 +156,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self._seed_urls:
-            if len(self.urls) + 1 > self.max_articles - pre_scrapped_url_count:
+            if len(self.urls) + 1 > self.max_articles - PRE_SCRAPPED_URL_COUNT:
                 break
 
             response = requests.get(seed_url)
@@ -256,7 +256,6 @@ def validate_config(crawler_path):
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
     pre_scrapped_urls = []
-    pre_scrapped_url_count = 0
 
     scrapper_mode_input = input('Should the environment be reset? Press R. '
                                 'If you want to continue running the scrapper, press C')
@@ -279,16 +278,16 @@ if __name__ == '__main__':
 
                 if pdf_path.is_file():
                     pre_scrapped_urls.append(config['url'])
-
-        pre_scrapped_url_count = len(pre_scrapped_urls)
     else:
         print('Incorrect input')
         raise KeyboardInterrupt
+
+    PRE_SCRAPPED_URL_COUNT = len(pre_scrapped_urls)
 
     crawler = CrawlerRecursive(outer_seed_urls, outer_max_articles)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
-        parser = HTMLParser(url, i + pre_scrapped_url_count + 1)
+        parser = HTMLParser(url, i + PRE_SCRAPPED_URL_COUNT + 1)
         article = parser.parse()
         article.save_raw()
