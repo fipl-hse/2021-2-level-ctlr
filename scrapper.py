@@ -129,7 +129,6 @@ def validate_config(crawler_path):
 
     return seed_urls, max_articles
 
-
 if __name__ == '__main__':
     # YOUR CODE HERE
     seed_links, maximum_articles = validate_config(CRAWLER_CONFIG_PATH)
