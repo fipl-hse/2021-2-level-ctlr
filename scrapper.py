@@ -70,6 +70,9 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
+        """
+        fills article instance with text of article
+        """
         text_bs = article_bs.find('div', class_='fullnews_content')
         self.article.text = text_bs.text
 
