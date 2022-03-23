@@ -1,4 +1,6 @@
 {
-    "seed_urls": ["https://www.gazeta.ru/news/"],
+    "seed_urls": ["https://www.gazeta.ru/news/",
+    "https://www.gazeta.ru/sport/news/",
+    "https://www.gazeta.ru/news/seealso/13969250.shtml"],
     "total_articles_to_find_and_parse": 100
 }

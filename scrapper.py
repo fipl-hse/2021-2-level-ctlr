@@ -4,7 +4,11 @@ Scrapper implementation
 import json
 import re
 import shutil
+from datetime import datetime
+from random import randint
+from time import sleep
 import requests
+from pathlib import Path
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
@@ -36,25 +40,36 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        article_url = article_bs.find('a')['href']
-        pattern = 'https://gazeta.ru'
-        if pattern in article_url:
-            self.urls.append(article_url)
-        else:
-            self.urls.append(pattern + article_url)
+        article_url_block = article_bs.find('div', id='_id_article_listing')
+        urls_to_articles = article_url_block.find_all('a')
+        new_urls = []
+        for url_to_article in urls_to_articles:
+            url = url_to_article['href']
+            pattern = r'https://gazeta.ru'
+            need_url = re.search(r'https://', url)
+            if not need_url:
+                new_urls.append(pattern + url)
+            else:
+                new_urls.append(url)
+        return new_urls
+
+        # wrong_pattern = re.compile('https://img.gazeta.ru')
+        # wrong_url = wrong_pattern.search(article_url)
+        # if wrong_url:
+        #     return
 
     def find_articles(self):
         """
         Finds articles
         """
         for url in self.seed_urls:
+            sleep(randint(1, 5))
             response = requests.get(url)
-            response.encoding = 'utf-8'
             page_bs = BeautifulSoup(response.text, 'lxml')
-            content_bs = page_bs.find_all('div', class_='b_ear-title')
-            for article_bs in content_bs:
+            urls = self._extract_url(page_bs)
+            for url in urls:
                 if len(self.urls) < self.max_articles:
-                    self._extract_url(article_bs)
+                    self.urls.append(url)
 
     def get_search_urls(self):
         """
@@ -73,11 +88,39 @@ class HTMLParser:
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find('div', class_='headline').text
-        self.article.title = title_bs
+        title_bs = article_bs.find('h1', class_='headline').text
+        # title_bs = article_bs.find('h1', class_='headline')
+        # title_bs = BeautifulSoup(title_bs, 'lxml')
+        needless_thing = ' <sup class="asterisk_mark s_asterisk_banned_orgs" data-banned-name="исламское государство">*</sup>'
+        # if needless_thing in title_bs:
+        result_title = str(title_bs)
+        # # result_title = result_title[2:-3]
+        #  #  title_bs = BeautifulSoup(result_title, 'lxml').text
+        # result_title = result_title.replace(u'\xa0', u' ')
+        # result_title = title_bs.replace('\xa0', ' ')
+        # result_title = title_bs.prettify(formatter='html')
+        print(result_title)
+        self.article.title = result_title
 
-        author_bs = article_bs.find('div', class_='author').text
-        self.article.author = author_bs
+        author_bs = article_bs.find('div', class_='author')
+        if not author_bs.find('a'):
+            self.article.author = 'NOT FOUND'
+            # print('NOT FOUND')
+        else:
+            self.article.author = author_bs.find('a').text
+            # print(author_bs.find('a').text)
+
+        self.article.topics = 'NOT FOUND'
+
+        date_bs = article_bs.find('time').text
+        months = {"января": "01", "февраля": "02", "марта": "03", "апреля": "04",
+                  "мая": "05", "июня": "06", "июля": "07", "августа": "08",
+                  "сентября": "09", "октября": "10", "ноября": "11",
+                  "декабря": "12"}
+        for month in months.keys():
+            if month in date_bs:
+                date_bs = date_bs.replace(month, months[month])
+        self.article.date = datetime.strptime(date_bs, '\n%d %m %Y, %H:%M\n')
 
     def parse(self):
         response = requests.get(self.article_url)
@@ -90,9 +133,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if base_path.exists():
+    path = Path(base_path)
+    if path.exists():
         shutil.rmtree(base_path)
-    base_path.mkdir(exist_ok=True, parents=True)
+    path.mkdir(exist_ok=True, parents=True)
 
 
 def validate_config(crawler_path):
