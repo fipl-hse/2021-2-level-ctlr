@@ -111,14 +111,14 @@ def validate_config(crawler_path):
 
     if not seed_urls:
         raise IncorrectURLError
-    if not isinstance(seed_urls, list):
+    if not isinstance (seed_urls, list):
         raise IncorrectURLError
     for article_url in seed_urls:
         correct_url = re.match(r'https://', article_url)
         if not correct_url:
             raise IncorrectURLError
 
-    if not isinstance(max_articles, int):
+    if not isinstance (max_articles, int):
         raise IncorrectNumberOfArticlesError
 
     if max_articles <= 0:
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(seed_urls=seed_links, max_articles=maximum_articles)
     crawler.find_articles()
-    for i, url in enumerate(crawler.urls):
+    for i, url in enumerate (crawler.urls):
         parser = HTMLParser(url, i + 1)
         article = parser.parse()
         article.save_raw()
