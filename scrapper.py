@@ -1,6 +1,7 @@
 """
 Scrapper implementation
 """
+import datetime
 import json
 import pathlib
 import re
@@ -116,8 +117,8 @@ class HTMLParser:
         article_title_bs = article_bs.find('h1', {'class': 'page_title'})
         self.article.title = article_title_bs
 
-        date_holder_bs = article_bs.find('div', {'class': 'item published'})
-        article_date_bs = date_holder_bs.find('div', {'class': 'value'})
+        date_raw_bs = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
+        article_date_bs = datetime.datetime.strptime(date_raw_bs, '%Y-%m-%d')
         self.article.date = article_date_bs
 
     def parse(self):
@@ -171,6 +172,8 @@ def validate_config(crawler_path):
 
     if total_articles > 300:
         raise NumberOfArticlesOutOfRangeError
+
+    prepare_environment(ASSETS_PATH)
 
     return seed_urls, total_articles
 
