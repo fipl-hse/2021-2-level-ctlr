@@ -135,14 +135,10 @@ class HTMLParser:
         self.article.author = article_author_bs
 
         article_title_bs = article_bs.find('h1', {'class': 'page_title'})
-        if not article_title_bs:
-            article_title_bs = 'Not Found'
         self.article.title = article_title_bs
 
         date_holder_bs = article_bs.find('div', {'class': 'item published'})
         article_date_bs = date_holder_bs.find('div', {'class': 'value'})
-        if not article_date_bs:
-            article_date_bs = 'Not Found'
         self.article.date = article_date_bs
 
     def parse(self):
@@ -202,4 +198,13 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    pass
+    given_seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+
+    crawler = Crawler(given_seed_urls, max_articles)
+    crawler.find_articles()
+
+    for i, url in enumerate(crawler.urls):
+        parser = HTMLParser(url, i + 1)
+        article = parser.parse()
+        article.save_raw()
