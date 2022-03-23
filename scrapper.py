@@ -3,11 +3,11 @@ Scrapper implementation
 """
 from datetime import datetime
 from pathlib import Path
+import json
 import random
 import re
 import shutil
 import time
-import json
 
 from bs4 import BeautifulSoup
 import requests
@@ -15,7 +15,7 @@ from random_user_agent.user_agent import UserAgent
 from random_user_agent.params import SoftwareName, OperatingSystem
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
-from core_utils.article import Article
+from core_utils.article import Article, date_from_meta
 
 
 class IncorrectURLError(Exception):
@@ -46,8 +46,21 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        link = article_bs.find('a')
-        return 'https://www.m24.ru' + link['href']
+        class_bs = article_bs.find('div', class_="b-materials-list b-list_infinity")
+        title_bs = class_bs.find_all('p', class_="b-materials-list__title")
+
+        extracted_urls = []
+
+        for link_bs in title_bs:
+            if len(self.urls) >= self.max_articles:
+                break
+
+            extracted_url = 'https://www.m24.ru' + link_bs.find('a')['href']
+
+            if extracted_url not in self.urls and extracted_url not in extracted_urls:
+                extracted_urls.append(extracted_url)
+
+        return extracted_urls
 
     def find_articles(self):
         """
@@ -58,22 +71,12 @@ class Crawler:
                 break
 
             response = requests.get(seed_url, headers=get_random_headers(), allow_redirects=True, timeout=5)
-            time.sleep(2.0 + random.uniform(0.0, 2.0))
+            time.sleep(1.5 + random.uniform(0.0, 1.0))
             with open('index1.html', 'w', encoding='utf-8') as file:
                 file.write(response.text)
 
             article_bs = BeautifulSoup(response.text, 'html.parser')
-            class_bs = article_bs.find('div', class_="b-materials-list b-list_infinity")
-            title_bs = class_bs.find_all('p', class_="b-materials-list__title")
-
-            for link_bs in title_bs:
-                if len(self.urls) >= self.max_articles:
-                    break
-
-                extracted_url = self._extract_url(link_bs)
-
-                if extracted_url not in self.urls:
-                    self.urls.append(extracted_url)
+            self.urls.extend(self._extract_url(article_bs))
 
     def get_search_urls(self):
         """
@@ -90,7 +93,7 @@ class HTMLParser:
 
     def parse(self):
         response = requests.get(self.article_url, headers=get_random_headers(), allow_redirects=True, timeout=5)
-        time.sleep(1.0 + random.uniform(0.0, 1.0))
+        time.sleep(1.0 + random.uniform(0.0, 0.5))
 
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
@@ -104,7 +107,6 @@ class HTMLParser:
         material_body_bs = article_bs.find('div', class_='b-material-body')
         paragraphs_bs = material_body_bs.find_all('p', class_=None)
 
-        # text = ''
         text = ''
 
         for paragraph_bs in paragraphs_bs:
@@ -116,7 +118,8 @@ class HTMLParser:
         material_before_body = article_bs.find('div', class_='b-material-before-body')
 
         title_bs = material_before_body.find('h1')
-        self.article.title = title_bs.text
+        title_text = title_bs.text.replace('"', '&quot;')
+        self.article.title = title_text
 
         topic_bs = material_before_body.find('div', class_='b-material__rubrics').find('a')
         self.article.topics = [topic_bs.text]
@@ -141,7 +144,7 @@ class HTMLParser:
         time_match = re.search(r'\d{2}:\d{2}', time_bs.text)
         date_time_string = ' '.join([date_time_string, time_match.group(0)])
 
-        date_time = datetime.strptime(date_time_string, '%d.%m.%Y %H:%M')
+        date_time = date_from_meta(date_time_string)
         self.article.date = date_time
 
 
@@ -181,7 +184,7 @@ def validate_config(crawler_path):
 
         if max_articles > 100000:
             raise NumberOfArticlesOutOfRangeError
-        # если статей для парсинга больше 100000
+        # если статей для парсинга больше 100
 
         if max_articles == 0 or max_articles < 0:
             raise IncorrectNumberOfArticlesError
@@ -192,8 +195,6 @@ def validate_config(crawler_path):
             if seed_url[0:8] != 'https://' and seed_url[0:7] != 'http://':
                 raise IncorrectURLError
         # если протокол не соответствует стандратному паттерну
-
-        prepare_environment(ASSETS_PATH)  # пока не починили тесты
 
         return seed_urls, max_articles
         # возвращает список urls и число статей
@@ -212,10 +213,9 @@ def get_random_headers():
 
 if __name__ == '__main__':
     seed_urls_run, max_articles_run = validate_config(crawler_path=CRAWLER_CONFIG_PATH)
-    #  prepare_environment(base_path=ASSETS_PATH)
+    prepare_environment(base_path=ASSETS_PATH)
     crawler = Crawler(seed_urls=seed_urls_run, max_articles=max_articles_run)
     crawler.find_articles()
-    #  test
 
     for i, url in enumerate(crawler.urls):
         parser = HTMLParser(url, i + 1)
