@@ -1,4 +1,5 @@
-import os
+import pathlib
+import shutil
 import unittest
 
 import pytest
@@ -28,7 +29,7 @@ class PipelinePathCheck(ExtendedTestCase):
     @pytest.mark.mark10
     @pytest.mark.stage_3_1_dataset_sanity_checks
     def test_pipe_fails_if_path_not_exists(self):
-        not_existing_path = "plain_text"
+        not_existing_path = pathlib.Path("plain_text")
 
         error_message = """Checking that scrapper can handle not existing assets paths failed. 
                         """
@@ -43,8 +44,9 @@ class PipelinePathCheck(ExtendedTestCase):
     @pytest.mark.mark10
     @pytest.mark.stage_3_1_dataset_sanity_checks
     def test_pipe_fails_if_no_files_in_folder_path(self):
-        test_dir = 'test_assets'
-        os.mkdir(test_dir)
+        test_dir = pathlib.Path('test_assets')
+
+        test_dir.mkdir(parents=True, exist_ok=True)
 
         error_message = """Checking that empty directories can not be processed failed.
                         """
@@ -52,7 +54,8 @@ class PipelinePathCheck(ExtendedTestCase):
                                      EmptyDirectoryError,
                                      validate_dataset,
                                      test_dir)
-        os.rmdir(test_dir)
+
+        shutil.rmtree(test_dir)
 
     @pytest.mark.mark4
     @pytest.mark.mark6
