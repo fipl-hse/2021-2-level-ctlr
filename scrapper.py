@@ -4,6 +4,7 @@ Scrapper implementation
 
 import datetime
 import json
+import random
 import re
 import shutil
 from time import sleep
@@ -48,7 +49,7 @@ class Crawler:
         all_links = articles.find_all('a')[1:]
         for link in all_links:
             if len(self.urls) < self.max_articles:
-                if re.match(r'https?://vestnik\.lunn\.ru/', link['href']):
+                if re.match(DOMAIN_NAME, link['href']):
                     self.urls.append(link['href'])
                 else:
                     self.urls.append(DOMAIN_NAME + link['href'])
@@ -59,10 +60,10 @@ class Crawler:
         """
         for url in self.seed_urls:
             response = requests.get(url, headers=HEADERS)
-            sleep(4)
+            sleep(random.randrange(2, 5))
 
             if not response.ok:
-                break
+                continue
 
             article_bs = BeautifulSoup(response.text, 'lxml')
 
@@ -102,8 +103,8 @@ class HTMLParser:
         if reference in full_article:
             split_article = full_article.split(reference)
             self.article.text = ''.join(split_article[:-1])
-
-        self.article.text = full_article
+        else:
+            self.article.text = full_article
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.title = article_bs.find('h1', {'class': 'entry-title'}).text
@@ -149,7 +150,7 @@ def validate_config(crawler_path):
     max_articles = config["total_articles_to_find_and_parse"]
 
     for url in seed_urls:
-        right_url = re.match(r'https?://vestnik\.lunn\.ru/arhiv-zhurnala/', url)
+        right_url = re.match(DOMAIN_NAME, url)
         if not right_url:
             raise IncorrectURLError
 
