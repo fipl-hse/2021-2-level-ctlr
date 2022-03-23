@@ -1,7 +1,6 @@
 """
 Scrapper implementation
 """
-from datetime import datetime
 from pathlib import Path
 import json
 import random
@@ -117,8 +116,9 @@ class HTMLParser:
     def _fill_article_with_meta_information(self, article_bs):
         material_before_body = article_bs.find('div', class_='b-material-before-body')
 
-        title_bs = material_before_body.find('h1')
-        title_text = title_bs.text.replace('"', '&quot;')
+        #  title_bs = material_before_body.find('h1')
+        #  code style ругается из-за кол-ва переменных
+        title_text = material_before_body.find('h1').text.replace('"', '&quot;')
         self.article.title = title_text
 
         topic_bs = material_before_body.find('div', class_='b-material__rubrics').find('a')
