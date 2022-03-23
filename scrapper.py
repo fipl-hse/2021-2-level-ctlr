@@ -176,8 +176,6 @@ def validate_config(crawler_path):
     if total_articles > 300:
         raise NumberOfArticlesOutOfRangeError
 
-    prepare_environment(ASSETS_PATH)
-
     return seed_urls, total_articles
 
 
