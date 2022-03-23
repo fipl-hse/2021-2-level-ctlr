@@ -151,8 +151,8 @@ def validate_config(crawler_path):
         config_dict = json.load(path_thing_idk)
     try:
         seed_urls = config_dict['seed_urls']
-    except KeyError as er:
-        raise IncorrectURLError from er
+    except KeyError as e:
+        raise IncorrectURLError from e
     else:
         max_articles = config_dict["total_articles_to_find_and_parse"]
     if not isinstance(max_articles, int) or max_articles <= 0:
