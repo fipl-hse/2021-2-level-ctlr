@@ -26,7 +26,7 @@ class ExtendedTestCase(unittest.TestCase):
 
 class CrawlerConfigCheck(ExtendedTestCase):
     def setUp(self) -> None:
-        with open(CRAWLER_CONFIG_PATH) as f:
+        with CRAWLER_CONFIG_PATH.open() as f:
             self.reference = json.load(f)
 
     @pytest.mark.mark4
