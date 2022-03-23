@@ -78,11 +78,11 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        texts = article_bs.find('div', class_='article__body')
-        paragraphs = texts.find_all('p', class_=None)
+        texts_bs = article_bs.find('div', class_='article__body')
+        paragraphs_bs = texts_bs.find_all('p', class_=None)
         self.article.text = ''
-        for paragraphs in paragraphs:
-            self.article.text += paragraphs.text
+        for paragraph_bs in paragraphs_bs:
+            self.article.text += paragraph_bs.text
 
     def parse(self):
         response = requests.get(self.article_url)
@@ -95,7 +95,8 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    path = Path(base_path)
+    path = Path (base_path)
+
     if path.exists():
         shutil.rmtree(base_path)
     path.mkdir(parents=True, exist_ok=True)
