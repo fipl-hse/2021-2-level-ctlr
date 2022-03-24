@@ -5,9 +5,9 @@ import datetime
 import json
 import random
 import re
-import requests
 import shutil
 from time import sleep
+import requests
 from bs4 import BeautifulSoup
 
 from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
@@ -152,10 +152,10 @@ def validate_config(crawler_path):
         config = json.load(file)
 
     http_pattern = re.compile(r"https://iling-ran.ru/web/ru/publications")
-    for url in seed_urls:
+    for url in config['seed_urls']:
         if not re.match(http_pattern, url):
             raise IncorrectURLError
- 
+
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
 
