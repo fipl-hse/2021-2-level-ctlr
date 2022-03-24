@@ -97,6 +97,9 @@ class HTMLParser:
         self.article.author = 'NOT FOUND'
 
     def _fill_article_with_date(self, article_bs):
+        """
+        fills article instance with title, date and topics
+        """
         meta_bs = article_bs.find('div', class_='news_item fullnews')
         date_bs = meta_bs.find('span', class_='date').text
         date = datetime.strptime(date_bs, '%d.%m.%Y : %H.%M')
