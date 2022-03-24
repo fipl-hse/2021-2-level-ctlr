@@ -1,4 +1,4 @@
 {
     "seed_urls": ["http://www.vestnik.unn.ru/ru/nomera?jnum=276", "http://www.vestnik.unn.ru/ru/nomera?jnum=275", "http://www.vestnik.unn.ru/ru/nomera?jnum=271", "http://www.vestnik.unn.ru/ru/nomera?jnum=268", "http://www.vestnik.unn.ru/ru/nomera?jnum=266", "http://www.vestnik.unn.ru/ru/nomera?jnum=264", "http://www.vestnik.unn.ru/ru/nomera?jnum=261"],
-    "total_articles_to_find_and_parse": 100
+    "total_articles_to_find_and_parse": 10
 }
