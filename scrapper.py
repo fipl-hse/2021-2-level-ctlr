@@ -300,7 +300,7 @@ def validate_config(crawler_path):
 
 
 def load_scrapped_urls():
-    pre_scrapped_urls = []
+    scrapped_urls = []
 
     for file_name in pathlib.Path(ASSETS_PATH).iterdir():
         if file_name.suffix == '.json':
@@ -313,9 +313,9 @@ def load_scrapped_urls():
             pdf_path = ASSETS_PATH / f'{number}_raw.pdf'
 
             if pdf_path.is_file():
-                pre_scrapped_urls.append(config['url'])
+                scrapped_urls.append(config['url'])
 
-    return pre_scrapped_urls
+    return scrapped_urls
 
 
 if __name__ == '__main__':
