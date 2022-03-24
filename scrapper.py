@@ -54,7 +54,6 @@ class Crawler:
         for full_url in full_urls:
             if len(self.urls) < self.total_max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
-        if
 
     def find_articles(self):
         """
