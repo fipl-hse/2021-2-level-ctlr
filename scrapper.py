@@ -163,7 +163,7 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(new_seed_urls, total_articles_to_find_and_parse)
     crawler.find_articles()
-    for i, my_url in enumerate(crawler.urls):
-        parser = HTMLParser(my_url, i + 1)
+    for new_id, new_url in enumerate(crawler.urls, start=1):
+        parser = HTMLParser(new_url, new_id)
         article = parser.parse()
         article.save_raw()
