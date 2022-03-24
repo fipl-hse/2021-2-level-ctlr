@@ -325,7 +325,7 @@ if __name__ == '__main__':
 
     pre_scrapped_urls = load_scrapped_urls()
 
-    crawler = Crawler(outer_seed_urls, outer_max_articles)
+    crawler = CrawlerRecursive(outer_seed_urls, outer_max_articles)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
