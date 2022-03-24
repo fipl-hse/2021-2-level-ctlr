@@ -120,7 +120,10 @@ def validate_config(crawler_path):
     pass
 ```
 
-`crawler_path` is the path to the config of the crawler. It is mandatory to call `validate_config()` 
+`crawler_path` is the path to the config of the crawler. 
+> NOTE: to specify a path, it is mandatory to use `pathlib` library 
+
+It is mandatory to call `validate_config()` 
 with passing a global variable `CRAWLER_CONFIG_PATH` that should be properly
 imported from the [`constants.py`](../constants.py) module.
 
@@ -152,7 +155,8 @@ def prepare_environment(base_path):
     pass
 ```
 It is mandatory to call this function after the config file is validated and before crawler is run.
-
+Also, do not forget that in order to specify a path it is required to use
+`pathlib`.
 > NOTE: you need to remove the folder if it exists and is not empty, then create an empty folder with this name
 
 ### Stage 2. Find necessary number of article URLs
@@ -261,7 +265,7 @@ Then you need to follow certain steps:
 
 1. find a URL to PDF using the `article_bs`
 2. create instance of `PDFRawFile` defined in [`core_utils/pdf_utils.py`](../core_utils/pdf_utils.py)
-   by passing an url to the PDF file and the article ID (look into the interface of `PDFRawFile.__init__` method)
+   by passing an URL to the PDF file and the article ID (look into the interface of `PDFRawFile.__init__` method)
 3. download a file with `PDFRawFile.download` method
 4. get a text from PDF by calling `pdf_file.get_text` method
 
@@ -310,7 +314,7 @@ A call to this method results in filling the internal Article instance with meta
 There is plenty of information that can be collected from each page, much more than title and
 author. It is very common to also collect publication date. Working with dates often becomes
 a nightmare for a data scientist. It can be represented very differently: `2009Feb17`, 
-`2009/02/17`, `20130623T13:22-0500`, or even `48/2009` (do you understand what 48 stand for?). 
+`2009/02/17`, `20130623T13:22-0500`, or even `48/2009` (do you understand what 48 stands for?). 
 
 The task is to ensure that each article metadata is extended with dates. However, the task is
 even harder as you have to follow the required format. In particular, you need to translate 
