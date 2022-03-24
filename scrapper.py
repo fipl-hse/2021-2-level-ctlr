@@ -302,7 +302,12 @@ def validate_config(crawler_path):
 def load_scrapped_urls():
     scrapped_urls = []
 
-    for file_name in pathlib.Path(ASSETS_PATH).iterdir():
+    pathlib_assets_path = pathlib.Path(ASSETS_PATH)
+
+    if not pathlib_assets_path.exists():
+        return []
+
+    for file_name in pathlib_assets_path.iterdir():
         if file_name.suffix == '.json':
             with open(file_name, encoding='utf-8') as file:
                 config = json.load(file)
