@@ -48,8 +48,14 @@ class Crawler:
         """
         Finds articles
         """
+        headers = {
+            'user-agent':
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                '(KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
+            'accept': '*/*'
+        }
         for url in self.seed_urls:
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
             response.encoding = 'utf-8'
             page_bs = BeautifulSoup(response.text, features='html.parser')
             class_bs = page_bs.find_all('div', class_='grid_19 omega')
@@ -98,7 +104,13 @@ class HTMLParser:
         """
         does all the work
         """
-        response = requests.get(self.article_url)
+        headers = {
+            'user-agent':
+                       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                       '(KHTML, like Gecko) Chrome/99.0.4844.82 Safari/537.36',
+            'accept' : '*/*'
+        }
+        response = requests.get(self.article_url, headers=headers)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
