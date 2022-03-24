@@ -2,8 +2,9 @@
 Scrapper implementation
 """
 from datetime import datetime
-import json
 from pathlib import Path
+import json
+import random
 import re
 import shutil
 import time
@@ -58,7 +59,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            time.sleep(1)
+            time.sleep(random.random())
             response = requests.get(seed_url, HEADERS)
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self._extract_url(article_bs)
@@ -76,7 +77,8 @@ def prepare_environment(base_path):
     """
     path = Path(base_path)
     if path.is_dir():
-        shutil.rmtree(path)
+        if path.exists():
+            shutil.rmtree(path)
     path.mkdir(parents=True, exist_ok=True)
 
 
@@ -139,7 +141,12 @@ class HTMLParser:
         pdf_file = PDFRawFile(link, self.article_id)
 
         pdf_file.download()
-        self.article.text = pdf_file.get_text()
+        text = pdf_file.get_text()
+        if 'ЛИТЕРАТУРА' in text:
+            text = text.split('ЛИТЕРАТУРА')[0]
+        if 'ИСТОЧНИКИ' in text:
+            text = text.split('ИСТОЧНИКИ')[0]
+        self.article.text = text
 
     def _fill_article_with_meta_information(self, article_bs):
 
@@ -164,9 +171,8 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls_test, total_articles_test)
     crawler.find_articles()
 
-    ARTICLE_ID = 0
-    for url in crawler.urls:
-        ARTICLE_ID += 1
-        article_parser = HTMLParser(article_url=url, article_id=ARTICLE_ID)
+    for index in range(len(crawler.urls)):
+        url = crawler.urls[index]
+        article_parser = HTMLParser(article_url=url, article_id=index)
         article = article_parser.parse()
         article.save_raw()
