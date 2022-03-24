@@ -155,6 +155,6 @@ if __name__ == '__main__':
     crawler = Crawler(sites, articles)
     crawler.find_articles()
     for article_url_new in crawler.urls:
-        parsing_article = HTMLParser(article_url_new, crawler.urls.index(article_url_new))
+        parsing_article = HTMLParser(article_url_new, crawler.urls.index(article_url_new)+1)
         parsed_article = parsing_article.parse()
         parsed_article.save_raw()
