@@ -6,6 +6,7 @@ import shutil
 from datetime import datetime
 
 import requests
+import validators
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
@@ -131,7 +132,7 @@ def validate_config(crawler_path):
     if max_articles > 100:
         raise NumberOfArticlesOutOfRangeError
     for urls in seed_urls:
-        if urls[0:8] != 'https://' and urls[0:7] != 'http://':
+        if not validators.url(urls):
             raise IncorrectURLError
     return seed_urls, max_articles
 
@@ -141,10 +142,7 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(sites, articles)
     crawler.find_articles()
-    print(crawler.urls)
-    A_ID = 1
     for article_url_new in crawler.urls:
-        parsing_article = HTMLParser(article_url_new, A_ID)
+        parsing_article = HTMLParser(article_url_new, crawler.urls.index(article_url_new))
         parsed_article = parsing_article.parse()
         parsed_article.save_raw()
-        A_ID += 1
