@@ -304,8 +304,8 @@ def load_scrapped_urls():
 
     for file_name in pathlib.Path(ASSETS_PATH).iterdir():
         if file_name.suffix == '.json':
-            with open(file_name, encoding='utf-8') as f:
-                config = json.load(f)
+            with open(file_name, encoding='utf-8') as file:
+                config = json.load(file)
 
             stem = file_name.stem
             number = stem[0]
