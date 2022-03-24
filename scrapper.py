@@ -154,8 +154,8 @@ class HTMLParser:
             article_bs = 'NOT FOUND'
         self.article.author = author_bs
 
-        name_bs = article_bs.find('meta', {"name": "description"})['content']
-        self.article.title = name_bs
+        title_bs = article_bs.find('meta', {"name": "description"})['content']
+        self.article.title = title_bs
 
         date_bs = article_bs.find("meta", {"name": "DC.Date.dateSubmitted"})['content']
         article_date = datetime.strptime(date_bs, '%Y-%m-%d')
