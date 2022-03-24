@@ -52,8 +52,9 @@ class Crawler:
         full_urls = [HTTP_PATTERN + not_full_url for not_full_url in not_full_urls]
 
         for full_url in full_urls:
-            if len(self.urls) < self.total_max_articles:
+            if len(self.urls) < self.total_max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
+        if
 
     def find_articles(self):
         """
@@ -142,6 +143,9 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         configuration = json.load(file)
 
+    if not configuration['seed_urls']:
+        raise IncorrectURLError
+
     http_pattern = 'https://m.polit.ru'
     for url in configuration["seed_urls"]:
         if http_pattern not in url:
@@ -150,10 +154,9 @@ def validate_config(crawler_path):
     seed_urls = configuration["seed_urls"]
     total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
 
-    if not seed_urls:
-        raise IncorrectURLError
-
-    if not isinstance(total_articles_to_find_and_parse, int) or total_articles_to_find_and_parse <= 0:
+    if not isinstance(total_articles_to_find_and_parse, int):
+        raise IncorrectNumberOfArticlesError
+    if total_articles_to_find_and_parse <= 0:
         raise IncorrectNumberOfArticlesError
 
     if total_articles_to_find_and_parse > 200:
