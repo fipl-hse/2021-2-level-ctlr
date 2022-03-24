@@ -9,6 +9,7 @@ import datetime
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
+# checks
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
