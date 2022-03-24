@@ -1,5 +1,5 @@
 beautifulsoup4==4.10.0
-pymupdf
-pytest
+pymupdf==1.19.6
+pytest==7.1.0
 requests==2.27.1
-wget
+wget==3.2
