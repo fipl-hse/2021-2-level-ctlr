@@ -65,7 +65,8 @@ class Crawler:
             urls = self._extract_url(page_bs)
             for the_url in urls:
                 if len(self.urls) < self.max_articles:
-                    self.urls.append(the_url)
+                    if the_url not in self.urls:
+                        self.urls.append(the_url)
 
     def get_search_urls(self):
         """
@@ -85,7 +86,7 @@ class HTMLParser:
 
     def _fill_article_with_meta_information(self, article_bs):
         title_bs = article_bs.find('h1', class_='headline').prettify(formatter='html')
-        self.article.title = title_bs
+        self.article.title = title_bs[41:-5]
 
         author_bs = article_bs.find('div', class_='author')
         if not author_bs.find('a'):
@@ -136,7 +137,7 @@ def validate_config(crawler_path):
         raise IncorrectNumberOfArticlesError
     if not isinstance(seed_urls, list) or not seed_urls:
         raise IncorrectURLError
-    if max_articles > 100:
+    if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
     for url in seed_urls:
         correct_url = re.match(r'https://', url)
