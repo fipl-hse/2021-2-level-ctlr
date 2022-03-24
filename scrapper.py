@@ -1,11 +1,13 @@
 """
 Scrapper implementation
 """
+import random
 from datetime import datetime
 import json
 import pathlib
 import re
 import shutil
+import time
 from urllib.parse import urljoin
 
 from bs4 import BeautifulSoup
@@ -165,6 +167,8 @@ class Crawler:
             if len(self.urls) + 1 > self.max_articles:
                 break
 
+            time.sleep(random.uniform(0.0, 1.0))
+
             response = requests.get(seed_url)
             article_bs = BeautifulSoup(response.text, features="html.parser")
 
@@ -203,7 +207,9 @@ class CrawlerRecursive(Crawler):
     def crawl(self, url_to_crawl):
         if len(self.urls) + 1 > self.max_articles:
             return
-        print(self.urls, self.max_articles)
+
+        time.sleep(random.uniform(0.0, 1.0))
+
         response = requests.get(url_to_crawl)
         response_bs = BeautifulSoup(response.text, features="html.parser")
         links_bs = response_bs.find_all('a')
