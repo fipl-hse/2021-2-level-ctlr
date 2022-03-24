@@ -91,14 +91,16 @@ class HTMLParser:
         title_bs = meta_bs.find('h1').text
         self.article.title = title_bs
 
-        date_bs = meta_bs.find('span', class_='date').text
-        date = datetime.strptime(date_bs, '%d.%m.%Y : %H.%M')
-        self.article.date = date
-
         topic = article_bs.find('h4', class_='chapter_h').text
         self.article.topics.append(topic)
 
         self.article.author = 'NOT FOUND'
+
+    def _fill_article_with_date(self, article_bs):
+        meta_bs = article_bs.find('div', class_='news_item fullnews')
+        date_bs = meta_bs.find('span', class_='date').text
+        date = datetime.strptime(date_bs, '%d.%m.%Y : %H.%M')
+        self.article.date = date
 
     def parse(self):
         """
@@ -115,6 +117,7 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
+        self._fill_article_with_date(article_bs)
         return self.article
 
 
