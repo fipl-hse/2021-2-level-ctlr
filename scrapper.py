@@ -2,7 +2,6 @@
 Scrapper implementation
 """
 
-
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
