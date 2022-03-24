@@ -1,7 +1,6 @@
 """
 Scrapper implementation
 """
-from bs4 import BeautifulSoup
 import datetime
 import json
 import random
@@ -9,6 +8,7 @@ import re
 import requests
 import shutil
 from time import sleep
+from bs4 import BeautifulSoup
 
 from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
