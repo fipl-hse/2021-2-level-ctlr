@@ -92,6 +92,7 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
+        self._fill_article_with_date(article_bs)
         return self.article
 
     def _fill_article_with_text(self, article_bs):
@@ -131,6 +132,10 @@ class HTMLParser:
             article_author = article_author['content']
         self.article.author = article_author
 
+    def _fill_article_with_date(self, article_bs):
+        """
+        Fills the Article instance with publication date
+        """
         date_raw = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
         article_date = datetime.datetime.strptime(date_raw, '%Y-%m-%d')
         self.article.date = article_date
@@ -168,16 +173,23 @@ def validate_config(crawler_path):
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
 
 if __name__ == '__main__':
+    print('some preparations')
     my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+
+    print('starting crawling...')
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
+    print('urls have been collected successfully')
 
+    print('staring parsing...')
     for i, my_url in enumerate(crawler.urls):
         parser = HTMLParser(my_url, i + 1)
         my_article = parser.parse()
         my_article.save_raw()
+        print(f'{i+1} articles are ready')
+    print('done!')
