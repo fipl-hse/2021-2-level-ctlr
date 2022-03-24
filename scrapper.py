@@ -149,20 +149,19 @@ def validate_config(crawler_path):
 
     pattern = re.compile(r"^https?://")
 
+    if not isinstance(seed_urls, list) or not seed_urls:
+        raise IncorrectURLError
+
     for url in seed_urls:
         if not re.match(pattern, url):
             raise IncorrectURLError
-
-    if not seed_urls:
-        raise IncorrectURLError
-
-    prepare_environment(ASSETS_PATH)
 
     return seed_urls, total_articles
 
 
 if __name__ == '__main__':
     given_seed_urls, all_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
     crawler = Crawler(given_seed_urls, all_articles)
     crawler.find_articles()
 
