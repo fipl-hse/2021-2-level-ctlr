@@ -45,9 +45,9 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         not_full_urls = []
-        articles_bs = article_bs.find_all('a', class_='post-pre')
-        for article_bs in articles_bs:
-            url_to_article = article_bs['href']
+        all_urls_bs = article_bs.find_all('a', class_='post-pre')
+        for url_bs in all_urls_bs:
+            url_to_article = url_bs['href']
             not_full_urls.append(url_to_article)
         full_urls = [HTTP_PATTERN + not_full_url for not_full_url in not_full_urls]
 
