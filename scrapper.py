@@ -10,7 +10,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
 from core_utils.article import Article
 
 
@@ -54,14 +54,14 @@ class Crawler:
             if len(self.urls) < self.max_articles:
                 self.urls.append(full_url)
 
-        return urls_bs_full
+        # return urls_bs_full
 
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url)
+            response = requests.get(seed_url, headers=HEADERS)
             if not response.ok:
                 continue
 
@@ -72,7 +72,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
 class HTMLParser:
@@ -107,7 +107,7 @@ class HTMLParser:
                 self.article.text += p_tag.text.strip()
 
     def parse(self):
-        response = requests.get(url=self.article_url)
+        response = requests.get(url=self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
