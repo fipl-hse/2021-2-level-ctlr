@@ -5,7 +5,7 @@ import unittest
 
 import pytest
 import requests
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH,HEADERS
 
 class RawBasicDataValidator(unittest.TestCase):
     def setUp(self) -> None:
@@ -24,7 +24,7 @@ class RawBasicDataValidator(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
-    def test_validate_sort(self):
+    def test_validate_sort_raw(self):
         list_ids = [pair[0] for pair in self.texts]
         for i in range(1, len(list_ids)+1):
             self.assertTrue(i in list_ids,
@@ -62,21 +62,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
-    def test_match_requested_volume_sample(self):
-        metas, raws = 0, 0
-        for file in os.listdir(ASSETS_PATH):
-            if file.endswith("_raw.txt"):
-                raws += 1
-            if file.endswith("_meta.json"):
-                metas += 1
-        self.assertEqual(metas, raws, msg="""Resulted number of meta.json files is not equal 
-        to num_articles param specified in config - not in range(2, 8)""")
-
-    @pytest.mark.mark6
-    @pytest.mark.mark8
-    @pytest.mark.mark10
-    @pytest.mark.stage_2_5_dataset_validation
-    def test_validate_sort(self):
+    def test_validate_sort_metadata(self):
         list_ids = [pair[0] for pair in self.metadata]
         for i in range(1, len(list_ids)+1):
             self.assertTrue(i in list_ids,
@@ -86,17 +72,16 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
-    def test_validate_metadata(self):
+    def test_validate_metadata_medium(self):
         # can i open this URL?
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
-            self.assertTrue(requests.get(metadata[1]['url']),
+            self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
                             msg="Can not open URL: <{}>. Check how you collect URLs".format(
                                 metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url']).text
-
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
             print(metadata[1]['title'])
             self.assertTrue(metadata[1]['title'] in
                             html_source,
@@ -161,46 +146,19 @@ class RawAdvancedDataValidator(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
-    def test_validate_sort(self):
-        list_ids = [pair[0] for pair in self.metadata]
-        for i in range(1, len(list_ids)+1):
-            self.assertTrue(i in list_ids,
-                            msg="""Articles ids are not homogeneous. E.g. numbers are not from 1 to N""")
-
-    @pytest.mark.mark8
-    @pytest.mark.mark10
-    @pytest.mark.stage_2_5_dataset_validation
-    def test_validate_metadata(self):
+    def test_validate_metadata_advanced(self):
         # can i open this URL?
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
-            self.assertTrue(requests.get(metadata[1]['url']),
-                            msg="Can not open URL: <{}>. Check how you collect URLs".format(
-                                metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url']).text
-
-            self.assertTrue(metadata[1]['title'] in
-                            html_source,
-                            msg="""Title is not found by specified in metadata URL <{}>.
-                            Check how you collect titles""".format(metadata[1]['url']))
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
 
             # is a date in given format?
             self.assertTrue(re.search(self.data_pattern, metadata[1]['date']),
                             msg="""Date <{}> do not match given format <{}> (url <{}>). 
                             Check how you write dates.""".format(
                                 metadata[1]['date'], self.data_pattern, metadata[1]['url']))
-
-            # author is presented? NOT FOUND otherwise?
-            try:
-                self.assertTrue(metadata[1]['author'] in html_source)
-            except AssertionError:
-                self.assertEqual(metadata[1]['author'], 'NOT FOUND',
-                                 msg="""Author field <{}> (url <{}>) is incorrect. 
-                                        Collect author from the page or specify it with special keyword <NOT FOUND> 
-                                        if it is not presented at the page.""".format(
-                                     metadata[1]['author'], metadata[1]['url']))
 
             topics = metadata[1]['topics']
             if topics is not []:
