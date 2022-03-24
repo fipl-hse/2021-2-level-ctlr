@@ -51,8 +51,10 @@ class HTMLParser:
 
     def parse(self):
         """
-
+        Parses the URL
         """
+        time.sleep(random.uniform(0.0, 1.0))
+
         response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
@@ -65,27 +67,19 @@ class HTMLParser:
         """
         Fills self.article with text from article_bs
         """
+        download_table_data_bs = article_bs.find('strong', string=" Загрузить статью")
+        download_table_row_bs = download_table_data_bs.parent.parent.parent
 
-        table_rows_bs = article_bs.find_all('tr', {"class": "unnrow"})
+        pdf_url_bs = download_table_row_bs.find('a')
 
-        for table_row_bs in table_rows_bs:
-            table_datas_bs = table_row_bs.find_all('td')
+        pdf_raw_file = PDFRawFile(pdf_url_bs['href'], self.article_id)
 
-            if not table_datas_bs:
-                continue
+        pdf_raw_file.download()
+        text = pdf_raw_file.get_text()
 
-            if "Загрузить статью" in table_datas_bs[0].text:
-                pdf_url_bs = table_datas_bs[1].find('a')
+        parts_of_article = text.split('Список литературы')
 
-                pdf_raw_file = PDFRawFile(pdf_url_bs['href'], self.article_id)
-
-                pdf_raw_file.download()
-                text = pdf_raw_file.get_text()
-
-                parts_of_article = text.split('Список литературы')
-
-                self.article.text = ''.join(parts_of_article[:-1])
-                break
+        self.article.text = ''.join(parts_of_article[:-1])
 
     def _fill_article_with_meta_information(self, article_bs):
         """
@@ -94,24 +88,17 @@ class HTMLParser:
 
         self.article.title = article_bs.find('h3').get_text()
 
-        tables_bs = article_bs.find_all('table', {"class": "unntable"})
+        td_authors = article_bs.find('td', string='Авторы')
+        table_bs = td_authors.parent.parent
+        table_row_bs = table_bs.find('tr', {"class": 'unnrow'})
+        first_author_bs = table_row_bs.find('a')
 
-        for table_bs in tables_bs:
-            table_datas_bs = table_bs.find_all('td')
-
-            if table_datas_bs[0].text != 'Авторы':
-                continue
-
-            link_to_author_bs = table_datas_bs[1].find('a')
-
-            self.article.author = link_to_author_bs.text
+        self.article.author = first_author_bs.text
 
         text_date = re.search(r'Поступила в редакцию\s+\d{2}\.\d{2}\.\d{4}', self.article.text)
+        date_re = re.search(r'\d{2}\.\d{2}\.\d{4}', text_date.group(0))
 
-        if text_date:
-            date_re = re.search(r'\d{2}\.\d{2}\.\d{4}', text_date.group(0))
-
-            self.article.date = datetime.strptime(date_re.group(0), '%d.%m.%Y')
+        self.article.date = datetime.strptime(date_re.group(0), '%d.%m.%Y')
 
 
 class Crawler:
@@ -338,7 +325,7 @@ if __name__ == '__main__':
 
     pre_scrapped_urls = load_scrapped_urls()
 
-    crawler = CrawlerRecursive(outer_seed_urls, outer_max_articles)
+    crawler = Crawler(outer_seed_urls, outer_max_articles)
     crawler.find_articles()
 
     for i, url in enumerate(crawler.urls):
