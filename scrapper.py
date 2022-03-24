@@ -45,6 +45,7 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         articles_code_bs = article_bs.find_all('div', {'class': 'articles'})
+        extracted_urls = []
         for article_code in articles_code_bs:
             links_articles = article_code.find_all('a')
             for link in links_articles:
@@ -54,7 +55,8 @@ class Crawler:
                     continue
                 else:
                     if art_link.startswith('/') and 'pdf' not in art_link:
-                        self.urls.append(ROOT_URL + link["href"])
+                        extracted_urls.append(ROOT_URL + link["href"])
+        return extracted_urls
 
     def find_articles(self):
         """
@@ -63,7 +65,11 @@ class Crawler:
         for seed_url in self.seed_urls:
             issue_page = requests.get(seed_url, headers=HEADERS)
             issue_page_bs = BeautifulSoup(issue_page.text, 'html.parser')
-            self._extract_url(issue_page_bs)
+            urls = self._extract_url(issue_page_bs)
+            for url in urls:
+                if len(self.urls) == self.max_articles:
+                    break
+                self.urls.append(url)
 
     def get_search_urls(self):
         """
@@ -178,7 +184,6 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(s_urls, max_as)
     crawler.find_articles()
-    print(len(crawler.urls))
     for i, art_url in enumerate(crawler.urls):
         if i == crawler.max_articles:
             break
