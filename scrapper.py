@@ -173,7 +173,6 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
     my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(my_seed_urls, my_max_articles)
