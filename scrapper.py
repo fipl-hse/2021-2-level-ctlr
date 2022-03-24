@@ -2,11 +2,14 @@
 Scrapper implementation
 """
 import datetime
+import random
 import re
 import shutil
 
 from pathlib import Path
 import json
+from time import sleep
+
 import requests
 from bs4 import BeautifulSoup
 
@@ -45,13 +48,13 @@ class Crawler:
     def _extract_url(self, article_bs):
         urls_bs = article_bs.find_all('a', class_="cardWrap_link__2AN_X")
         the_beginning = 'https://tass.ru'
-        urls_bs_full = []
+        the_ends = []
         for url_bs in urls_bs:
             the_end = url_bs['href']
-            url_select = f'{the_beginning}{the_end}'
-            urls_bs_full.append(url_select)
-        for full_url in urls_bs_full:
-            if len(self.urls) < self.max_articles:
+            the_ends.append(the_end)
+        full_urls = [the_beginning + the_end for the_end in the_ends]
+        for full_url in full_urls:
+            if len(self.urls) < self.max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
 
         # return urls_bs_full
@@ -62,9 +65,9 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers=HEADERS)
+            sleep(random.randint(1, 5))
             if not response.ok:
                 continue
-
             soup = BeautifulSoup(response.text, 'lxml')
             self._extract_url(soup)
 
