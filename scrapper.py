@@ -155,5 +155,3 @@ if __name__ == '__main__':
         parsed_article = parsing_article.parse()
         parsed_article.save_raw()
         A_ID += 1
-
-#checking if the checks are working
