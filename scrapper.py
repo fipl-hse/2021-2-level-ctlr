@@ -1,12 +1,13 @@
 """
 Scrapper implementation
 """
-import json
-import shutil
 from datetime import datetime
-import requests
+import json
+from pathlib import Path
+import shutil
 
 from bs4 import BeautifulSoup
+import requests
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
@@ -53,6 +54,7 @@ class Crawler:
             for article_bs in class_bs:
                 if len(self.urls) < self.max_articles:
                     self._extract_url(article_bs)
+
 
     def get_search_urls(self):
         """
@@ -119,7 +121,6 @@ def prepare_environment(base_path):
         pass
     base_path.mkdir(parents=True)
 
-
 def validate_config(crawler_path):
     """
     Validates given config
@@ -128,9 +129,13 @@ def validate_config(crawler_path):
         config = json.load(file)
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
-    if not isinstance(max_articles, int) or max_articles <= 0:
+    if not isinstance(max_articles, int):
         raise IncorrectNumberOfArticlesError
-    if not isinstance(seed_urls, list) or not seed_urls:
+    if max_articles <= 0:
+        raise IncorrectNumberOfArticlesError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
+    if not seed_urls:
         raise IncorrectURLError
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
