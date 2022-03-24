@@ -74,9 +74,6 @@ class Crawler:
 
             response = requests.get(seed_url, headers=get_random_headers(), allow_redirects=True, timeout=5)
             time.sleep(1.5 + random.uniform(0.0, 1.0))
-            # with open('index1.html', 'w', encoding='utf-8') as file:
-            # file.write(response.text)
-
             article_bs = BeautifulSoup(response.text, 'html.parser')
             self.urls.extend(self._extract_url(article_bs))
 
