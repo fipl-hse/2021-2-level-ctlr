@@ -2,6 +2,8 @@ set -ex
 
 echo "Stage: Downloading articles"
 
+source venv/bin/activate
+
 python config/config_param_changer.py --config_path="scrapper_config.json"
 
 echo "Changed config params"
