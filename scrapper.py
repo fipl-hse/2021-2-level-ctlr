@@ -11,7 +11,7 @@ import shutil
 from bs4 import BeautifulSoup
 import requests
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -61,7 +61,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            issue_page = requests.get(seed_url)
+            issue_page = requests.get(seed_url, headers=HEADERS)
             issue_page_bs = BeautifulSoup(issue_page.text, 'html.parser')
             self._extract_url(issue_page_bs)
 
