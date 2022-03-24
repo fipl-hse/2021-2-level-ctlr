@@ -119,7 +119,6 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def parse(self):
-        self.article = Article(self.article_url, self.article_id)
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
         self._fill_article_with_text(article_bs)
