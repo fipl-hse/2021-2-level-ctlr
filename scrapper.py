@@ -4,15 +4,15 @@ Scrapper implementation
 import datetime
 import json
 import random
+from bs4 import BeautifulSoup
 import re
+import requests
 import shutil
 from time import sleep
-import requests
-from bs4 import BeautifulSoup
 
+from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
@@ -55,7 +55,8 @@ class Crawler:
                 if len(self.urls) < self.max_articles:
                     if raw_journal_url[:len(journal_pattern)] == journal_pattern:
                         journal_url = f"https:{raw_journal_url}"
-                        self.urls.append(journal_url)
+                        if not journal_url in self.urls:
+                            self.urls.append(journal_url)
 
     def find_articles(self):
         """
@@ -150,28 +151,30 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         config = json.load(file)
 
+    http_pattern = re.compile(r"https://iling-ran.ru/web/ru/publications")
+    for url in seed_urls:
+        if not re.match(http_pattern, url):
+            raise IncorrectURLError
+ 
     seed_urls = config['seed_urls']
     max_articles = config['total_articles_to_find_and_parse']
 
     if not seed_urls:
         raise IncorrectURLError
 
-    http_pattern = re.compile(r"https://iling-ran.ru/web/ru/publications")
-    for url in seed_urls:
-        if not re.match(http_pattern, url):
-            raise IncorrectURLError
     if not isinstance(max_articles, int) or max_articles <= 0:
         raise IncorrectNumberOfArticlesError
+
     if max_articles > 15:
         raise NumberOfArticlesOutOfRangeError
 
-    prepare_environment(ASSETS_PATH)
     return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
     my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
     for i, my_url in enumerate(crawler.urls):
