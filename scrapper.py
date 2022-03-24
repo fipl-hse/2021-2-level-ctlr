@@ -7,8 +7,9 @@ import random
 import re
 import shutil
 from time import sleep
-import requests
+
 from bs4 import BeautifulSoup
+import requests
 
 from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
