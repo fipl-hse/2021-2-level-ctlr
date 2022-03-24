@@ -1,10 +1,10 @@
 """
 Scrapper implementation
 """
+from bs4 import BeautifulSoup
 import datetime
 import json
 import random
-from bs4 import BeautifulSoup
 import re
 import requests
 import shutil
