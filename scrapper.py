@@ -45,7 +45,7 @@ class Crawler:
         """
         Finds articles
         """
-        for seed_url_index, seed_url in enumerate(self.seed_urls):
+        for _, seed_url in enumerate(self.seed_urls):
             response = requests.get(url=seed_url)
             soup = BeautifulSoup(response.text, features="lxml")
             articles_urls_bs = self._extract_url(soup)
