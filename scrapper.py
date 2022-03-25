@@ -85,6 +85,8 @@ class HTMLParser:
 
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
+        sleep(random.randrange(2, 5))
+
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
