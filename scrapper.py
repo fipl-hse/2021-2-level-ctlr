@@ -102,11 +102,12 @@ class HTMLParser:
         Fills the Article instance with text
         """
         content_bs = article_bs.find_all('div', class_="clearfix text-formatted")[1]
-        raw_download_page = content_bs.find_all('p')[1].find('a')['href']
-        download_page = f'https:{raw_download_page}'
-        pdf = PDFRawFile(download_page, self.article_id)
-        pdf.download()
-        self.article.text = pdf.get_text()
+        raw_download_page = content_bs.find_all('ul')
+        for i in raw_download_page:
+            download_page = f'https:{i.find('a')['href']}'
+            pdf = PDFRawFile(download_page, self.article_id)
+            pdf.download()
+            self.article.text = pdf.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
         """
