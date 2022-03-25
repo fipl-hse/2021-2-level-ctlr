@@ -24,7 +24,7 @@ class PDFRawFile:
         """
         Downloads PDF file by the URL given.
         """
-        wget.download(self._url, os.path.join(ASSETS_PATH, f"{self._id}_raw.pdf"))
+        wget.download(self._url, str(ASSETS_PATH / f"{self._id}_raw.pdf"))
 
     def get_text(self):
         """
