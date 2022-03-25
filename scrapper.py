@@ -150,21 +150,21 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    with open(crawler_path) as file:
-        configuration = json.load(file)
+    with open(crawler_path) as json_file:
+        config = json.load(json_file)
 
-    if "seed_urls" not in configuration and "total_articles_to_find_and_pars":
+    if "seed_urls" not in config and "total_articles_to_find_and_pars":
         raise IncorrectURLError
     http_pattern = re.compile(HTTP_PATTERN)
-    for url in configuration["seed_urls"]:
+    for url in config["seed_urls"]:
         result = http_pattern.search(url)
         if not result:
             raise IncorrectURLError
 
-    seed_urls = configuration["seed_urls"]
-    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
-    stop = configuration["stop"]
-    flag = bool(configuration["continue"])
+    seed_urls = config["seed_urls"]
+    total_articles_to_find_and_parse = config["total_articles_to_find_and_parse"]
+    stop = config["stop"]
+    flag = bool(config["continue"])
 
     if not seed_urls:
         raise IncorrectURLError
