@@ -114,9 +114,7 @@ class HTMLParser:
         article_date = datetime.strptime(article_date, '%Y-%m-%d')
         self.article.date = article_date
         article_topics = article_bs.find('div', class_='item keywords')
-        if not article_topics:
-            article_topics = 'NOT FOUND'
-        else:
+        if article_topics:
             article_topics = article_topics.find('span', class_='value')
             article_topics = article_topics.text
             if '\n' in article_topics:
