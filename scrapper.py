@@ -130,7 +130,8 @@ class HTMLParser:
 
         self.article.date = datetime.datetime.strptime(dm_date, '%d-%m %Y г')
 
-        self.article.topics = article_bs.find('tbody').find_all('tr')[3].find_all('td')[1].text
+        article_topics = article_bs.find('tbody').find_all('tr')[3].find_all('td')[1].text
+        self.article.topics = article_topics.replace('.', '').split('; ')
 
 
 def prepare_environment(base_path):
@@ -149,8 +150,13 @@ def validate_config(crawler_path):
     with open(crawler_path, 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    seed_urls = list(config.values())[0]
-    max_articles = list(config.values())[1]
+    if "seed_urls" not in config:
+        raise IncorrectURLError
+    if "total_articles_to_find_and_parse" not in config:
+        raise IncorrectNumberOfArticlesError
+
+    seed_urls = config["seed_urls"]
+    max_articles = config["total_articles_to_find_and_parse"]
 
     for url in seed_urls:
         right_url = re.match(DOMAIN_NAME, url)
