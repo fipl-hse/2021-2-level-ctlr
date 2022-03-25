@@ -133,7 +133,11 @@ class HTMLParser:
         self.article.text = pdf_raw_file.get_text()
         if 'Л и т е р а т у р а' in self.article.text:
             new_list = self.article.text.split('Л и т е р а т у р а')
+            number_of_references = new_list[-1]
+            references = re.findall(r'([а-я]|[А-Я])+.{1,2}\d{4}\s+—', number_of_references)
+            len_of_references = len(references)
             self.article.text = ''.join(new_list[:-1])
+
 
     def _fill_article_with_meta_information(self, article_bs):
         author_bs = article_bs.find('span', class_='field__item-wrapper')
