@@ -112,9 +112,6 @@ class HTMLParser:
         """
         Fills the Article instance with meta information
         """
-        journal_title = article_bs.find('span',
-                                        class_="field field--name-title field--type-string field--label-hidden")
-        self.article.title = journal_title.text
         article_title = article_bs.find_all('div', class_="clearfix text-formatted")[1]
         links_bs = article_title.find_all('li')
         for link in links_bs:
@@ -130,6 +127,8 @@ class HTMLParser:
 
             if link.find("a")["href"][-4:] == ".pdf":
                 self.article.url = f'https:{link.find("a")["href"]}'
+            article_name = link.find("a").text
+            self.article.title = article_name
         date_raw = article_bs.find('span',
                                    class_="field field--name-created field--type-created field--label-hidden").text[4:]
         article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y - %H:%M')
