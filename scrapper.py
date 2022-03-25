@@ -210,9 +210,9 @@ class CrawlerRecursive(Crawler):
 
             if not match:
                 link = urljoin(url_to_crawl, link)
-            else:
-                if ROOT_URL not in link:
-                    continue
+
+            if not absolute_url_structure_is_valid(link):
+                continue
 
             # Ignore english version to avoid duplicates
             if RUSSIAN_ROOT_URL not in link or 'eng' in link:
@@ -220,7 +220,6 @@ class CrawlerRecursive(Crawler):
 
             if link not in self.crawled_urls:
                 self.crawled_urls.append(link)
-
                 match = re.search(r'\?jnum=', link)
 
                 if match:
@@ -233,9 +232,9 @@ class CrawlerRecursive(Crawler):
 
                     if len(self.urls) + 1 > self.max_articles:
                         break
-
-                # Recursion
-                self.crawl(link)
+                else:
+                    # Recursion
+                    self.crawl(link)
 
 
 def prepare_environment(base_path):
@@ -290,16 +289,19 @@ def validate_config(crawler_path):
         raise IncorrectURLError
 
     for seed_url in seed_urls:
-        match = re.match(r'(^http://|^https://)', seed_url)
-
-        if not match or ROOT_URL not in seed_url:
+        if not absolute_url_structure_is_valid(seed_url):
             raise IncorrectURLError
 
     return seed_urls, max_articles
 
 
-def check_url_structure(url_to_check):
-    return re.match(r'(^http://|^https://)', url_to_check)
+def absolute_url_structure_is_valid(url_to_check):
+    match = re.match(r'(^http://|^https://)', url_to_check)
+
+    if not match or ROOT_URL not in url_to_check:
+        return False
+
+    return True
 
 
 def load_scrapped_urls():
