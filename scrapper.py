@@ -102,18 +102,19 @@ class HTMLParser:
         Fills the Article instance with text
         """
         content_bs = article_bs.find_all('div', class_="clearfix text-formatted")[1]
-        raw_download_page = content_bs.find_all('ul')
-        for url in raw_download_page:
-            raw = url.find("a")["href"]
-            download_page = f'https:{raw}'
-            pdf = PDFRawFile(download_page, self.article_id)
-            pdf.download()
-            self.article.text = pdf.get_text()
+        raw_download_page = content_bs.find_all('p')[1].find('a')['href']
+        download_page = f'https:{raw_download_page}'
+        pdf = PDFRawFile(download_page, self.article_id)
+        pdf.download()
+        self.article.text = pdf.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
         """
         Fills the Article instance with meta information
         """
+        journal_title = article_bs.find('span',
+                                        class_='field field--name-title field--type-string field--label-hidden')
+        self.article.title = journal_title.text
         article_title = article_bs.find_all('div', class_="clearfix text-formatted")[1]
         links_bs = article_title.find_all('li')
         for link in links_bs:
@@ -129,8 +130,7 @@ class HTMLParser:
 
             if link.find("a")["href"][-4:] == ".pdf":
                 self.article.url = f'https:{link.find("a")["href"]}'
-            article_name = link.find("a").text
-            self.article.title = article_name
+     
         date_raw = article_bs.find('span',
                                    class_="field field--name-created field--type-created field--label-hidden").text[4:]
         article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y - %H:%M')
