@@ -48,14 +48,17 @@ class Crawler:
     def _extract_url(self, article_bs):
         urls_bs = article_bs.find_all('a', class_="cardWrap_link__2AN_X")
         the_beginning = 'https://tass.ru'
-        the_ends = []
+        # the_ends = []
         for url_bs in urls_bs:
             the_end = url_bs['href']
-            the_ends.append(the_end)
-        full_urls = [the_beginning + the_end for the_end in the_ends]
-        for full_url in full_urls:
+            full_url = the_beginning + the_end
             if len(self.urls) < self.max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
+            # the_ends.append(the_beginning + the_end)
+        # full_urls = [the_beginning + the_end for the_end in the_ends]
+        # for full_url in the_ends:
+        #     if len(self.urls) < self.max_articles and full_url not in self.urls:
+        #         self.urls.append(full_url)
 
         # return urls_bs_full
 
