@@ -90,6 +90,12 @@ class HTMLParser:
         pdf = PDFRawFile(download_link, self.article_id)
         pdf.download()
         self.article.text = pdf.get_text()
+        if 'ЛИТЕРАТУРА' in self.article.text:
+            new_text = self.article.text.split('ЛИТЕРАТУРА')
+            self.article.text = ''.join(new_text[:-1])
+        if 'REFERENCES' in self.article.text:
+            new_text = self.article.text.split('REFERENCES')
+            self.article.text = ''.join(new_text[:-1])
 
     def _fill_article_with_meta_information(self, article_bs):
         article_title = article_bs.find('h1', class_='page_title').text
@@ -107,6 +113,17 @@ class HTMLParser:
         article_date = article_date.text.strip()
         article_date = datetime.strptime(article_date, '%Y-%m-%d')
         self.article.date = article_date
+        article_topics = article_bs.find('div', class_='item keywords')
+        if not article_topics:
+            article_topics = 'NOT FOUND'
+        else:
+            article_topics = article_topics.find('span', class_='value')
+            article_topics = article_topics.text
+            if '\n' in article_topics:
+                article_topics = article_topics.replace('\n', '')
+            if '\t' in article_topics:
+                article_topics = article_topics.replace('\t', '')
+        self.article.topics = article_topics
 
 def prepare_environment(base_path):
     """
