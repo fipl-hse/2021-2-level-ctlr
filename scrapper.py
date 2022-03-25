@@ -109,7 +109,7 @@ class HTMLParser:
         for refs_maker in list_of_possible_l:
             if refs_maker in text_from_pdf:
                 text_pdf_list = text_from_pdf.split(refs_maker)
-                text_from_pdf = ' '.join(text_pdf_list[1:-1:])
+                text_from_pdf = ' '.join(text_pdf_list[0:-1:])
         self.article.text = text_from_pdf
 
     def _fill_article_with_meta_information(self, article_bs):
