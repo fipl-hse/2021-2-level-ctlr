@@ -299,10 +299,7 @@ def validate_config(crawler_path):
 
 
 def check_url_structure(url_to_check):
-    match = re.match(r'(^http://|^https://)', url_to_check)
-
-    if not match or ROOT_URL not in url_to_check:
-        raise IncorrectURLError
+    return re.match(r'(^http://|^https://)', url_to_check)
 
 
 def load_scrapped_urls():
