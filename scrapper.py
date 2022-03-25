@@ -64,7 +64,7 @@ class Crawler:
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers=HEADERS)
             if not response.ok:
-                break
+                continue
 
             article_bs = BeautifulSoup(response.text, 'lxml')
             self._extract_url(article_bs)
