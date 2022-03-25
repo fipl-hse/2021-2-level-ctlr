@@ -131,8 +131,8 @@ class HTMLParser:
         pdf_raw_file = PDFRawFile(url_of_pdf, self.article_id)
         pdf_raw_file.download()
         self.article.text = pdf_raw_file.get_text()
-        if 'Литература' in self.article.text:
-            new_list = self.article.text.split('Литература')
+        if 'Л и т е р а т у р а' in self.article.text:
+            new_list = self.article.text.split('Л и т е р а т у р а')
             self.article.text = ''.join(new_list[:-1])
 
     def _fill_article_with_meta_information(self, article_bs):
