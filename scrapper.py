@@ -13,7 +13,7 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
@@ -67,7 +67,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers=HEADERS)
+            response = requests.get(seed_url)
             # sleep(random.randint(1, 5))
             if not response.ok:
                 continue
@@ -113,7 +113,7 @@ class HTMLParser:
                 self.article.text += p_tag.text.strip()
 
     def parse(self):
-        response = requests.get(self.article_url, headers=HEADERS)
+        response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
