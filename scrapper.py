@@ -104,7 +104,7 @@ class HTMLParser:
         content_bs = article_bs.find_all('div', class_="clearfix text-formatted")[1]
         raw_download_page = content_bs.find_all('ul')
         for i in raw_download_page:
-            download_page = f'https:{i.find('a')['href']}'
+            download_page = f'https:{i.find("a")["href"]}'
             pdf = PDFRawFile(download_page, self.article_id)
             pdf.download()
             self.article.text = pdf.get_text()
