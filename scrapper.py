@@ -109,8 +109,7 @@ class Crawler:
     def __init__(self, seed_urls, max_articles: int):
         self._seed_urls = seed_urls
         self.max_articles = max_articles
-
-        self.urls = load_scrapped_urls()
+        self.urls = []
 
     def _extract_url(self, article_bs):
         """
@@ -148,8 +147,6 @@ class Crawler:
         """
         Finds articles
         """
-        pre_scrapped_url_count = len(self.urls)
-
         for seed_url in self._seed_urls:
             if len(self.urls) + 1 > self.max_articles:
                 break
@@ -160,8 +157,6 @@ class Crawler:
             article_bs = BeautifulSoup(response.text, features="html.parser")
 
             self.urls.extend(self._extract_url(article_bs))
-
-        self.urls = self.urls[pre_scrapped_url_count:]
 
     def get_search_urls(self):
         """
@@ -186,6 +181,7 @@ class CrawlerRecursive(Crawler):
         start_url = self._seed_urls[0]
         self._seed_urls = []
 
+        self.urls = load_scrapped_urls()
         pre_scrapped_url_count = len(self.urls)
 
         self.crawl(start_url)
@@ -254,6 +250,16 @@ def prepare_environment(base_path):
     path.mkdir(parents=True)
 
 
+def should_reset_crawler(crawler_path):
+    with open(crawler_path, 'r') as crawler_file:
+        crawler_config = json.load(crawler_file)
+
+        if 'reset_parser' not in crawler_config:
+            return True
+
+        return crawler_config['reset_parser']
+
+
 def validate_config(crawler_path):
     """
     Validates given config
@@ -286,10 +292,17 @@ def validate_config(crawler_path):
     for seed_url in seed_urls:
         match = re.match(r'(^http://|^https://)', seed_url)
 
-        if not match or DOMAIN_URL not in seed_url:
+        if not match or ROOT_URL not in seed_url:
             raise IncorrectURLError
 
     return seed_urls, max_articles
+
+
+def check_url_structure(url_to_check):
+    match = re.match(r'(^http://|^https://)', url_to_check)
+
+    if not match or ROOT_URL not in url_to_check:
+        raise IncorrectURLError
 
 
 def load_scrapped_urls():
@@ -319,8 +332,7 @@ def load_scrapped_urls():
 if __name__ == '__main__':
     outer_seed_urls, outer_max_articles = validate_config(CRAWLER_CONFIG_PATH)
 
-    # delete tmp/articles folder to reset crawler
-    if not pathlib.Path(ASSETS_PATH).exists():
+    if should_reset_crawler(CRAWLER_CONFIG_PATH) or not pathlib.Path(ASSETS_PATH).exists():
         prepare_environment(ASSETS_PATH)
 
     pre_scrapped_urls = load_scrapped_urls()
