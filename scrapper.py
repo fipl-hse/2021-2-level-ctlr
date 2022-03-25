@@ -65,7 +65,7 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers=HEADERS)
-            sleep(random.randint(1, 5))
+            # sleep(random.randint(1, 5))
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
