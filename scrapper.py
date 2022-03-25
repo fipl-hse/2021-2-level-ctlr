@@ -147,6 +147,16 @@ class HTMLParser:
         data_year = data_year_string.group(0)[-4:]
         volume_number = re.search(r'-\d/', self.article_url).group(0)[1]
         date = datetime.datetime(int(data_year), 6 * int(volume_number), 1)
+        topics_div_bs = article_bs.find('div', class_='field field-node-field-klyu '
+                                                      'field-entity-reference-type-taxonomy-term '
+                                                      'field-formatter-entity-reference-label field-name-field-klyu '
+                                                      'field-type-entity-reference field-label-above')
+        if topics_div_bs:
+            article_topics_bs = topics_div_bs.find_all('a')
+            list_with_article_topics = []
+            for topic_bs in article_topics_bs:
+                list_with_article_topics.append(topic_bs.text)
+            self.article.topics = list_with_article_topics
         self.article.author = author_bs
         self.article.title = title_of_the_article_bs
         self.article.date = date
