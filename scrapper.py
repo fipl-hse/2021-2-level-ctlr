@@ -1,8 +1,9 @@
 """
 Scrapper implementation
 """
-import os
 import json
+from pathlib import Path
+import shutil
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
@@ -71,15 +72,15 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        text_bs = article_bs.findall(class_='doc__text').text
+        text_bs = article_bs.find(class_='doc__text')
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find(class_="doc_header__name js-search-mark").text
+        title_bs = article_bs.find(class_="doc_header__name js-search-mark")
         self.article.title = title_bs
 
         date_bs = article_bs.find(class_="doc_header__publish_time").text
-        date = datetime.strptime(date_bs, '%Y.%m.%dT%H:%M:%S%z')
+        date = datetime.strptime(date_bs, "%d.%m.%Y, %H:%M")
         self.article.date = date
 
         author_bs = article_bs.find(class_='doc__text document_authors')
@@ -96,11 +97,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir('ASSETS_PATH')
-    except FileNotFoundError:
-        pass
-    os.mkdir('ASSETS_PATH')
+    path_for_env = Path(base_path)
+    if path_for_env.exists():
+        shutil.rmtree(base_path)
+    path_for_env.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
