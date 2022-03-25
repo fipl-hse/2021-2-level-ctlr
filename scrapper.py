@@ -120,7 +120,7 @@ class HTMLParser:
                 article_topics = article_topics.replace('\n', '')
             if '\t' in article_topics:
                 article_topics = article_topics.replace('\t', '')
-        self.article.topics = article_topics
+        self.article.topics = article_topics.split()
 
 def prepare_environment(base_path):
     """
