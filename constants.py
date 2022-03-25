@@ -13,4 +13,4 @@ HEADERS = {
     'Accept-Encoding': "gzip, deflate, br",
     'Accept-Language': "en-US,en;q=0.5"
 }
-DOMAIN = 'https:\/\/languagejournal\.spbu\.ru'
+DOMAIN = 'https://languagejournal.spbu.ru'
