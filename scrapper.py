@@ -1,12 +1,14 @@
 """
 Scrapper implementation
 """
+import os
 import json
 from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
+
 
 class IncorrectURLError(Exception):
     """
@@ -37,14 +39,14 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         self.urls.append('https://www.kommersant.ru'+article_bs.findall(class_="uho__link uho__link--overlay"))
+        return self.urls
 
     def find_articles(self):
         """
         Finds articles
         """
-        for url in self.seed_urls:
-            for seed_url_index, seed_url in enumerate(self.seed_urls):
-                response = requests.get(url=seed_url)
+        for seed_url_index, seed_url in enumerate(self.seed_urls):
+            response = requests.get(url=seed_url)
             soup = BeautifulSoup(response.text, features="lxml")
             articles_urls_bs = self._extract_url(soup)
             list_of_urls = [url_bs for url_bs in articles_urls_bs if len(self.urls) < self.max_articles]
@@ -76,7 +78,7 @@ class HTMLParser:
         date = datetime.strptime(date_bs, '%Y.%m.%dT%H:%M:%S%z')
         self.article.date = date
 
-        author_bs = article.bs.find(class_='doc__text document_authors')
+        author_bs = article_bs.find(class_='doc__text document_authors')
         self.article.author = author_bs
 
     def parse(self):
@@ -107,11 +109,11 @@ def validate_config(crawler_path):
     seed_urls = configuration["seed_urls"]
     total_articles = configuration["total_articles_to_find_and_parse"]
 
-    if not isinstance(max_articles, int) or max_articles <= 0:
+    if not isinstance(total_articles, int) or total_articles <= 0:
         raise IncorrectNumberOfArticlesError
     if not isinstance(seed_urls, list) or not seed_urls:
         raise IncorrectURLError
-    if max_articles > 100:
+    if total_articles > 100:
         raise NumberOfArticlesOutOfRangeError
 
     return seed_urls, total_articles
