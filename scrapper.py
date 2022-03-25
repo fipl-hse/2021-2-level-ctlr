@@ -46,7 +46,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        content_bs = article_bs.find_all('div', class_="issueArticle flex")
+        content_bs = article_bs.find_all('div', class_="issueArticle flex")[1:]
         for tag in content_bs:
             if len(self.urls) >= self.max_articles:
                 break
@@ -75,10 +75,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    path_to_base_path = Path(base_path)
-    if path_to_base_path.exists():
+    path = Path(base_path)
+    if path.exists():
         shutil.rmtree(base_path)
-    path_to_base_path.mkdir(parents=True, exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
@@ -90,6 +90,11 @@ def validate_config(crawler_path):
 
     seed_urls = scrapper_config["seed_urls"]
     max_articles = scrapper_config["total_articles_to_find_and_parse"]
+
+    if 'seed_urls' not in scrapper_config:
+        raise IncorrectURLError
+    if 'total_articles_to_find_and_parse' not in scrapper_config:
+        raise IncorrectNumberOfArticlesError
 
     if not isinstance(seed_urls, list):
         raise IncorrectURLError
@@ -125,6 +130,7 @@ class HTMLParser:
         """
         Parses each article
         """
+        time.sleep(random.random())
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
@@ -156,6 +162,9 @@ class HTMLParser:
 
         title_bs = article_bs.find('meta', {"name": "description"})['content']
         self.article.title = title_bs
+
+        topics_bs = article_bs.find("meta", {"name": "keywords"})['content'].split('; ')
+        self.article.topics = topics_bs
 
         date_bs = article_bs.find("meta", {"name": "DC.Date.dateSubmitted"})['content']
         article_date = datetime.strptime(date_bs, '%Y-%m-%d')

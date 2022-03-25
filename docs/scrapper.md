@@ -230,7 +230,6 @@ of extracting all necessary data from the article web page. It should do the fol
    (more details in the next sections).
 
 `parse` method usage is straightforward:
-
 ```py
 article = parser.parse()
 ```
