@@ -128,15 +128,12 @@ class HTMLParser:
             self.article.topics = 'NOT FOUND'
         year = article_bs.find('meta', {'name': 'citation_publication_date'})['content']
         issue_title = article_bs.find('meta', {'name': 'citation_journal_title'})['content']
-        pattern = re.compile(r'\d{2}')
-        issue_number = re.search(pattern, issue_title)
+        issue_number = re.search(r'\d{2}', issue_title)
         month = month_dict[int(''.join(issue_number[0])) % 4]
-        date = datetime.datetime.strptime(f'{month}.{year}', '%m.%Y')
-        self.article.date = date
-        pages_pattern = re.compile(r'\d+-\d+')
+        self.article.date = datetime.datetime.strptime(f'{month}.{year}', '%m.%Y')
         link_to_citation = article_bs.find('div', class_='articles-item-text').text
         if link_to_citation:
-            pages = re.search(pages_pattern, link_to_citation)
+            pages = re.search(r'\d+-\d+', link_to_citation)
             if pages:
                 pages_list = pages[0].split('-')
                 count_pages = int(pages_list[1]) - int(pages_list[0]) + 1
