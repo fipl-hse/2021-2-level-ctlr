@@ -38,8 +38,12 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        self.urls.append('https://www.kommersant.ru'+article_bs.findall(class_="uho__link uho__link--overlay"))
-        return self.urls
+        full_urls = []
+        all_urls_bs = article_bs.find_all(class_="uho__link uho__link--overlay")
+        for url_bs in all_urls_bs:
+            url_to_article = url_bs['href']
+            full_urls.append('https://www.kommersant.ru'+url_to_article)
+        return full_urls
 
     def find_articles(self):
         """
