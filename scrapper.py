@@ -2,13 +2,13 @@
 Scrapper implementation
 """
 import datetime
-import random
+# import random
 import re
 import shutil
 
 from pathlib import Path
 import json
-from time import sleep
+# from time import sleep
 
 import requests
 from bs4 import BeautifulSoup
