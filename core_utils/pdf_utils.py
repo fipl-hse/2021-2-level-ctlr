@@ -2,6 +2,7 @@
 PDF files downloader implementation
 """
 
+
 import wget
 import fitz
 
