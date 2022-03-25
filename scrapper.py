@@ -73,17 +73,23 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
         text_bs = article_bs.find(class_='doc__text')
+        if text_bs is None:
+            text_bs = article_bs.find(class_='b-article__text air__text')
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find(class_="doc_header__name js-search-mark")
+        title_bs = article_bs.find(class_="doc_header__name js-search-mark").text
         self.article.title = title_bs
+        print(title_bs)
 
         date_bs = article_bs.find(class_="doc_header__publish_time").text
         date = datetime.strptime(date_bs, "%d.%m.%Y, %H:%M")
         self.article.date = date
 
-        author_bs = article_bs.find(class_='doc__text document_authors')
+        try:
+            author_bs = article_bs.find(class_='doc__text document_authors').text
+        except AttributeError:
+            author_bs = 'NOT FOUND'
         self.article.author = author_bs
 
     def parse(self):
