@@ -167,5 +167,5 @@ if __name__ == '__main__':
     for article_url_text in crawler.urls:
         ID += 1
         article_parser = HTMLParser(article_url_text, ID)
-        article = article_parser.parse()
+        article = article_parser.parse()  # article = article_parser.parse()
         article.save_raw()
