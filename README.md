@@ -46,6 +46,8 @@ Instructors:
 |04.03.2022|**Lecture:** installing external dependencies with `python -m pip install -r requirements.txt`, learning `requests` library: basics, tricks. **Practice:** downloading your website pages, working with exceptions.|[Exceptions practice](./seminars/03.04.2022/try_exceptions.py), [`requests` practice](./seminars/03.04.2022/try_requests.py)|
 |11.03.2022|**Lecture:** learning `beautifulsoup4` library: find elements and get data from them. **Practice:** parsing your website pages.|[`beautifulsoup4` practice](./seminars/03.11.2022/try_beautiful_soup.py)|
 |18.03.2022|**Lecture:** working with file system via `pathlib`, `shutil`. **Practice:** parsing dates, creating and removing folders.|[Dates practice](./seminars/03.18.2022/try_dates.py), [`pathlib` practice](./seminars/03.18.2022/try_fs.py)|
+|25.03.2022|**First deadline:** crawler assignment|**N/A**|
+|01.04.2022|**EXAM WEEK:** skipping lecture and seminars|**N/A**|
 
 ## Technical solution
 
