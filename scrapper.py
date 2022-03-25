@@ -138,4 +138,4 @@ if __name__ == '__main__':
         parsing_article = HTMLParser(article_url_new, A_ID)
         parsed_article = parsing_article.parse()
         parsed_article.save_raw()
-        A_ID += 1 #sample
+        A_ID += 1 #sampleline
