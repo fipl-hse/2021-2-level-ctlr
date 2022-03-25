@@ -44,9 +44,12 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        table_rows = article_bs.find('div', class_='sections').find('div', class_='title')
-        link = table_rows.find('a')
-        self.urls.append(link['href'])
+        table_rows = article_bs.find('div', class_='sections').find_all('div', class_='title')
+        for table_row in table_rows:
+            if len(self.urls) >= self.total_max_articles:
+                break
+            link = table_row.find('a')
+            self.urls.append(link['href'])
 
 
     def find_articles(self):
