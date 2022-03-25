@@ -15,7 +15,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
 from core_utils.article import Article
 
 
@@ -76,7 +76,7 @@ class Crawler:
             retry = Retry(connect=3, backoff_factor=5)
             adapter = HTTPAdapter(max_retries=retry)
             session.mount("https://", adapter)
-            response = session.get(seed_url)
+            response = session.get(seed_url, verify=False, headers=HEADERS)
             # response = requests.get(seed_url, headers=HEADERS)
             # sleep(random.randint(1, 3))
             if not response.ok:
