@@ -1,9 +1,9 @@
 {
-    "seed_urls": ["https://tass.ru/kosmos" ,
+    "seed_urls": [
         "https://tass.ru/kultura",
         "https://tass.ru/ekonomika" ,
         "https://tass.ru/v-strane" ,
         "https://tass.ru/sport" ,
-        "https://tass.ru/proisshestviya" , "https://tass.ru/mezhdunarodnaya-panorama"],
+        "https://tass.ru/proisshestviya" , "https://tass.ru/mezhdunarodnaya-panorama", "https://tass.ru/kosmos"],
     "total_articles_to_find_and_parse": 5
 }
