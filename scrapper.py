@@ -110,7 +110,7 @@ class HTMLParser:
                 self.article.text += p_tag.text.strip()
 
     def parse(self):
-        response = requests.get(url=self.article_url, headers=HEADERS)
+        response = requests.get(self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
