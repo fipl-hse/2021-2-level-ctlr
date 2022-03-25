@@ -117,10 +117,7 @@ class HTMLParser:
         if article_topics:
             article_topics = article_topics.find('span', class_='value')
             article_topics = article_topics.text
-            if '\n' in article_topics:
-                article_topics = article_topics.replace('\n', '')
-            if '\t' in article_topics:
-                article_topics = article_topics.replace('\t', '')
+            article_topics = article_topics.split()
         self.article.topics = article_topics
 
 def prepare_environment(base_path):
