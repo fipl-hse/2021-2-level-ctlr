@@ -3,7 +3,6 @@ Scrapper implementation
 """
 import datetime
 import json
-import os
 from pathlib import Path
 import re
 import shutil
@@ -85,7 +84,7 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def parse(self):
-        article_page = requests.get(self.url)
+        article_page = requests.get(self.url, headers=HEADERS)
         article_bs = BeautifulSoup(article_page.text, 'html.parser')
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
@@ -98,7 +97,7 @@ class HTMLParser:
         class_of_link = article_bs.find('div', {'class': "articles-item-more"})
         link_to_save = class_of_link.find('a')
         link_to_pdf = ROOT_URL + link_to_save['href']
-        final_page = requests.get(link_to_pdf)
+        final_page = requests.get(link_to_pdf, headers=HEADERS)
         final_page_bs = BeautifulSoup(final_page.text, 'html.parser')
         url_pattern = re.compile(r"var DEFAULT_URL = '(.*?)'")
         final_link = final_page_bs.find(string=url_pattern)
@@ -110,8 +109,7 @@ class HTMLParser:
         for refs_maker in list_of_possible_l:
             if refs_maker in text_from_pdf:
                 text_pdf_list = text_from_pdf.split(refs_maker)
-                del text_pdf_list[-1]
-                text_from_pdf = ' '.join(text_pdf_list)
+                text_from_pdf = ' '.join(text_pdf_list[1:-1:])
         self.article.text = text_from_pdf
 
     def _fill_article_with_meta_information(self, article_bs):
@@ -125,7 +123,7 @@ class HTMLParser:
         self.article.title = title.text
         topics = article_bs.find('div', {"class": "articles"}).find_all('p')
         try:
-            self.article.topics = topics[2].text
+            self.article.topics = topics[2].text.split(', ')
         except IndexError:
             self.article.topics = 'NOT FOUND'
         year = article_bs.find('meta', {'name': 'citation_publication_date'})['content']
@@ -135,6 +133,18 @@ class HTMLParser:
         month = month_dict[int(''.join(issue_number[0])) % 4]
         date = datetime.datetime.strptime(f'{month}.{year}', '%m.%Y')
         self.article.date = date
+        pages_pattern = re.compile(r'\d+-\d+')
+        link_to_citation = article_bs.find('div', class_='articles-item-text').text
+        if link_to_citation:
+            pages = re.search(pages_pattern, link_to_citation)
+            if pages:
+                pages_list = pages[0].split('-')
+                count_pages = int(pages_list[1]) - int(pages_list[0]) + 1
+                print(f'Pages: {count_pages}')
+        else:
+            print('NOT FOUND')
+        citation_list = article_bs.find('ol').find_all('li')
+        print(f'The article has {len(citation_list)} references')
 
 
 def prepare_environment(base_path):
@@ -142,7 +152,7 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     base_path_p = Path(base_path)
-    if os.path.exists(base_path_p):
+    if Path.exists(base_path_p):
         shutil.rmtree(base_path_p)
         base_path_p.mkdir(parents=True)
     else:
@@ -155,12 +165,13 @@ def validate_config(crawler_path):
     """
     with open(crawler_path) as path_thing_idk:
         config_dict = json.load(path_thing_idk)
-    try:
-        seed_urls = config_dict['seed_urls']
-    except KeyError as error_1:
-        raise IncorrectURLError from error_1
-    else:
-        max_articles = config_dict["total_articles_to_find_and_parse"]
+    if not isinstance(config_dict, dict):
+        raise IncorrectURLError
+    if not ('seed_urls' in config_dict
+            or 'total_articles_to_find_and_parse' in config_dict):
+        raise IncorrectURLError
+    seed_urls = config_dict['seed_urls']
+    max_articles = config_dict["total_articles_to_find_and_parse"]
     if not isinstance(max_articles, int) or max_articles <= 0:
         raise IncorrectNumberOfArticlesError
     if max_articles > 150:
@@ -172,7 +183,7 @@ def validate_config(crawler_path):
     for seed_url in seed_urls:
         if not isinstance(seed_url, str):
             raise IncorrectURLError
-        if not seed_url.startswith('https://'):
+        if not seed_url.startswith(ROOT_URL):
             raise IncorrectURLError
 
     return seed_urls, max_articles
@@ -187,8 +198,6 @@ if __name__ == '__main__':
     for i, art_url in enumerate(crawler.urls):
         if i == crawler.max_articles:
             break
-        print(i)
-        print(art_url)
         parser = HTMLParser(art_url, i+1)
         article = parser.parse()
         article.save_raw()
