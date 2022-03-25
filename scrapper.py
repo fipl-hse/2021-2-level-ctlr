@@ -71,7 +71,7 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        text_bs = article_bs.findall(class_='doc__text')
+        text_bs = article_bs.findall(class_='doc__text').text
         self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
