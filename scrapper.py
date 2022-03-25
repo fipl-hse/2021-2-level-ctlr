@@ -53,8 +53,6 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            if len(self.urls) >= self.max_articles:
-                break
             response = requests.get(seed_url, HEADERS)
             time.sleep(1 + random.uniform(0.0, 1.0))
             article_bs = BeautifulSoup(response.text, 'html.parser')
