@@ -4,16 +4,18 @@ Scrapper implementation
 import datetime
 import json
 # import random
-import random
+# import random
 import re
 import shutil
 from pathlib import Path
-from time import sleep
+# from time import sleep
 
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
@@ -70,8 +72,13 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url, headers=HEADERS)
-            sleep(random.randint(1, 3))
+            session = requests.Session()
+            retry = Retry(connect=3, backoff_factor=5)
+            adapter = HTTPAdapter(max_retries=retry)
+            session.mount("https://", adapter)
+            response = session.get(seed_url)
+            # response = requests.get(seed_url, headers=HEADERS)
+            # sleep(random.randint(1, 3))
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
