@@ -30,7 +30,7 @@ class PDFRawFile:
         Gets text from the PDF file downloaded.
         """
         text = ""
-        with fitz.open(os.path.join(ASSETS_PATH, f"{self._id}_raw.pdf")) as pdf:
+        with fitz.open(ASSETS_PATH / f"{self._id}_raw.pdf") as pdf:
             for page in pdf:
                 text += page.get_text()
         return text
