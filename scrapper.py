@@ -157,10 +157,10 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    main_seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    main_seed_urls, main_max_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
 
-    crawler = Crawler(main_seed_urls, max_articles)
+    crawler = Crawler(main_seed_urls, main_max_articles)
     crawler.find_articles()
 
     ID_OF_ARTICLE = 1
@@ -170,4 +170,3 @@ if __name__ == '__main__':
         article.save_raw()
         ID_OF_ARTICLE += 1
         print(f'The {ID_OF_ARTICLE} article is done!')
-
