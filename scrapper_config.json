@@ -1,4 +1,14 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": [
+        "https://russkayarech.ru/ru/archive/2017-1",
+        "https://russkayarech.ru/ru/archive/2017-2",
+        "https://russkayarech.ru/ru/archive/2017-3",
+        "https://russkayarech.ru/ru/archive/2017-4",
+        "https://russkayarech.ru/ru/archive/2017-5",
+        "https://russkayarech.ru/ru/archive/2017-6",
+        "https://russkayarech.ru/ru/archive/2018-1",
+        "https://russkayarech.ru/ru/archive/2018-2",
+        "https://russkayarech.ru/ru/archive/2018-3"
+    ],
+    "total_articles_to_find_and_parse": 100
 }
