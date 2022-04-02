@@ -5,8 +5,8 @@ import json
 import re
 
 from constants import ASSETS_PATH
-from pipeline import CorpusManager
 from core_utils.visualizer import visualize
+from pipeline import CorpusManager
 
 
 class EmptyFileError(Exception):
