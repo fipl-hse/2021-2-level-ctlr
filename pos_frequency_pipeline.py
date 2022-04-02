@@ -20,9 +20,9 @@ class POSFrequencyPipeline:
         self.corpus_manager = corpus_manager
 
     def run(self):
-        pos_frequencies = {}
-
         for article in self.corpus_manager.get_articles().values():
+            pos_frequencies = {}
+
             article_path = article.get_file_path('single_tagged')
 
             with open(article_path, 'r') as text_file:
