@@ -144,6 +144,9 @@ class TextProcessingPipeline:
             if not token_info['analysis']:
                 continue
 
+            if 'lex' not in token_info['analysis'][0] or 'gr' not in token_info['analysis'][0]:
+                continue
+
             morphological_token.normalized_form = token_info['analysis'][0]['lex']
             morphological_token.tags_mystem = token_info['analysis'][0]['gr']
 
@@ -174,7 +177,7 @@ def validate_dataset(path_to_validate):
     for full_file_name in pathlib_path_to_validate.iterdir():
         file_name = full_file_name.name
 
-        # In case macOS Finder system file exists (Ignore this)
+        # In case this annoying macOS Finder system file exists locally
         if file_name == '.DS_Store':
             full_file_name.unlink()
             continue
