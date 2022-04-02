@@ -86,7 +86,6 @@ class HTMLParser:
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.title = article_bs.find('h1').text
-        print(self.article.title)
 
         author_bs = article_bs.find('div', class_='author')
         if not author_bs.find('a'):
@@ -101,7 +100,7 @@ class HTMLParser:
                   "мая": "05", "июня": "06", "июля": "07", "августа": "08",
                   "сентября": "09", "октября": "10", "ноября": "11",
                   "декабря": "12"}
-        for month in months.keys():
+        for month in months:
             if month in date_bs:
                 date_bs = date_bs.replace(month, months[month])
         self.article.date = datetime.strptime(date_bs, '\n%d %m %Y, %H:%M\n')
