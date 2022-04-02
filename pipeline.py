@@ -147,8 +147,8 @@ class TextProcessingPipeline:
             morphological_token.tags_mystem = token_info['analysis'][0]['gr']
 
             morph = pymorphy2.MorphAnalyzer()
-            p = morph.parse(original_word)[0]
-            morphological_token.tags_pymorphy = p.tag
+            parsed_word = morph.parse(original_word)[0]
+            morphological_token.tags_pymorphy = parsed_word.tag
 
             morphological_tokens.append(morphological_token)
 
