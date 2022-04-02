@@ -125,7 +125,8 @@ class TextProcessingPipeline:
         # Gets rid of '-\n's that break up words, so we won't get 'кот-' 'орый' as example (Should be: 'который')
         text = raw_text.replace('-\n', '')
 
-        result = Mystem().analyze(text)
+        # [:500] is temporary and is there because CI takes too long instead
+        result = Mystem().analyze(text[:500])
 
         morphological_tokens = []
 
