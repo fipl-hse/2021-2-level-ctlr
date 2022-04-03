@@ -178,10 +178,10 @@ if __name__ == '__main__':
     crawler.find_articles()
 
     print('pars')
-    articles_id = 1
+    ARTICLES_ID = 1
     for test_article_url in crawler.urls:
-        article_parser = HTMLParser(article_url=test_article_url, article_id=articles_id)
+        article_parser = HTMLParser(article_url=test_article_url, article_id=ARTICLES_ID)
         article = article_parser.parse()
         article.save_raw()
-        print(articles_id,'done')
-        articles_id += 1
+        print(ARTICLES_ID,'done')
+        ARTICLES_ID += 1
