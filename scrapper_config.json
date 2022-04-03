@@ -1,13 +1,11 @@
 {
-    "seed_urls": ["https://snob.ru/theme/907/",
-    "https://snob.ru/theme/910/",
-    "https://snob.ru/theme/151/",
-    "https://snob.ru/theme/909/",
-    "https://snob.ru/theme/904/",
-    "https://snob.ru/theme/545/",
-    "https://snob.ru/theme/168/",
-    "https://snob.ru/theme/153/",
-    "https://snob.ru/theme/177/",
-    "https://snob.ru/theme/164/"],
+    "seed_urls": [
+      "https://snob.ru/magazine/908/",
+             "https://snob.ru/magazine/718/",
+             "https://snob.ru/magazine/716/",
+             "https://snob.ru/magazine/714/",
+             "https://snob.ru/magazine/694/",
+             "https://snob.ru/magazine/667/"
+    ],
     "total_articles_to_find_and_parse": 100
 }
