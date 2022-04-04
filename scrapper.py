@@ -106,8 +106,6 @@ class HTMLParser:
     def parse(self):
         sleep(random.randint(1, 5))
         response = requests.get(url=self.article_url)
-        if not response.ok:
-            return
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
@@ -161,11 +159,9 @@ if __name__ == '__main__':
     crawler = Crawler(config_seed_urls, config_total_articles)
     crawler.find_articles()
 
-    counter = 1
-    for article_url in crawler.urls:
-        article_parser = HTMLParser(article_url=article_url, article_id=counter)
+    COUNTER = 1
+    for crawler_url in crawler.urls:
+        article_parser = HTMLParser(article_url=crawler_url, article_id=counter)
         article = article_parser.parse()
         article.save_raw()
-        counter += 1
-
-
+        COUNTER += 1
