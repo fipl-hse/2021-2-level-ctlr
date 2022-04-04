@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     COUNTER = 1
     for crawler_url in crawler.urls:
-        article_parser = HTMLParser(article_url=crawler_url, article_id=counter)
+        article_parser = HTMLParser(article_url=crawler_url, article_id=COUNTER)
         article = article_parser.parse()
         article.save_raw()
         COUNTER += 1
