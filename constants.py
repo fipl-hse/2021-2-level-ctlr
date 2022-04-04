@@ -10,5 +10,3 @@ CRAWLER_CONFIG_PATH = PROJECT_ROOT / 'scrapper_config.json'
 
 
 HTTP_PATTERN = 'https://www.ng.ru'
-
-
