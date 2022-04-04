@@ -120,7 +120,7 @@ def validate_config(crawler_path):
         if not correct_url:
             raise IncorrectURLError
 
-    if max_articles > 100:
+    if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
     if max_articles <= 0:
