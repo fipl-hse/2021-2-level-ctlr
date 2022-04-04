@@ -196,10 +196,7 @@ def validate_dataset(path_to_validate):
     last_file_id = 0
 
     for file_id in file_ids:
-        # if not last_file_id and file_id != 1:
-            # raise InconsistentDatasetError
-
-        if not 0 <= file_id - last_file_id <= 1:
+        if not last_file_id and file_id != 1 or not 0 <= file_id - last_file_id <= 1:
             raise InconsistentDatasetError
 
         last_file_id = file_id
