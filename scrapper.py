@@ -12,7 +12,6 @@ import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS, URL
 from core_utils.article import Article
-from core_utils.pdf_utils import PDFRawFile
 
 
 class IncorrectURLError(Exception):
