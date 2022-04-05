@@ -1,6 +1,7 @@
 """
 Scrapper implementation
 """
+from datetime import datetime
 import json
 import pathlib
 import re
@@ -77,10 +78,21 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        title = article_bs.find('h1')
-        self.article.title = title.text
-        author = 'NOT FOUND'
-        self.article.author = author
+        title_bs = article_bs.find('h1')
+        self.article.title = title_bs.text
+
+        author_bs = 'NOT FOUND'
+        self.article.author = author_bs
+
+        date_bs = article_bs.find('div', class_='news__date').text
+        months = {"января": "01", "февраля": "02", "марта": "03", "апреля": "04",
+                  "мая": "05", "июня": "06", "июля": "07", "августа": "08",
+                  "сентября": "09", "октября": "10", "ноября": "11",
+                  "декабря": "12"}
+        for month in months:
+            if month in date_bs:
+                date_bs = date_bs.replace(month, months[month])
+        self.article.date = datetime.strptime(date_bs, '%H:%M, %d %m %Y')
 
     def _fill_article_with_text(self, article_bs):
         texts_bs = article_bs.find('div', class_='article__body')
