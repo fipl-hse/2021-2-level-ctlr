@@ -40,8 +40,8 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.find('div', class_='jscroll-inner')
-        urls_to_aritcle = urls_bs.find('a')
+        urls = article_bs.find('div', class_='jscroll-inner')
+        urls_to_aritcle = urls.find('a')
 
         new = []
         for article in urls_to_aritcle:
@@ -53,7 +53,6 @@ class Crawler:
             else:
                 new.append(urls_bs)
         return new
-
 
 
     def find_articles(self):
