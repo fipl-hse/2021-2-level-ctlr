@@ -95,8 +95,8 @@ class HTMLParser:
     def _fill_article_with_text(self, article_bs):
         article_text = article_bs.find_all("font")
         self.article.text = ''
-        for s in article_text:
-            self.article.text += s.text
+        for text in article_text:
+            self.article.text += text.text
 
     def parse(self):
         response = requests.get(self.article_url)
