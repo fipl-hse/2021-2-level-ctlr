@@ -45,13 +45,13 @@ class Crawler:
 
         new = []
         for article in urls_to_aritcle:
-            urls_bs = article['href']
+            urls = article['href']
             pattern = r'https://vz.ru'
-            need_url = re.search(r'https://', urls_bs)
+            need_url = re.search(r'https://', urls)
             if not need_url:
-                new.append(pattern + urls_bs)
+                new.append(pattern + urls)
             else:
-                new.append(urls_bs)
+                new.append(urls)
         return new
 
 
