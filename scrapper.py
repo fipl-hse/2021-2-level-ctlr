@@ -7,11 +7,12 @@ from pathlib import Path
 import random
 import shutil
 import os
+from time import sleep
 import requests
 from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
-from time import sleep
+
 
 
 class IncorrectURLError(Exception):
