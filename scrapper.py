@@ -14,7 +14,6 @@ from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
-
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
@@ -84,20 +83,20 @@ class HTMLParser:
         author = article_bs.find('em')
         if author:
             self.article.author = author.text
+        else:
+            self.article.author = "NOT FOUND"
 
         date = article_bs.find('div', class_='mndata')
         self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
 
-        topics = article_bs.find('div', class_="nav")
-        topic = topics.find("h1")
-        self.article.topics = topic
+        topic = article_bs.find("h1")
+        self.article.topics = topic.text
 
     def _fill_article_with_text(self, article_bs):
         article_text = article_bs.find_all("font")
         self.article.text = ''
         for s in article_text:
             self.article.text += s.text
-
 
     def parse(self):
         response = requests.get(self.article_url)
