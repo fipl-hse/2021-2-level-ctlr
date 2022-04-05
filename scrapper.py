@@ -76,6 +76,12 @@ class HTMLParser:
         self.article_id = article_id
         self.article = Article(article_url, article_id)
 
+    def _fill_article_with_meta_information(self, article_bs):
+        title = article_bs.find('h1')
+        self.article.title = title.text
+        author = 'NOT FOUND'
+        self.article.author = author
+
     def _fill_article_with_text(self, article_bs):
         texts_bs = article_bs.find('div', class_='article__body')
         paragraphs_bs = texts_bs.find_all('p', class_=None)
@@ -88,7 +94,10 @@ class HTMLParser:
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
         return self.article
+
+
 
 def prepare_environment(base_path):
     """
