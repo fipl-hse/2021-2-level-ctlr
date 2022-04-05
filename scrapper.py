@@ -10,7 +10,7 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
 from core_utils.article import Article
 
 
@@ -56,7 +56,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(seed_url)
+            response = requests.get(seed_url, headers=HEADERS)
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
@@ -78,19 +78,19 @@ class HTMLParser:
     def _fill_article_with_meta_information(self, article_bs):
         article_title = article_bs.find('div', class_="mnname")
         title = article_title.find('h2')
-        self.article.title = title.text
-
-        author = article_bs.find('em')
-        if author:
-            self.article.author = author.text
-        else:
-            self.article.author = "NOT FOUND"
+        self.article.title = title.text.strip()
 
         date = article_bs.find('div', class_='mndata')
         self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
 
+        try:
+            author = article_bs.find('em')
+            self.article.author = author.text
+        except AttributeError:
+            self.article.author = "NOT FOUND"
+
         topic = article_bs.find("h1")
-        self.article.topics = topic.text
+        self.article.topics = topic.text.strip()
 
     def _fill_article_with_text(self, article_bs):
         article_text = article_bs.find_all("font")
@@ -99,7 +99,8 @@ class HTMLParser:
             self.article.text += text.text
 
     def parse(self):
-        response = requests.get(self.article_url)
+        response = requests.get(self.article_url, headers=HEADERS)
+        response.encoding = 'windows-1251'
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
