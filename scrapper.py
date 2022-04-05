@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 import random
 import shutil
-import os
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
