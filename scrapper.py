@@ -143,7 +143,7 @@ def prepare_environment(base_path):
     path_to_base_path = Path(base_path)
     if path_to_base_path.exists():
         shutil.rmtree(base_path)
-    path_to_base_path.mkdir(parents=True, exist_ok=True)
+    path_to_base_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
@@ -163,8 +163,6 @@ def validate_config(crawler_path):
 
     seed_urls = config["seed_urls"]
     total_articles_to_find_and_parse = config["total_articles_to_find_and_parse"]
-    stop = config["stop"]
-    flag = bool(config["continue"])
 
     if not seed_urls:
         raise IncorrectURLError
@@ -178,13 +176,10 @@ def validate_config(crawler_path):
     if total_articles_to_find_and_parse > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    return seed_urls, total_articles_to_find_and_parse, stop, flag
+    return seed_urls, total_articles_to_find_and_parse
 
 
 if __name__ == '__main__':
-    with open(CRAWLER_CONFIG_PATH) as file:
-        configuration = json.load(file)
-
     print('---Preparing environment---')
     seed_urls_test, total_articles_test, stop_article, should_continue = validate_config(CRAWLER_CONFIG_PATH)
     if not should_continue:
@@ -196,15 +191,9 @@ if __name__ == '__main__':
 
     print('---Parsing---')
     for id_of_article, article_url_test in enumerate(crawler.urls):
-        if id_of_article < stop_article and should_continue:
-            continue
         article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article + 1)
         article = article_parser.parse()
         article.save_raw()
-        configuration["stop"] = id_of_article + 1
-        with open(CRAWLER_CONFIG_PATH, 'w') as file:
-            json.dump(configuration, file)
-
         print(f'The {id_of_article + 1} article is done!')
 
     print('---Done!---')
