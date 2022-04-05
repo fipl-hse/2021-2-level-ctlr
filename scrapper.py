@@ -96,7 +96,7 @@ def prepare_environment(base_path):
     """
     path = pathlib.Path(base_path)
     if path.exists():
-        shutil.rmtree(path)
+        shutil.rmtree(base_path)
     path.mkdir(parents=True, exist_ok=True)
 
 def validate_config(crawler_path):
