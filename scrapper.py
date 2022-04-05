@@ -47,14 +47,11 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         urls_bs = article_bs.find_all('td', class_='views-field views-field-title table__cell')
-        full_urls = []
         for url_bs in urls_bs:
             url = url_bs.find('a')['href']
-            full_urls.append(HTTP_PATTERN + url)
-        for full_url in full_urls:
-            if len(self.urls) >= 100:
+            if len(self.urls) >= self.max_articles:
                 break
-            self.urls.append(full_url)
+            self.urls.append(HTTP_PATTERN + url)
 
     def find_articles(self):
         """
@@ -63,13 +60,10 @@ class Crawler:
         for seed_url in self.seed_urls:
             sleep(randint(1, 5))
             response = requests.get(seed_url)
-
             if not response.ok:
                 continue
-
-            seed_url_bs = BeautifulSoup(response.text, 'lxml')
-
-            self._extract_url(seed_url_bs)
+            article_bs = BeautifulSoup(response.text, 'lxml')
+            self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
@@ -88,11 +82,8 @@ class HTMLParser:
         pdf_url = article_bs.find('iframe', class_='pdf')['data-src']
         pdf = PDFRawFile(pdf_url, self.article_id)
         pdf.download()
-
-        pdf_with_lit = pdf.get_text()
-        pdf_without_lit = pdf_with_lit.split('Литература')[0]
-
-        self.article.text = pdf_without_lit
+        article_text = pdf.get_text().split('Литература')[0]
+        self.article.text = article_text
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.author = article_bs.find('span', class_='field__item-wrapper').text
@@ -132,6 +123,9 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         configuration = json.load(file)
 
+    if "seed_urls" and "total_articles_to_find_and_pars" not in configuration:
+        raise IncorrectURLError
+
     http_pattern = re.compile(HTTP_PATTERN)
     for url in configuration["seed_urls"]:
         result = http_pattern.search(url)
@@ -163,10 +157,8 @@ if __name__ == '__main__':
     crawler = Crawler(main_seed_urls, main_max_articles)
     crawler.find_articles()
 
-    ID_OF_ARTICLE = 1
-    for main_article_url in crawler.urls:
-        article_parser = HTMLParser(article_url=main_article_url, article_id=ID_OF_ARTICLE)
+    for id_of_article, url_of_article in enumerate(crawler.urls):
+        article_parser = HTMLParser(article_url=url_of_article, article_id=id_of_article + 1)
         article = article_parser.parse()
         article.save_raw()
-        ID_OF_ARTICLE += 1
-        print(f'The {ID_OF_ARTICLE} article is done!')
+        print(f'The {id_of_article + 1} article is done!')
