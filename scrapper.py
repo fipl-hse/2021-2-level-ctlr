@@ -4,12 +4,14 @@ Scrapper implementation
 import re
 import json
 from pathlib import Path
+import random
 import shutil
 import os
 import requests
 from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
+from time import sleep
 
 
 class IncorrectURLError(Exception):
@@ -40,8 +42,7 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls = article_bs.find('div', class_='jscroll-inner')
-        urls_to_aritcle = urls.find_all('a')
+        urls_to_aritcle = article_bs.find_all('a')
 
         new = []
         for article in urls_to_aritcle:
@@ -54,21 +55,21 @@ class Crawler:
                 new.append(urls)
         return new
 
-
     def find_articles(self):
         """
         Finds articles
         """
-        url = 'https://vz.ru/news/'
-        reqs = requests.get(url)
-        soup = BeautifulSoup(reqs.text, 'html.parser')
-        try:
-            for link in soup.find_all('a', attrs={'href': re.compile("^http[s]?://")}):
-                print(link.get('href'))
-        except KeyError:
-            print('Incorrect link')
+        for seed_url in self.seed_urls:
+            sleep(random.randint(1, 5))
+
+            response = requests.get(url=seed_url)
+
+            if not response.ok:
+                continue
+        soup = BeautifulSoup(response.text, 'lxml')
 
         self._extract_url(soup)
+
 
     def get_search_urls(self):
         """
@@ -109,9 +110,9 @@ def prepare_environment(base_path):
     path.mkdir(exist_ok=True, parents=True)
 
     # try:
-    #    os.rmdir(base_path)  # removing directory
-    #  except FileNotFoundError:
-    #    pass
+    #   os.rmdir(base_path)  # removing directory
+    # except FileNotFoundError:
+    #   pass
     # os.mkdir(base_path)  # creating directory
 
 
