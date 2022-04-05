@@ -3,6 +3,8 @@ Scrapper implementation
 """
 import re
 import json
+from pathlib import Path
+import shutil
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -38,13 +40,21 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.find_all('a', class_='table')
+        urls_bs = article_bs.find('div', class_='jscroll-inner')
+        urls_to_aritcle = urls_bs.find('a')
 
-        for article in urls_bs:
-            if len(self.urls) < self.max_articles:
-                link = article.find('a')
-                href = link['href']
-                self.urls.append(href)
+        new = []
+        for article in urls_to_aritcle:
+            urls_bs = article['href']
+            pattern = r'https://vz.ru'
+            need_url = re.search(r'https://', urls_bs)
+            if not need_url:
+                new.append(pattern + urls_bs)
+            else:
+                new.append(urls_bs)
+        return new
+
+
 
     def find_articles(self):
         """
@@ -77,6 +87,8 @@ class HTMLParser:
     def _fill_article_with_text(self, article_bs):
         text_bs = article_bs.find('div', class_='text')
         self.article.text = text_bs.text
+        print(text_bs)
+
 
     def parse(self):
         response = requests.get(self.article_url)
@@ -92,11 +104,16 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(base_path)  # removing directory
-    except FileNotFoundError:
-        pass
-    os.mkdir(base_path)  # creating directory
+    path = Path(base_path)
+    if path.exists():
+        shutil.rmtree(base_path)
+    path.mkdir(exist_ok=True, parents=True)
+
+    # try:
+    #    os.rmdir(base_path)  # removing directory
+    #  except FileNotFoundError:
+    #    pass
+    # os.mkdir(base_path)  # creating directory
 
 
 def validate_config(crawler_path):
