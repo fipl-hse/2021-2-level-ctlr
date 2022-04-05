@@ -1,25 +1,18 @@
 """
 Scrapper implementation
 """
-import datetime
+from datetime import datetime
 import json
-# import random
-# import random
 import re
 import shutil
 from pathlib import Path
-# from time import sleep
 
 import requests
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
-
-# from time import sleep
 
 
 class IncorrectURLError(Exception):
@@ -51,34 +44,20 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.find_all('a', class_="cardWrap_link__2AN_X")
-        the_beginning = 'https://tass.ru'
-        # the_ends = []
-        for url_bs in urls_bs:
-            the_end = url_bs['href']
+        links = article_bs.find_all('div', class_='mnname')
+        the_beginning = 'http://www.selsknov.ru'
+        for url_bs in links:
+            the_end = url_bs.find('a')['href']
             full_url = the_beginning + the_end
             if len(self.urls) < self.max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
-            # the_ends.append(the_beginning + the_end)
-        # full_urls = [the_beginning + the_end for the_end in the_ends]
-        # for full_url in the_ends:
-        #     if len(self.urls) < self.max_articles and full_url not in self.urls:
-        #         self.urls.append(full_url)
-
-        # return urls_bs_full
 
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self.seed_urls:
-            session = requests.Session()
-            retry = Retry(connect=3, backoff_factor=5)
-            adapter = HTTPAdapter(max_retries=retry)
-            session.mount("https://", adapter)
-            response = session.get(seed_url, verify=False, headers=HEADERS)
-            # response = requests.get(seed_url, headers=HEADERS)
-            # sleep(random.randint(1, 3))
+            response = requests.get(seed_url)
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
@@ -98,29 +77,27 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        article_title = article_bs.find('h1').text
-        self.article.title = article_title.strip()
+        article_title = article_bs.find('div', class_="mnname")
+        title = article_title.find('h2')
+        self.article.title = title.text
 
-        self.article.author = 'NOT FOUND'
+        author = article_bs.find('em')
+        if author:
+            self.article.author = author.text
 
-        date_epoch = article_bs.dateformat['time']
-        self.article.date = datetime.datetime.fromtimestamp(int(date_epoch))
+        date = article_bs.find('div', class_='mndata')
+        self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
 
-        topic = article_bs.find('a', class_='tags__item')
-        if not topic:
-            topic = 'NOT FOUND'
-        else:
-            topic = topic.text
+        topics = article_bs.find('div', class_="nav")
+        topic = topics.find("h1")
         self.article.topics = topic
 
     def _fill_article_with_text(self, article_bs):
-        text_content = article_bs.find('div', class_="text-content")
-        divs = text_content.find_all('div', class_="text-block")
+        article_text = article_bs.find_all("font")
         self.article.text = ''
-        for div in divs:
-            p_tags = div.find_all('p')
-            for p_tag in p_tags:
-                self.article.text += p_tag.text.strip()
+        for s in article_text:
+            self.article.text += s.text
+
 
     def parse(self):
         response = requests.get(self.article_url)
@@ -180,5 +157,5 @@ if __name__ == '__main__':
     for article_url_text in crawler.urls:
         ID += 1
         article_parser = HTMLParser(article_url_text, ID)
-        article = article_parser.parse()  # article = article_parser.parse()
+        article = article_parser.parse()
         article.save_raw()

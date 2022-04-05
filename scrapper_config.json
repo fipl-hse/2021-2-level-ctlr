@@ -1,9 +1,15 @@
 {
     "seed_urls": [
-        "https://tass.ru/kultura",
-        "https://tass.ru/ekonomika" ,
-        "https://tass.ru/v-strane" ,
-        "https://tass.ru/sport" ,
-        "https://tass.ru/proisshestviya" , "https://tass.ru/mezhdunarodnaya-panorama", "https://tass.ru/kosmos"],
-    "total_articles_to_find_and_parse": 5
+        "http://www.selsknov.ru/news-3.html",
+        "http://www.selsknov.ru/news-2.html",
+        "http://www.selsknov.ru/news-10.html",
+        "http://www.selsknov.ru/news-8.html",
+        "http://www.selsknov.ru/news-4.html",
+        "http://www.selsknov.ru/news-7.html",
+        "http://www.selsknov.ru/news-6.html",
+        "http://www.selsknov.ru/news-5.html",
+        "http://www.selsknov.ru/news-17.html",
+        "http://www.selsknov.ru/news-15.html"
+    ],
+    "total_articles_to_find_and_parse": 100
 }

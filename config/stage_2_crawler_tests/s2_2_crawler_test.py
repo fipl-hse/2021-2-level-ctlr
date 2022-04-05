@@ -54,6 +54,5 @@ class CrawlerTest(unittest.TestCase):
     def test_crawler_finds_required_number_of_articles(self):
         crawler = Crawler(self.seed, self.total_number)
         crawler.find_articles()
-        print(crawler.urls)
         error_msg = 'Method find_articles() must fill field "urls" with not less articles than specified in config file'
         self.assertTrue(len(crawler.urls) >= self.total_number, error_msg)

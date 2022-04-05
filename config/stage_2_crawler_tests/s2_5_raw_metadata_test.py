@@ -5,7 +5,7 @@ import unittest
 
 import pytest
 import requests
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 
 class RawBasicDataValidator(unittest.TestCase):
@@ -78,11 +78,11 @@ class RawMediumDataValidator(unittest.TestCase):
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
-            self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
+            self.assertTrue(requests.get(metadata[1]['url']),
                             msg="Can not open URL: <{}>. Check how you collect URLs".format(
                                 metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
+            html_source = requests.get(metadata[1]['url']).text
 
             print(metadata[1]['title'])
             self.assertTrue(metadata[1]['title'] in
@@ -154,7 +154,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
 
-            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
+            html_source = requests.get(metadata[1]['url']).text
 
             # is a date in given format?
             self.assertTrue(re.search(self.data_pattern, metadata[1]['date']),
