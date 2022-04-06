@@ -4,11 +4,11 @@ Scrapper implementation
 
 from datetime import datetime
 import json
+from pathlib import Path
 import re
 import time
 
 from bs4 import BeautifulSoup
-from pathlib import Path
 import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
