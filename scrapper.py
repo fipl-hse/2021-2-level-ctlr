@@ -4,11 +4,15 @@ Scrapper implementation
 
 import json
 import re
-import os
 import time
 import requests
 from bs4 import BeautifulSoup
-# from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+from pathlib import Path
+
+from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
+
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -39,29 +43,29 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        main_block_bs = article_bs.find("div", {"class": "cat-children"})
+        extracted_urls = []
+        for link in main_block_bs.find_all("a"):
+            if link == main_block_bs.find("li", {"class": "first"}).find("a"):
+                continue
+            extracted_urls.append('https://l.jvolsu.com/' + link.get('href'))
+        return extracted_urls
 
     def find_articles(self):
         """
         Finds articles
         """
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) '
-            'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'ru,en;q=0.9,de;q=0.8'
-        }
-
         for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url, headers=headers)
+            response = requests.get(url=seed_url, headers=HEADERS)
             time.sleep(3)
             if not response.ok:
-                print("Something went wrong...")
-            soup = BeautifulSoup(response.text, "lxml")
-            main_block_bs = soup.find('div', {'class': 'cat-children'})
-            for link in main_block_bs.find_all("a"):
-                self.urls.append('https://l.jvolsu.com/' + link.get('href'))
-
+                continue
+            soup = BeautifulSoup(response.text, "html.parser")
+            extracted_urls = self._extract_url(soup)
+            self.urls += extracted_urls
+            if len(self.urls) >= self.max_articles:
+                break
+        return self.urls[:self.max_articles]
 
     def get_search_urls(self):
         """
@@ -70,14 +74,45 @@ class Crawler:
         pass
 
 
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(self.article_url, self.article_id)
+
+    def parse(self):
+        response = requests.get(self.article_url, headers=HEADERS)
+        time.sleep(3)
+        article_bs = BeautifulSoup(response.text, "html.parser")
+
+        self._fill_article_with_text(article_bs)
+        return self.article
+
+    def _fill_article_with_text(self, article_bs):
+        page = article_bs.find("div", {"id": "main"})
+        attachment = page.find("div", {"class": "attachmentsContainer"})
+        pdf_link = attachment.find("a", {"class": "at_url"})["href"]
+
+        pdf = PDFRawFile(pdf_link, self.article_id)
+        pdf.download()
+
+        pdf_text = pdf.get_text()
+        if 'Список литературы' in pdf_text:
+            split_pdf = pdf_text.split('Список литературы')
+            self.article.text = split_pdf[0]
+        else:
+            self.article.text = pdf.get_text()
+
+
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.rmdir(base_path)
-    except FileNotFoundError:
-        os.mkdir(base_path)
+    directory = Path(base_path)
+    for item in directory.iterdir():
+        item.unlink()
+    directory.rmdir()
+    Path(directory).mkdir(parents=True)
 
 
 def validate_config(crawler_path):
@@ -98,11 +133,18 @@ def validate_config(crawler_path):
             raise IncorrectURLError
     if not isinstance(number_of_articles, int) or number_of_articles <= 0:
         raise IncorrectNumberOfArticlesError
-    if number_of_articles > 200:
+    if number_of_articles > 50:
         raise NumberOfArticlesOutOfRangeError
     return seed_urls, number_of_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    pass
+    my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(my_seed_urls, my_max_articles)
+    crawler.find_articles()
+    for i, my_url in enumerate(crawler.urls):
+        parser = HTMLParser(my_url, i + 1)
+        my_article = parser.parse()
+        my_article.save_raw()
