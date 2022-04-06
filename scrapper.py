@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from core_utils.article import Article
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN, HTTP_PATTERN1
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN
 
 
 class IncorrectURLError(Exception):
