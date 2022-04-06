@@ -159,3 +159,4 @@ if __name__ == '__main__':
         article = article_parser.parse()
         article.save_raw()
         print(f'The {id_of_article + 1} article is done!')
+    print('Done!')
