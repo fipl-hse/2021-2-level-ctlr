@@ -5,9 +5,16 @@ import os
 import json
 import re
 import requests
+import shutil
+import pathlib
+
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+
 from core_utils.article import Article
+from datetime import datetime
+import random
+from time import sleep
 
 
 class IncorrectURLError(Exception):
@@ -52,16 +59,17 @@ class Crawler:
         """
         Finds articles
         """
+
         for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url)
+            sleep(random.randint(1, 5))
+            response = requests.get(seed_url)
 
             if not response.ok:
                 continue
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
-            article_urls = self._extract_url(soup_lib)
-            for article_url in article_urls:
-                self.urls.append(article_url)
+
+            self._extract_url(soup_lib)
 
     def get_search_urls(self):
         """
