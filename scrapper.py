@@ -9,6 +9,7 @@ from time import sleep
 import requests
 from bs4 import BeautifulSoup
 
+from datetime import datetime
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
@@ -81,6 +82,30 @@ class HTMLParser:
         self.article_url = article_url
         self.article_id = article_id
         self.article = Article(article_url, article_id)
+
+    def _fill_article_with_meta_information(self, article_bs):
+        self.article.title = article_bs.find('h1', class_='article__header__title-in js-slide-title').text
+        a_author = article_bs.find('a', class_='article__authors__author')
+        self.article.author = a_author.text
+
+        a_date = article_bs.find('span', class_="article__header__date").text
+
+        months = {"января": "01",
+                  "февраля": "02",
+                  "марта": "03",
+                  "апреля": "04",
+                  "мая": "05",
+                  "июня": "06",
+                  "июля": "07",
+                  "августа": "08",
+                  "сентября": "09",
+                  "октября": "10",
+                  "ноября": "11",
+                  "декабря": "12"}
+        for month in months:
+            if month in a_date:
+                a_date = a_date.replace(month, months[month])
+        self.article.date = datetime.strptime(a_date, '%H:%M, %d %m %Y')
 
     def _fill_article_with_text(self, article_bs):
         texts = article_bs.find('div', class_='article__text article__text_free')
