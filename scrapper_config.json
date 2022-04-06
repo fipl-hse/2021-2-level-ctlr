@@ -2,5 +2,5 @@
     "seed_urls": [
         "https://k1news.ru/news", "https://k1news.ru/news/?ppp=50",
         "https://k1news.ru/news/page/2/?ppp=50"],
-    "total_articles_to_find_and_parse": 10
+    "total_articles_to_find_and_parse": 100
 }
