@@ -3,7 +3,9 @@ set -ex
 echo "CorpusManager validation"
 echo "Starting tests for CorpusManager"
 
-TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh pipeline)
+
+source venv/bin/activate
 
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"

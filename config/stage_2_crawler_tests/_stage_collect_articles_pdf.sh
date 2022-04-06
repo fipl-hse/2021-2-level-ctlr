@@ -3,7 +3,7 @@ set -ex
 echo -e '\n'
 echo 'Collect articles...'
 
-TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh crawler)
 
 if [[ ${TARGET_SCORE} != 0 ]]; then
   bash config/stage_2_crawler_tests/s2_4_collect_articles_from_internet_pdf.sh

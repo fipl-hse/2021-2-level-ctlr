@@ -3,12 +3,16 @@ set -ex
 echo -e '\n'
 echo 'Running lint check...'
 
-#TODO: rework scoring function to actually get score before passing to python script
-TARGET_SCORE=$(cat config/target_score.txt)
+TARGET_SCORE_PIPELINE=$(bash config/get_mark.sh pipeline)
+TARGET_SCORE_CRAWLER=$(bash config/get_mark.sh crawler)
+
+LINT_SCORE=$(( TARGET_SCORE_CRAWLER > TARGET_SCORE_PIPELINE ? TARGET_SCORE_CRAWLER : TARGET_SCORE_PIPELINE))
+
+source venv/bin/activate
 
 lint_output=$(python -m pylint *.py core_utils \
               --rcfile config/stage_1_style_tests/.pylintrc)
 
-python3 config/stage_1_style_tests/lint_level.py \
+python config/stage_1_style_tests/lint_level.py \
           --lint-output "$lint_output" \
-          --target-score "$TARGET_SCORE"
+          --target-score "$LINT_SCORE"

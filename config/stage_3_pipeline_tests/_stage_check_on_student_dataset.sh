@@ -3,7 +3,9 @@ set -ex
 echo -e '\n'
 echo "Check processing on student dataset"
 
-TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh pipeline)
+
+source venv/bin/activate
 
 if [[ ${TARGET_SCORE} != 0 ]]; then
   mkdir -p tmp/articles

@@ -2,6 +2,8 @@ set -ex
 
 echo "Stage: Downloading articles"
 
+source venv/bin/activate
+
 python config/config_param_changer.py --config_path="scrapper_config.json"
 
 echo "Changed config params"
@@ -12,7 +14,7 @@ echo "Collected dataset"
 
 echo "Checking volume of files"
 
-TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh crawler)
 
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"

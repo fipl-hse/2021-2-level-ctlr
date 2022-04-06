@@ -3,7 +3,7 @@ set -ex
 echo -e '\n'
 echo "Check files processing on student dataset"
 
-TARGET_SCORE=$(bash config/get_pipeline_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh pipeline)
 
 if [[ ${TARGET_SCORE} != 0 ]]; then
   mkdir -p tmp/articles
@@ -17,6 +17,7 @@ if [[ ${TARGET_SCORE} != 0 ]]; then
   fi
   mv *_raw.txt tmp/articles
   bash config/stage_4_pos_frequency_pipeline_tests/run_pos_frequency_pipeline.sh
+  bash config/stage_4_pos_frequency_pipeline_tests/s4_pos_frequency_pipeline.sh
   echo "Your solution is accepted! Proceed to further tasks from your lecturer."
 else
   echo "Skip stage"

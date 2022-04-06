@@ -3,7 +3,9 @@ set -ex
 echo "Stage 1B: Validating metadata"
 echo "Starting tests for received metadata"
 
-TARGET_SCORE=$(bash config/get_scrapper_target_score.sh)
+TARGET_SCORE=$(bash config/get_mark.sh crawler)
+
+source venv/bin/activate
 
 if [[ ${TARGET_SCORE} == 4 ]]; then
   echo "Running score four checks"
