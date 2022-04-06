@@ -81,8 +81,9 @@ class HTMLParser:
         title_bs = article_bs.find('h1')
         self.article.title = title_bs.text
 
-        author_bs = 'NOT FOUND'
-        self.article.author = author_bs
+        self.article.author = 'NOT FOUND'
+
+        self.article.topics = 'NOT FOUND'
 
         date_bs = article_bs.find('div', class_='news__date').text
         months = {"января": "01", "февраля": "02", "марта": "03", "апреля": "04",
