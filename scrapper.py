@@ -4,15 +4,14 @@ Scrapper implementation
 import os
 import json
 import re
+import random
+from time import sleep
 import requests
 
 from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 from core_utils.article import Article
-
-import random
-from time import sleep
 
 
 class IncorrectURLError(Exception):
