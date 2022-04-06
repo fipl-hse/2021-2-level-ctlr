@@ -11,7 +11,7 @@ import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils import pdf_utils
-from core_utils.article import Article
+from core_utils.article import Article, date_from_meta
 
 
 class IncorrectURLError(Exception):
@@ -93,10 +93,25 @@ class HTMLParser:
         article_text = ''.join(main_text)
         self.article.text = article_text
 
+    def _fill_article_with_meta_information(self, article_bs):
+        main_body_bs = article_bs.find('div', {'class': 'two_thirds'})
+        self.article.title = main_body_bs.find('h1').text
+
+        authors_table_bs = main_body_bs.find('table', {'class': 'content_table otvet_list'})
+        authors_table_raws_bs = authors_table_bs.find_all('tr')[1:]
+        authors_list = []
+        for table_raw in authors_table_raws_bs:
+            authors_list.append(table_raw.find('td').text)
+        self.article.author = ', '.join(authors_list)
+
+        topics = article_bs.find('meta', {'name': 'keywords'})['content']
+        self.article.topics = topics.split(', ')
+
     def parse(self):
         web_page = requests.get(self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(web_page.text, 'lxml')
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
         return self.article
 
 
