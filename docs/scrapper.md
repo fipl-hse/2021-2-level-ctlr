@@ -171,7 +171,7 @@ Once the crawler is instantiated, it can be started by executing its
 method:
 
 ```py
-crawler.find_articles()
+crawler.stolen_from_slava()
 ```
 
 The method should iterate over the list of seeds, 

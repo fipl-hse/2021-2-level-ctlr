@@ -1,7 +1,7 @@
 """
 Pipeline for text processing implementation
 """
-
+# import requests
 
 class EmptyDirectoryError(Exception):
     """
@@ -92,7 +92,16 @@ def validate_dataset(path_to_validate):
 
 
 def main():
-    # YOUR CODE HERE
+
+    html = "https://esquire.ru/"
+
+    data = requests.get(html, headers={'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 '
+                                                     '(KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36'})
+    page_code = data.text
+
+    with open('page_code.html', 'w', encoding='utf-8') as f:
+        f.write(page_code)
+
     pass
 
 
