@@ -7,6 +7,7 @@ import re
 import time
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime
 from pathlib import Path
 
 from core_utils.article import Article
@@ -48,7 +49,7 @@ class Crawler:
         for link in main_block_bs.find_all("a"):
             if link == main_block_bs.find("li", {"class": "first"}).find("a"):
                 continue
-            extracted_urls.append('https://l.jvolsu.com/' + link.get('href'))
+            extracted_urls.append('https://l.jvolsu.com' + link.get('href'))
         return extracted_urls
 
     def find_articles(self):
@@ -62,9 +63,10 @@ class Crawler:
                 continue
             soup = BeautifulSoup(response.text, "html.parser")
             extracted_urls = self._extract_url(soup)
-            self.urls += extracted_urls
-            if len(self.urls) >= self.max_articles:
-                break
+            for extracted_url in extracted_urls:
+                self.urls.append(extracted_url)
+                if len(self.urls) >= self.max_articles:
+                    break
         return self.urls[:self.max_articles]
 
     def get_search_urls(self):
@@ -86,12 +88,15 @@ class HTMLParser:
         article_bs = BeautifulSoup(response.text, "html.parser")
 
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
+        self._fill_article_with_data(article_bs)
+
         return self.article
 
     def _fill_article_with_text(self, article_bs):
         page = article_bs.find("div", {"id": "main"})
         attachment = page.find("div", {"class": "attachmentsContainer"})
-        pdf_link = attachment.find("a", {"class": "at_url"})["href"]
+        pdf_link = "https://l.jvolsu.com" + attachment.find("a", {"class": "at_url"})["href"]
 
         pdf = PDFRawFile(pdf_link, self.article_id)
         pdf.download()
@@ -101,7 +106,49 @@ class HTMLParser:
             split_pdf = pdf_text.split('Список литературы')
             self.article.text = split_pdf[0]
         else:
-            self.article.text = pdf.get_text()
+            self.article.text = pdf_text
+
+    def _fill_article_with_meta_information(self, article_bs):
+        page = article_bs.find("div", {"id": "main"})
+        title_and_author = page.find('h2')
+        title_and_author = title_and_author.text.replace(' "', "").replace('" ', "")
+
+        title = ""
+        for letter in title_and_author[::-1]:
+            if letter == ".":
+                if title_and_author[title_and_author.index(letter) - 1].isupper():
+                    break
+            title += letter
+        self.article.title = title[::-1][1:-2]
+
+        author = title_and_author.replace(title[::-1], "")
+        if "," in author:
+            self.article.author = author.split(",")[0][4:]
+        else:
+            self.article.author = author[4:]
+
+    def _fill_article_with_data(self, article_bs):
+        page = article_bs.find("div", {"id": "main"})
+        # I don't have normal date information, so let's try to get it from citation
+        citation = page.find_all("p", {"style": "text-align: justify;"})[-1]
+        date_inf = citation.text.replace('"', "")
+
+        date_of_article = ""
+
+        year = re.search(r'\d{4}\.', date_inf).group(0)
+        for symbol in year:
+            if symbol.isdigit():
+                date_of_article += symbol
+
+        # Well... I have only the knowledge that this journal is being published six times a year
+        day_and_month = {"1": "-01-01", "2": "-01-03", "3": "-01-05",
+                         "4": "-01-07", "5": "-01-09", "6": "-01-11"}
+        number_of_journal = re.search(r'№ \d', date_inf).group(0)
+        for number, month in day_and_month.items():
+            if number in number_of_journal:
+                date_of_article += month
+
+        self.article.date = datetime.strptime(date_of_article, '%Y-%d-%m')
 
 
 def prepare_environment(base_path):
@@ -133,7 +180,7 @@ def validate_config(crawler_path):
             raise IncorrectURLError
     if not isinstance(number_of_articles, int) or number_of_articles <= 0:
         raise IncorrectNumberOfArticlesError
-    if number_of_articles > 50:
+    if number_of_articles > 100:
         raise NumberOfArticlesOutOfRangeError
     return seed_urls, number_of_articles
 
