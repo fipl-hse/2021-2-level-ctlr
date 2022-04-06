@@ -57,13 +57,14 @@ class Crawler:
         for seed_url in self.seed_urls:
             response = requests.get(url=seed_url)
 
-            if not response.ok:
-                continue
-
             soup = BeautifulSoup(response.text, 'lxml')
+
             article_urls = self._extract_url(soup)
+
             for article_url in article_urls:
-                self.urls.append(article_url)
+                if len(self.urls) < self.max_articles:
+                    if article_url not in self.urls:
+                        self.urls.append(article_url)
 
     def get_search_urls(self):
         """
@@ -156,7 +157,10 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(seed_urls=seed_links, max_articles=maximum_articles)
     crawler.find_articles()
-    for i, url in enumerate (crawler.urls):
-        parser = HTMLParser(url, i + 1)
-        article = parser.parse()
+
+    COUNTER = 1
+    for crawler_url in crawler.urls:
+        article_parser = HTMLParser(article_url=crawler_url, article_id=COUNTER)
+        article = article_parser.parse()
         article.save_raw()
+        COUNTER += 1
