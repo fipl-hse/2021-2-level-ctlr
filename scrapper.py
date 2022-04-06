@@ -2,18 +2,18 @@
 Scrapper implementation
 """
 
+from datetime import datetime
 import json
 import re
 import time
+
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime
 from pathlib import Path
 
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 
 
 class IncorrectURLError(Exception):
