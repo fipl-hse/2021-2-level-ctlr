@@ -7,9 +7,9 @@ import json
 import re
 import time
 
-import requests
 from bs4 import BeautifulSoup
 from pathlib import Path
+import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
 from core_utils.article import Article
