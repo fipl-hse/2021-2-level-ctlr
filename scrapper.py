@@ -110,10 +110,11 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    path_to_base_path = Path(base_path)
-    if path_to_base_path.exists():
-        shutil.rmtree(base_path)
-    path_to_base_path.mkdir(parents=True)
+    path = Path(base_path)
+    if path.exists():
+        if path.is_dir():
+            shutil.rmtree(base_path)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
@@ -122,9 +123,6 @@ def validate_config(crawler_path):
     """
     with open(crawler_path) as file:
         configuration = json.load(file)
-
-    if "seed_urls" and "total_articles_to_find_and_pars" not in configuration:
-        raise IncorrectURLError
 
     http_pattern = re.compile(HTTP_PATTERN)
     for url in configuration["seed_urls"]:
@@ -135,10 +133,16 @@ def validate_config(crawler_path):
     seed_urls = configuration["seed_urls"]
     total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
 
+    if 'seed_urls' not in configuration:
+        raise IncorrectURLError
+    if 'total_articles_to_find_and_parse' not in configuration:
+        raise IncorrectNumberOfArticlesError
     if not seed_urls:
         raise IncorrectURLError
     if not isinstance(total_articles_to_find_and_parse, int):
         raise IncorrectNumberOfArticlesError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
     if total_articles_to_find_and_parse <= 0:
         raise IncorrectNumberOfArticlesError
     if total_articles_to_find_and_parse > 200:
