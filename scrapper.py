@@ -4,8 +4,6 @@ Scrapper implementation
 import os
 import json
 import re
-import random
-from time import sleep
 import requests
 
 from bs4 import BeautifulSoup
@@ -56,17 +54,15 @@ class Crawler:
         """
         Finds articles
         """
-
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 5))
-            response = requests.get(seed_url)
-
-            if not response.ok:
-                continue
-
+            response = requests.get(url=seed_url)
             soup_lib = BeautifulSoup(response.text, 'lxml')
 
-            self._extract_url(soup_lib)
+            art_urls = self._extract_url(soup_lib)
+            for a_url in art_urls:
+                if len(self.urls) < self.max_articles:
+                    if a_url in self.urls is False:
+                        self.urls.append(a_url)
 
     def get_search_urls(self):
         """
