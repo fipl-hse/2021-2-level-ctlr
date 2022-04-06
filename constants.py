@@ -10,6 +10,3 @@ CRAWLER_CONFIG_PATH = PROJECT_ROOT / 'scrapper_config.json'
 
 
 HTTP_PATTERN = 'https://www.vedomosti.ru'
-HTTP_PATTERN1 = 'https://www.vedomosti.ru/rubrics'
-
-
