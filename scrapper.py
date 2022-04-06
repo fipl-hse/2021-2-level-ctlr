@@ -6,8 +6,8 @@ import json
 import pathlib
 import re
 import shutil
-import requests
 from bs4 import BeautifulSoup
+import requests
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
@@ -158,9 +158,7 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=seed_links, max_articles=maximum_articles)
     crawler.find_articles()
 
-    COUNTER = 1
-    for crawler_url in crawler.urls:
-        article_parser = HTMLParser(article_url=crawler_url, article_id=COUNTER)
-        article = article_parser.parse()
+    for i, urls in enumerate(crawler.urls):
+        parser = HTMLParser(urls, i + 1)
+        article = parser.parse()
         article.save_raw()
-        COUNTER += 1
