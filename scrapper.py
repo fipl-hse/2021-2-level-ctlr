@@ -4,10 +4,10 @@ Scrapper implementation
 
 import json
 import re
-import requests
 import shutil
 
 from bs4 import BeautifulSoup
+import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils import pdf_utils
@@ -75,7 +75,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
 class HTMLParser:
@@ -142,21 +142,17 @@ def validate_config(crawler_path):
     return seed_urls, max_articles
 
 
-#  crawler = Crawler(validate_config(CRAWLER_CONFIG_PATH)[0],
-#  validate_config(CRAWLER_CONFIG_PATH)[1])
-
-
 if __name__ == '__main__':
     print('Validating config...')
-    seed_urls, number_of_articles = validate_config(CRAWLER_CONFIG_PATH)
-    if seed_urls and number_of_articles:
-        print(f'Config is correct.\nURLs found: {seed_urls};\t'
+    valid_seed_urls, number_of_articles = validate_config(CRAWLER_CONFIG_PATH)
+    if valid_seed_urls and number_of_articles:
+        print(f'Config is correct.\nURLs found: {valid_seed_urls};\t'
               f'Number of articles to parse: {number_of_articles}')
         print('Preparing environment...')
         prepare_environment(ASSETS_PATH)
 
         print('Creating a crawler instance...')
-        crawler = Crawler(seed_urls, number_of_articles)
+        crawler = Crawler(valid_seed_urls, number_of_articles)
         crawler.find_articles()
 
         print('Parsing...')
