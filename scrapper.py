@@ -11,7 +11,7 @@ import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils import pdf_utils
-from core_utils.article import Article, date_from_meta
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
