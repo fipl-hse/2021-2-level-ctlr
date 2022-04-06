@@ -132,7 +132,7 @@ def validate_config(crawler_path):
     if not seed_urls:
         raise IncorrectURLError
     for article_url in seed_urls:
-        correct_url = re.match(r'https://', article_url)  # looking for pattern in the string
+        correct_url = re.match(r'https://', article_url)
         if not correct_url:
             raise IncorrectURLError
 
