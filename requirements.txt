@@ -1,3 +1,9 @@
+<<<<<<< HEAD
 beautifulsoup4==4.10.0
 requests==2.27.1
 pathlib==1.0.1
+=======
+requests>=2.27.1
+pytest>=7.1.0
+beautifulsoup4>=4.10.0
+>>>>>>> e59d8b851c54bc21b9fcf13ca047a099df578557
