@@ -110,7 +110,7 @@ class HTMLParser:
     def _fill_article_with_text(self, article_bs):
         texts = article_bs.find('div', class_='article__text article__text_free')
 
-        inner_blocks_1 = texts.find_all('div', class_='article__text__overview')
+        inner_blocks_1 = texts.find('div', class_='article__text__overview')
         for inner_block_1 in inner_blocks_1:
             overview_texts = inner_block_1.find_all('span')
             for overview_text in overview_texts:
@@ -122,7 +122,7 @@ class HTMLParser:
                 self.article.text += paragraph_1.text.strip()
 
         additional_blocks = article_bs.find('div', class_='l-col-center-590 article__content')
-        inner_blocks_2 = additional_blocks.find_all('div', class_='article__text')
+        inner_blocks_2 = additional_blocks.find('div', class_='article__text')
         for inner_block_2 in inner_blocks_2:
             paragraphs_2 = inner_block_2.find_all('p')
             for paragraph_2 in paragraphs_2:
