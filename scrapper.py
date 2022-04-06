@@ -4,11 +4,12 @@ Scrapper implementation
 import os
 import json
 import re
+import random
+from time import sleep
 import requests
-
 from bs4 import BeautifulSoup
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
@@ -40,29 +41,33 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.find_all('a', class_="item__link")
-        begin_link = "https://www.rbc.ru/"
+        urls_bs = article_bs.find_all('div', class_="item__wrap l-col-center")
         urls_bs_all = []
 
         for url_bs in urls_bs:
-            end_link = url_bs['href']
-            urls_bs_all.append(f'{begin_link}{end_link}')
+            url = url_bs.find('a')['href']
+            urls_bs_all.append(url)
+        for link in urls_bs_all:
+            if len(self.urls) < self.max_articles:
+                self.urls.append(link)
 
-        return urls_bs_all
+        return self.urls
 
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url)
+            sleep(random.randint(1, 5))
+
+            response = requests.get(seed_url)
+
+            if not response.ok:
+                continue
+
             soup_lib = BeautifulSoup(response.text, 'lxml')
 
-            art_urls = self._extract_url(soup_lib)
-            for a_url in art_urls:
-                if len(self.urls) < self.max_articles:
-                    if a_url in self.urls is False:
-                        self.urls.append(a_url)
+            self._extract_url(soup_lib)
 
     def get_search_urls(self):
         """
