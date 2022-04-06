@@ -82,17 +82,18 @@ class RawMediumDataValidator(unittest.TestCase):
                             msg="Can not open URL: <{}>. Check how you collect URLs".format(
                                 metadata[1]['url']))
 
-            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS)
+            html_source.encoding = "windows-1251"
 
             print(metadata[1]['title'])
             self.assertTrue(metadata[1]['title'] in
-                            html_source,
+                            html_source.text,
                             msg="""Title is not found by specified in metadata URL <{}>.
                             Check how you collect titles""".format(metadata[1]['url']))
 
             # author is presented? NOT FOUND otherwise?
             try:
-                self.assertTrue(metadata[1]['author'] in html_source)
+                self.assertTrue(metadata[1]['author'] in html_source.text)
             except AssertionError:
                 self.assertEqual(metadata[1]['author'], 'NOT FOUND',
                                  msg="""Author field <{}> (url <{}>) is incorrect. 
@@ -154,8 +155,8 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):  # skip monolithic metadata checks
                 continue
 
-            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
-
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS)
+            html_source.encoding = "windows-1251"
             # is a date in given format?
             self.assertTrue(re.search(self.data_pattern, metadata[1]['date']),
                             msg="""Date <{}> do not match given format <{}> (url <{}>). 
@@ -165,7 +166,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             topics = metadata[1]['topics']
             if topics is not []:
                 for topic in topics:
-                    self.assertTrue(topic in html_source,
+                    self.assertTrue(topic in html_source.text,
                                     msg="""Topics <{}> (topic <{}>) for url <{}> are not found.
                                     Check how you create topics.""".format(
                                         metadata[1]['topics'], topic, metadata[1]['url']))

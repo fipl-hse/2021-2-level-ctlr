@@ -85,7 +85,13 @@ class HTMLParser:
 
         try:
             author = article_bs.find('em')
-            self.article.author = author.text
+            if "\xa0" in author.text:
+                self.article.author = author.text.replace("\xa0", "NOT FOUND")
+            else:
+                if len(author.text) < 40:
+                    self.article.author = author.text
+                else:
+                    self.article.author = "NOT FOUND"
         except AttributeError:
             self.article.author = "NOT FOUND"
 
