@@ -57,6 +57,7 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(seed_url, headers=HEADERS)
+            response.encoding = 'windows-1251'
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
@@ -76,9 +77,8 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        article_title = article_bs.find('div', class_="mnname")
-        title = article_title.find('h2')
-        self.article.title = title.text.strip()
+        article_title = article_bs.find('div', class_="mnname").text
+        self.article.title = article_title.strip()
 
         date = article_bs.find('div', class_='mndata')
         self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
