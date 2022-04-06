@@ -4,7 +4,6 @@ Scrapper implementation
 
 from datetime import datetime
 import json
-# from pathlib import Path
 import re
 import shutil
 import time
@@ -159,11 +158,6 @@ def prepare_environment(base_path):
     if base_path.exists():
         shutil.rmtree(base_path)
     base_path.mkdir(exist_ok=True, parents=True)
-    """directory = Path(base_path)
-    for item in directory.iterdir():
-        item.unlink()
-    directory.rmdir()
-    Path(directory).mkdir(parents=True)"""
 
 
 def validate_config(crawler_path):
