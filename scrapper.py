@@ -10,7 +10,7 @@ import shutil
 from bs4 import BeautifulSoup
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
-from core_utils import article
+from core_utils import article, pdf_utils
 
 
 class IncorrectURLError(Exception):
@@ -84,11 +84,19 @@ class HTMLParser:
         self.article = article.Article(self.article_url, self.article_id)
 
     def _fill_article_with_text(self, article_bs):
-        pass
+        pdf_link = article_bs.find('a', {'class': 'file pdf'})['href']
+        article_instance = pdf_utils.PDFRawFile(pdf_link, self.article_id)
+        article_instance.download()
+        pdf_text = article_instance.get_text()
+        main_text = pdf_text.split('Литература\n')[0]
+        article_text = ''.join(main_text)
+        self.article.text = article_text
 
     def parse(self):
         web_page = requests.get(self.article_url, headers=HEADERS)
-        pass
+        article_bs = BeautifulSoup(web_page.text, 'lxml')
+        self._fill_article_with_text(article_bs)
+        return self.article
 
 
 def prepare_environment(base_path):
@@ -96,11 +104,8 @@ def prepare_environment(base_path):
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
     if base_path.exists():
-        if base_path.glob('*'):
-            shutil.rmtree(base_path)
-            base_path.mkdir(parents=True)
-    else:
-        base_path.mkdir(parents=True)
+        shutil.rmtree(base_path)
+    base_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
