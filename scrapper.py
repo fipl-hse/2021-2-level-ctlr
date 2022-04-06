@@ -10,7 +10,8 @@ import shutil
 from bs4 import BeautifulSoup
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
-from core_utils import article, pdf_utils
+from core_utils import pdf_utils
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -81,14 +82,14 @@ class HTMLParser:
     def __init__(self, full_url, i):
         self.article_url = full_url
         self.article_id = i
-        self.article = article.Article(self.article_url, self.article_id)
+        self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_text(self, article_bs):
         pdf_link = article_bs.find('a', {'class': 'file pdf'})['href']
         article_instance = pdf_utils.PDFRawFile(pdf_link, self.article_id)
         article_instance.download()
         pdf_text = article_instance.get_text()
-        main_text = pdf_text.split('Литература\n')[0]
+        main_text = pdf_text.split('Литература \n')[0]
         article_text = ''.join(main_text)
         self.article.text = article_text
 
@@ -146,5 +147,25 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    print('Validating config...')
+    seed_urls, number_of_articles = validate_config(CRAWLER_CONFIG_PATH)
+    if seed_urls and number_of_articles:
+        print(f'Config is correct.\nURLs found: {seed_urls};\t'
+              f'Number of articles to parse: {number_of_articles}')
+        print('Preparing environment...')
+        prepare_environment(ASSETS_PATH)
+
+        print('Creating a crawler instance...')
+        crawler = Crawler(seed_urls, number_of_articles)
+        crawler.find_articles()
+
+        print('Parsing...')
+        for article_id, article_url in enumerate(crawler.urls):
+            article_parser = HTMLParser(article_url, article_id + 1)
+            article = article_parser.parse()
+            article.save_raw()
+            print(f'Article {article_parser.article_id} of {number_of_articles} is done.')
+            if article_parser.article_id == number_of_articles:
+                break
+
+        print('DONE')
