@@ -9,16 +9,16 @@ import shutil
 from collections import namedtuple
 from dataclasses import dataclass, asdict
 from pathlib import Path
-from requests.exceptions import RequestException
 from time import sleep
 from typing import List
 
 import requests
 from bs4 import BeautifulSoup
+from requests.exceptions import RequestException
 
+from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
-from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
 class IncorrectURLError(Exception):
