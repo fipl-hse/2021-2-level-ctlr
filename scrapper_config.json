@@ -8,6 +8,7 @@
         "https://esquire.ru/news/science-and-technology/",
         "https://esquire.ru/news/sports-news/",
         "https://esquire.ru/news/society-news/",
-        "https://esquire.ru/news/esquire-news/"],
-    "total_articles_to_find_and_parse": 100
+        "https://esquire.ru/news/esquire-news/",
+    "https://esquire.ru/news/partner-news/"],
+    "total_articles_to_find_and_parse": 20
 }

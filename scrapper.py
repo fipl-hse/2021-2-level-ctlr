@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from core_utils.article import Article
-from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH, HTTP_MAIN
 
 
 class IncorrectURLError(Exception):
@@ -41,12 +41,14 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         main_bs = article_bs.find('div', {'class': 'article-tile-news'})
-        urls_bs = main_bs.find_all('а')
-        for url_bs in urls_bs:
+        for url_bs in main_bs:
             if len(self.urls) < self.max_articles:
-                if 'https://esquire.ru/' + url_bs['href'] not in self.urls:
-                    self.urls.append('https://esquire.ru/' + url_bs['href'])
+                link = url_bs.find('a')
+                full_link = link['href']
+                self.urls.append(HTTP_MAIN + full_link)
 
+    # if 'https://esquire.ru/' + url_bs['href'] not in self.urls:
+    # urls_bs = main_bs.find_all('а')
     def find_articles(self):
         """
         Finds articles
