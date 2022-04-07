@@ -45,6 +45,7 @@ class Crawler:
     def _extract_url(self, article_bs):
         urls = article_bs.find_all('div', class_='jscroll-inner')
         beginning_link = "https://vz.ru/news/"
+
         urls_all = []
 
         for url in urls:
