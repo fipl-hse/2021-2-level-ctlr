@@ -90,9 +90,8 @@ class HTMLParser:
         else:
             print('NOT FOUND')
 
-        date_parent = article_bs.find('div', class_='article__header__info-block')
-        date = date_parent.find('span', class_='article__header__date')
-        self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
+        self.article.date = 'NOT FOUND'
+        self.article.topics = 'NOT FOUND'
 
     def _fill_article_with_text(self, article_bs):
         self.article.text = ''
