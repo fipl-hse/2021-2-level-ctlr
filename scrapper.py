@@ -67,8 +67,7 @@ class Crawler:
             for extracted_url in extracted_urls:
                 if len(self.urls) == self.max_articles:
                     break
-                else:
-                    self.urls.append(extracted_url)
+                self.urls.append(extracted_url)
         return self.urls[:self.max_articles]
 
     def get_search_urls(self):
@@ -120,8 +119,7 @@ class HTMLParser:
             if letter == ".":
                 if title_and_author[::-1][ind + 1].isupper():
                     break
-                else:
-                    title += letter
+                title += letter
             else:
                 title += letter
         self.article.title = title[::-1][1:-2]
