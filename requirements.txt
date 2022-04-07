@@ -1,7 +1,6 @@
-requests==2.27.1
 beautifulsoup4==4.10.0
-pytest==7.1.0
-wget==3.2
-fitz==0.0.1.dev2
-numpy==1.22.3
+lxml==4.8.0
 pathlib==1.0.1
+PyMuPDF==1.19.6
+requests==2.27.1
+wget==3.2
