@@ -57,15 +57,15 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 5))
-
-            response = requests.get(seed_url)
-
-            if not response.ok:
-                continue
+            response = requests.get(url=seed_url)
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
-            self._extract_url(soup_lib)
+
+            urls = self._extract_url(soup_lib)
+            for url in urls:
+                if len(self.urls) < self.max_articles:
+                    if url not in self.urls:
+                        self.urls.append(url)
 
     def get_search_urls(self):
         """
@@ -86,7 +86,7 @@ class HTMLParser:
         self.article.title = title.strip()   # delete spaces
 
         author_parent = article_bs.find('a', class_='article__authors__author')
-        if 'article__authors__author' in article_bs:
+        if author_parent in article_bs:
             author = author_parent.find('span', class_='article__authors__author__name')
             self.article.author = author.text
         else:
@@ -97,17 +97,18 @@ class HTMLParser:
         self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
 
     def _fill_article_with_text(self, article_bs):
+        self.article.text = ''
         block_1 = article_bs.find('div', class_='article__text article__text_free')
         txt_group1 = block_1.find_all('p')
         txt_group1 = txt_group1.select_one('a').decompose()
+        for i in txt_group1:
+            self.article.text += i.text
 
         block_2 = article_bs.find('div', class_='article__text')
         txt_group2 = block_2.find_all('p')
         txt_group2 = txt_group2.select_one('a').decompose()  # delete irrelevant tag
-
-        self.article.text = ''
-        for text in txt_group1, txt_group2:
-            self.article.text += text.text
+        for k in txt_group2:
+            self.article.text += k.text
 
     def parse(self):
         response = requests.get(self.article_url)
