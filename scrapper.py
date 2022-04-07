@@ -43,16 +43,17 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls = article_bs.find_all('div', class_='jscroll-inner')
-        beginning_link = "https://vz.ru/news/"
-
-        urls_all = []
-
-        for url in urls:
-            ending_link = url['href']
-            urls_all.append(f'{beginning_link}{ending_link}')
-
-        return urls_all
+        urls_to_aritcle = article_bs.find_all('div', class_='jscroll-inner')
+        new = []
+        for article in urls_to_aritcle:
+            urls = article['href']
+            pattern = r'https://vz.ru'
+            need_url = re.search(r'https://', urls)
+            if not need_url:
+                new.append(pattern + urls)
+            else:
+                new.append(urls)
+        return new
 
     def find_articles(self):
         """
