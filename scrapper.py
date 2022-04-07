@@ -88,7 +88,7 @@ class HTMLParser:
             author = author_parent.find('span', class_='article__authors__author__name')
             self.article.author = author.text
         else:
-            print('NOT FOUND')
+            self.article.author = 'NOT FOUND'
 
         self.article.date = 'NOT FOUND'
         self.article.topics = 'NOT FOUND'
