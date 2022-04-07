@@ -1,7 +1,7 @@
 """
 Scrapper implementation
 """
-import os
+
 import json
 import re
 import shutil
@@ -170,9 +170,9 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=seed_links, max_articles=mx_articles)
     crawler.find_articles()
 
-    counter = 0
+    COUNTER = 0
     for a_text in crawler.urls:
-        counter += 1
-        parser = HTMLParser(a_text, counter)
+        COUNTER += 1
+        parser = HTMLParser(a_text, COUNTER)
         article = parser.parse()
         article.save_raw()
