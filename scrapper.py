@@ -75,7 +75,9 @@ class Crawler:
             soup = BeautifulSoup(page, 'lxml')
             self._extract_url(soup)
             sleep(random.uniform(2, 4))
-            return self.urls[:self.total_max_articles]
+            if len(self.urls) < self.total_max_articles:
+                continue
+            self.urls = self.urls[:self.total_max_articles]
 
     def get_search_urls(self):
         """
