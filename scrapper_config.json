@@ -1,15 +1,15 @@
 {
     "seed_urls": ["https://l.jvolsu.com/index.php/ru/archive-ru/725-science-journal-of-volsu-linguistics-2021-vol-20-no-6",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/714-science-journal-of-volsu-linguistics-2021-vol-20-no-5",
-        "https://l.jvolsu.com/index.php/ru/archive-ru/701-science-journal-of-volsu-linguistics-2021-vol-20-no-4",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/688-science-journal-of-volsu-linguistics-2021-vol-20-no-3",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/679-science-journal-of-volsu-linguistics-2021-vol-20-no-2",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/668-science-journal-of-volsu-linguistics-2021-vol-20-no-1",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/655-science-journal-of-volsu-linguistics-2020-vol-19-no-6",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/642-science-journal-of-volsu-linguistics-2020-vol-19-no-5",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/630-science-journal-of-volsu-linguistics-2020-vol-19-no-4",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/619-science-journal-of-volsu-linguistics-2020-vol-19-no-3",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/608-science-journal-of-volsu-linguistics-2020-vol-19-no-2",
-    "https://l.jvolsu.com/index.php/ru/archive-ru/595-science-journal-of-volsu-linguistics-2020-vol-19-no-1"],
-    "total_articles_to_find_and_parse": 17
+            "https://l.jvolsu.com/index.php/ru/archive-ru/714-science-journal-of-volsu-linguistics-2021-vol-20-no-5",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/701-science-journal-of-volsu-linguistics-2021-vol-20-no-4",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/688-science-journal-of-volsu-linguistics-2021-vol-20-no-3",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/679-science-journal-of-volsu-linguistics-2021-vol-20-no-2",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/668-science-journal-of-volsu-linguistics-2021-vol-20-no-1",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/655-science-journal-of-volsu-linguistics-2020-vol-19-no-6",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/642-science-journal-of-volsu-linguistics-2020-vol-19-no-5",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/630-science-journal-of-volsu-linguistics-2020-vol-19-no-4",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/619-science-journal-of-volsu-linguistics-2020-vol-19-no-3",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/608-science-journal-of-volsu-linguistics-2020-vol-19-no-2",
+            "https://l.jvolsu.com/index.php/ru/archive-ru/595-science-journal-of-volsu-linguistics-2020-vol-19-no-1"],
+    "total_articles_to_find_and_parse": 100
 }

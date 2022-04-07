@@ -4,6 +4,7 @@ Scrapper implementation
 
 from datetime import datetime
 import json
+import random
 import re
 import shutil
 import time
@@ -11,7 +12,7 @@ import time
 from bs4 import BeautifulSoup
 import requests
 
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, HEADERS, URL_BEGINNING
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -49,7 +50,7 @@ class Crawler:
         for link in main_block_bs.find_all("a"):
             if link == main_block_bs.find("li", {"class": "first"}).find("a"):
                 continue
-            extracted_urls.append('https://l.jvolsu.com' + link.get('href'))
+            extracted_urls.append(URL_BEGINNING + link.get('href'))
         return extracted_urls
 
     def find_articles(self):
@@ -58,15 +59,16 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(url=seed_url, headers=HEADERS)
-            time.sleep(3)
+            time.sleep(random.randint(2, 5))
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, "html.parser")
             extracted_urls = self._extract_url(soup)
             for extracted_url in extracted_urls:
-                self.urls.append(extracted_url)
-                if len(self.urls) >= self.max_articles:
+                if len(self.urls) == self.max_articles:
                     break
+                else:
+                    self.urls.append(extracted_url)
         return self.urls[:self.max_articles]
 
     def get_search_urls(self):
@@ -84,19 +86,19 @@ class HTMLParser:
 
     def parse(self):
         response = requests.get(self.article_url, headers=HEADERS)
-        time.sleep(3)
+        time.sleep(random.randint(2, 5))
         article_bs = BeautifulSoup(response.text, "html.parser")
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self._fill_article_with_data(article_bs)
+        self._fill_article_with_date(article_bs)
 
         return self.article
 
     def _fill_article_with_text(self, article_bs):
         page = article_bs.find("div", {"id": "main"})
         attachment = page.find("div", {"class": "attachmentsContainer"})
-        pdf_link = "https://l.jvolsu.com" + attachment.find("a", {"class": "at_url"})["href"]
+        pdf_link = URL_BEGINNING + attachment.find("a", {"class": "at_url"})["href"]
 
         pdf = PDFRawFile(pdf_link, self.article_id)
         pdf.download()
@@ -114,11 +116,14 @@ class HTMLParser:
         title_and_author = title_and_author.text.replace(' "', "").replace('" ', "")
 
         title = ""
-        for letter in title_and_author[::-1]:
+        for ind, letter in enumerate(title_and_author[::-1]):
             if letter == ".":
-                if title_and_author[title_and_author.index(letter) - 1].isupper():
+                if title_and_author[::-1][ind + 1].isupper():
                     break
-            title += letter
+                else:
+                    title += letter
+            else:
+                title += letter
         self.article.title = title[::-1][1:-2]
 
         author = title_and_author.replace(title[::-1], "")
@@ -127,15 +132,13 @@ class HTMLParser:
         else:
             self.article.author = author[4:]
 
-    def _fill_article_with_data(self, article_bs):
+    def _fill_article_with_date(self, article_bs):
         page = article_bs.find("div", {"id": "main"})
-        # I don't have normal date information, so let's try to get it from citation
-        citation = page.find_all("p", {"style": "text-align: justify;"})[-1]
-        date_inf = citation.text.replace('"', "")
+        doi = page.find_all("p", {"style": "text-align: justify;"})[0]
 
         date_of_article = ""
 
-        year = re.search(r'\d{4}\.', date_inf).group(0)
+        year = re.search(r'\.\d{4}\.', doi.text).group(0)
         for symbol in year:
             if symbol.isdigit():
                 date_of_article += symbol
@@ -143,7 +146,7 @@ class HTMLParser:
         # Well... I have only the knowledge that this journal is being published six times a year
         day_and_month = {"1": "-01-01", "2": "-01-03", "3": "-01-05",
                          "4": "-01-07", "5": "-01-09", "6": "-01-11"}
-        number_of_journal = re.search(r'№ \d', date_inf).group(0)
+        number_of_journal = re.search(r'\.\d{4}\.\d', doi.text).group(0)[-1]
         for number, month in day_and_month.items():
             if number in number_of_journal:
                 date_of_article += month

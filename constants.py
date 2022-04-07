@@ -13,3 +13,4 @@ HEADERS = {
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept-Language': 'ru,en;q=0.9,de;q=0.8',
         }
+URL_BEGINNING = "https://l.jvolsu.com"
