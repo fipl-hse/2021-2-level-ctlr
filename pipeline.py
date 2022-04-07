@@ -1,14 +1,14 @@
 """
 Pipeline for text processing implementation
 """
-import pathlib
+from pathlib import Path
 import re
 
 import pymorphy2
 from pymystem3 import Mystem
 
-from constants import ASSETS_PATH
-from core_utils.article import Article
+from constants import ASSETS_PATH, RAW_FILE_PATH_ENDING
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -67,12 +67,12 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        pathlib_path_to_data = pathlib.Path(self.path_to_raw_txt_data)
+        pathlib_path_to_data = Path(self.path_to_raw_txt_data)
 
-        for full_file_name in pathlib_path_to_data.iterdir():
-            file_name = full_file_name.name
+        for file_path in pathlib_path_to_data.iterdir():
+            file_name = file_path.name
 
-            if file_name[-8:] == "_raw.txt":
+            if file_name[-8:] == RAW_FILE_PATH_ENDING:
                 match = re.search(r'\d+', file_name)
                 article_id = int(match.group(0))
 
@@ -114,9 +114,9 @@ class TextProcessingPipeline:
                 single_tagged_tokens.append(processed_token.get_single_tagged())
                 multiple_tagged_tokens.append(processed_token.get_multiple_tagged())
 
-            article.save_as(' '.join(cleaned_tokens), 'cleaned')
-            article.save_as(' '.join(single_tagged_tokens), 'single_tagged')
-            article.save_as(' '.join(multiple_tagged_tokens), 'multiple_tagged')
+            article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -125,10 +125,11 @@ class TextProcessingPipeline:
         # Gets rid of '-\n's that break up words, so we won't get 'кот-' 'орый' as example (Should be: 'который')
         text = raw_text.replace('-\n', '')
 
-        # [:500] is there because scientific articles are huge and CI takes too long instead (way more than 5 mins)
-        result = Mystem().analyze(text[:500])
+        result = Mystem().analyze(text)
 
         morphological_tokens = []
+
+        morph = pymorphy2.MorphAnalyzer()
 
         for token_info in result:
             original_word = token_info['text']
@@ -144,13 +145,12 @@ class TextProcessingPipeline:
             if not token_info['analysis']:
                 continue
 
-            if 'lex' not in token_info['analysis'][0] or 'gr' not in token_info['analysis'][0]:
+            if not {'lex', 'gr'}.issubset(set(token_info['analysis'][0])):
                 continue
 
             morphological_token.normalized_form = token_info['analysis'][0]['lex']
             morphological_token.tags_mystem = token_info['analysis'][0]['gr']
 
-            morph = pymorphy2.MorphAnalyzer()
             parsed_word = morph.parse(original_word)[0]
             morphological_token.tags_pymorphy = parsed_word.tag
 
@@ -164,7 +164,7 @@ def validate_dataset(path_to_validate):
     Validates folder with assets
     """
 
-    pathlib_path_to_validate = pathlib.Path(path_to_validate)
+    pathlib_path_to_validate = Path(path_to_validate)
 
     if not path_to_validate.exists():
         raise FileNotFoundError
@@ -174,12 +174,12 @@ def validate_dataset(path_to_validate):
 
     file_ids = []
 
-    for full_file_name in pathlib_path_to_validate.iterdir():
-        file_name = full_file_name.name
+    for file_path in pathlib_path_to_validate.iterdir():
+        file_name = file_path.name
 
         # In case this annoying macOS Finder system file exists locally
         if file_name == '.DS_Store':
-            full_file_name.unlink()
+            file_path.unlink()
             continue
 
         match = re.match(r'\d+', file_name)
@@ -196,7 +196,7 @@ def validate_dataset(path_to_validate):
     last_file_id = 0
 
     for file_id in file_ids:
-        if not last_file_id and file_id != 1 or not 0 <= file_id - last_file_id <= 1:
+        if not last_file_id and file_id != 1 or file_id - last_file_id > 1:
             raise InconsistentDatasetError
 
         last_file_id = file_id

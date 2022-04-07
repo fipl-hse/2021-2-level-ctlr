@@ -5,6 +5,7 @@ import json
 import re
 
 from constants import ASSETS_PATH
+from core_utils.article import ArtifactType
 from core_utils.visualizer import visualize
 from pipeline import CorpusManager
 
@@ -23,7 +24,7 @@ class POSFrequencyPipeline:
         for article in self.corpus_manager.get_articles().values():
             pos_frequencies = {}
 
-            article_path = article.get_file_path('single_tagged')
+            article_path = article.get_file_path(ArtifactType.single_tagged)
 
             with open(article_path, 'r') as text_file:
                 text = text_file.read()
