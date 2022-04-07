@@ -59,7 +59,7 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(url=seed_url, headers=HEADERS)
-            time.sleep(random.randint(2, 5))
+            time.sleep(random.randint(1, 3))
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, "html.parser")
@@ -85,7 +85,7 @@ class HTMLParser:
 
     def parse(self):
         response = requests.get(self.article_url, headers=HEADERS)
-        time.sleep(random.randint(2, 5))
+        time.sleep(random.randint(1, 3))
         article_bs = BeautifulSoup(response.text, "html.parser")
 
         self._fill_article_with_text(article_bs)
