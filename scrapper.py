@@ -6,7 +6,6 @@ import json
 import re
 import shutil
 import pathlib
-from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
