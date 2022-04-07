@@ -45,14 +45,12 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         urls_bs = article_bs.find_all('a', class_="item__link")
+        all_urls = []
 
         for url_bs in urls_bs:
-            url = url_bs.find('a')['href']
-            if len(self.urls) >= self.max_articles:
-                break
-            self.urls.append(HTTP_PATTERN + url)
-
-        return self.urls
+            last_part = url_bs['href']
+            all_urls.append(f'{HTTP_PATTERN}{last_part}')
+        return all_urls
 
     def find_articles(self):
         """
