@@ -124,6 +124,11 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         configuration = json.load(file)
 
+    if 'seed_urls' not in configuration:
+        raise IncorrectURLError
+    if 'total_articles_to_find_and_parse' not in configuration:
+        raise IncorrectNumberOfArticlesError
+
     http_pattern = re.compile(HTTP_PATTERN)
     for url in configuration["seed_urls"]:
         result = http_pattern.search(url)
@@ -133,10 +138,6 @@ def validate_config(crawler_path):
     seed_urls = configuration["seed_urls"]
     total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
 
-    if 'seed_urls' not in configuration:
-        raise IncorrectURLError
-    if 'total_articles_to_find_and_parse' not in configuration:
-        raise IncorrectNumberOfArticlesError
     if not seed_urls:
         raise IncorrectURLError
     if not isinstance(total_articles_to_find_and_parse, int):
@@ -160,6 +161,7 @@ if __name__ == '__main__':
 
     for id_of_article, url_of_article in enumerate(crawler.urls):
         article_parser = HTMLParser(article_url=url_of_article, article_id=id_of_article + 1)
+        sleep(randint(1, 5))
         article = article_parser.parse()
         article.save_raw()
         print(f'The {id_of_article + 1} article is done!')
