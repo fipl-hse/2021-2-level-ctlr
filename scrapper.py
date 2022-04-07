@@ -14,6 +14,7 @@ from core_utils.article import Article
 
 
 
+
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
@@ -42,18 +43,15 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_to_aritcle = article_bs.find_all('div', class_='jscroll-inner')
+        urls = article_bs.find_all('div', class_='jscroll-inner')
+        beginning_link = "https://vz.ru/news/"
+        urls_all = []
 
-        new = []
-        for article in urls_to_aritcle:
-            urls = article['href']
-            pattern = r'https://vz.ru'
-            need_url = re.search(r'https://', urls)
-            if not need_url:
-                new.append(pattern + urls)
-            else:
-                new.append(urls)
-        return new
+        for url in urls:
+            ending_link = url['href']
+            urls_all.append(f'{beginning_link}{ending_link}')
+
+        return urls_all
 
     def find_articles(self):
         """
