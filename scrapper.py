@@ -100,7 +100,7 @@ class HTMLParser:
 
         # topics
         meta_info = article_bs.find_all('meta')
-        self.article.topics = meta_info[2]['content']
+        self.article.topics = meta_info[2]['content'].split(', ')
 
         # date
         big_title = article_bs.find('h1')
@@ -114,15 +114,17 @@ class HTMLParser:
         pattern_of_date = r'\d{4}'
         result = re.findall(pattern_of_date, big_title.text)
         date_year = int(result[0])
-        full_date = datetime.datetime.strptime(f'{date_year}.{month}','%Y.%m')
+        full_date = datetime.datetime.strptime(f'{date_year}.{month}', '%Y.%m')
         self.article.date = full_date
 
     def _fill_article_with_text(self, article_bs):
         article_urls_bs = article_bs.find('a', class_='file pdf')
         pdf = PDFRawFile(article_urls_bs['href'], self.article_id)
         pdf.download()
-
-        self.article.text = pdf.get_text()
+        text = pdf.get_text()
+        first_part = text.split('Литература')[0]
+        article_text = ''.join(first_part)
+        self.article.text = article_text
 
     def parse(self):
         response = requests.get(url=self.article_url, headers=HEADERS)
@@ -141,24 +143,26 @@ def prepare_environment(base_path):
     path_to_base_path = Path(base_path)
     if path_to_base_path.exists():
         shutil.rmtree(base_path)
-    path_to_base_path.mkdir(parents=True, exist_ok=True)
+    path_to_base_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
     """
     Validates given config
     """
-    with open(crawler_path) as file:
-        configuration = json.load(file)
+    with open(crawler_path) as json_file:
+        config = json.load(json_file)
 
+    if "seed_urls" not in config and "total_articles_to_find_and_pars":
+        raise IncorrectURLError
     http_pattern = re.compile(HTTP_PATTERN)
-    for url in configuration["seed_urls"]:
+    for url in config["seed_urls"]:
         result = http_pattern.search(url)
         if not result:
             raise IncorrectURLError
 
-    seed_urls = configuration["seed_urls"]
-    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
+    seed_urls = config["seed_urls"]
+    total_articles_to_find_and_parse = config["total_articles_to_find_and_parse"]
 
     if not seed_urls:
         raise IncorrectURLError
@@ -177,8 +181,8 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     print('---Preparing environment---')
-    seed_urls_test, total_articles_test = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
+    seed_urls_test, total_articles_test = validate_config(CRAWLER_CONFIG_PATH)
 
     print('---Creating a Crawler---')
     crawler = Crawler(seed_urls_test, total_articles_test)
@@ -186,8 +190,9 @@ if __name__ == '__main__':
 
     print('---Parsing---')
     for id_of_article, article_url_test in enumerate(crawler.urls):
-        article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article+1)
+        article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article + 1)
         article = article_parser.parse()
         article.save_raw()
-        print(f'The {id_of_article} article is done!')
+        print(f'The {id_of_article + 1} article is done!')
+
     print('---Done!---')
