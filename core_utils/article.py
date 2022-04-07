@@ -4,9 +4,6 @@ Article implementation
 import json
 import datetime
 
-from dataclasses import dataclass
-from typing import List
-
 from constants import ASSETS_PATH
 
 
@@ -14,16 +11,6 @@ class ArtifactType:
     cleaned = 'cleaned'
     single_tagged = 'single_tagged'
     multiple_tagged = 'multiple_tagged'
-
-
-@dataclass
-class Author:
-    """
-    Stores detailed information about article authors
-    """
-    name: str = 'Unknown'
-    organisation: str = 'Unknown'
-    email: str = 'Unknown'
 
 
 def date_from_meta(date_txt):
@@ -40,18 +27,14 @@ class Article:
     """
 
     def __init__(self, url, article_id):
-        self.url: str = url
-        self.article_id: int = article_id
+        self.url = url
+        self.article_id = article_id
 
-        self.title: str = ''
-        self.authors: List[Author] = []
-        self.doi: str = ''
-        self.keywords: List[str] = []
-        self.reference: str = ''
-        self.abstract: str = ''
-        self.literature: List[str] = []
-        # TODO self.date = None
-        self.text: str = ''
+        self.title = ''
+        self.date = None
+        self.author = ''
+        self.topics = []
+        self.text = ''
 
         meta_file = self.get_meta_file_path()
         if meta_file.exists():
@@ -66,7 +49,7 @@ class Article:
         with open(self.get_raw_text_path(), 'w', encoding='utf-8') as file:
             file.write(self.text)
 
-        if self.authors:
+        if self.author:
             with (ASSETS_PATH / article_meta_name).open("w", encoding='utf-8') as file:
                 json.dump(self._get_meta(), file, sort_keys=False,
                           indent=4, ensure_ascii=False, separators=(',', ': '))
@@ -80,8 +63,10 @@ class Article:
 
         self.url = meta.get('url', None)
         self.title = meta.get('title', '')
-        self.date = date_from_meta(meta.get('date', None))
-        self.authors = meta.get('author', None)
+        # self.date = date_from_meta(meta.get('date', None))
+        self.date = meta.get('date', None)
+        self.author = meta.get('author', None)
+        self.topics = meta.get('topics', None)
 
         # intentionally leave it empty
         self.text = None
@@ -110,13 +95,9 @@ class Article:
             'id': self.article_id,
             'url': self.url,
             'title': self.title,
-            # 'date': self._date_to_text(),
-            'authors': self.authors,
-            'doi': self.doi,
-            'keywords': self.keywords,
-            'reference': self.reference,
-            'abstract': self.abstract,
-            'literature': self.literature
+            'date': self._date_to_text(),
+            'author': self.author,
+            'topics': self.topics
         }
 
     def _date_to_text(self):
