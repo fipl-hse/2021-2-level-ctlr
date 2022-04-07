@@ -12,7 +12,7 @@ from time import sleep
 from bs4 import BeautifulSoup
 import requests
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN, BLACK_LIST
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -47,9 +47,13 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         article_summaries_bs = article_bs.find_all("div", class_="obj_article_summary")
-        urls_bs = [article_summary_bs.find('div', class_='title').find(
-            'a')['href'] for article_summary_bs in article_summaries_bs]
-        self.urls.extend(urls_bs)
+        for article_summary_bs in article_summaries_bs:
+            if len(self.urls) < self.total_max_articles:
+                url_link = article_summary_bs.find('div', class_='title').find('a')['href']
+                self.urls.append(url_link)
+                for url_link in self.urls:
+                    if url_link in BLACK_LIST:
+                        self.urls.remove(url_link)
 
     def find_articles(self):
         """
@@ -136,11 +140,8 @@ def validate_config(crawler_path):
     with open(crawler_path, 'r', encoding='utf-8') as file:
         config = json.load(file)
 
-    pattern = re.compile(r"https?://journal\.asu\.ru/urisl/issue/.+")
-
-    for url in config["seed_urls"]:
-        result = pattern.search(url)
-        if not result:
+    for seed_url in config["seed_urls"]:
+        if not re.match(DOMAIN, seed_url):
             raise IncorrectURLError
 
     seed_urls = config["seed_urls"]
@@ -162,23 +163,15 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    print('preparing environment')
     new_seed_urls, new_total_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    print('creating Crawler')
     crawler = Crawler(new_seed_urls, new_total_articles)
     crawler.find_articles()
-    print('parsing')
-    ID_OF_ARTICLE = 1
-    for article_url in crawler.urls:
-        article_parser = HTMLParser(article_url=article_url, article_id=ID_OF_ARTICLE)
-        try:
-            article = article_parser.parse()
-            article.save_raw()
-            print(f'the {ID_OF_ARTICLE} article is successfully downloaded')
-            ID_OF_ARTICLE += 1
-        except Exception as e:
-            print(e)
-            print(article_url)
+
+    for ind, art_url in enumerate(crawler.urls):
+        parser = HTMLParser(art_url, ind + 1)
+        article = parser.parse()
+        article.save_raw()
+        print(f'the {ind + 1} article is successfully downloaded')
 
     print("That's all!")
