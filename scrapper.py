@@ -198,9 +198,9 @@ if __name__ == '__main__':
 
     prepare_environment(ASSETS_PATH)
 
-    articles_found = crawler.find_articles()
+    crawler.find_articles()
 
-    for index, article_link in enumerate(articles_found, start=1):
+    for index, article_link in enumerate(crawler.urls, start=1):
         parser = HTMLParser(article_url=article_link, article_id=index)
         article_instance = parser.parse()
         article_instance.save_raw()
