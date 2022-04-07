@@ -4,6 +4,8 @@ Scrapper implementation
 import os
 import json
 import re
+import shutil
+import pathlib
 import random
 from time import sleep
 from datetime import datetime
@@ -84,56 +86,40 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        self.article.title = article_bs.find('h1', class_='article__header__title-in js-slide-title').text
-        a_author = article_bs.find('a', class_='article__authors__author')
-        self.article.author = a_author.text
+        title_parent = article_bs.find('div', class_='article__header__title')
+        title = title_parent.find('h1', class_='article__header__title-in js-slide-title').text  # print the title
+        self.article.title = title.strip()   # delete spaces
 
-        a_date = article_bs.find('span', class_="article__header__date").text
+        author_parent = article_bs.find('a', class_='article__authors__author')
+        if 'article__authors__author' in article_bs:
+            author = author_parent.find('span', class_='article__authors__author__name')
+            self.article.author = author.text
+        else:
+            print('NOT FOUND')
 
-        months = {"января": "01",
-                  "февраля": "02",
-                  "марта": "03",
-                  "апреля": "04",
-                  "мая": "05",
-                  "июня": "06",
-                  "июля": "07",
-                  "августа": "08",
-                  "сентября": "09",
-                  "октября": "10",
-                  "ноября": "11",
-                  "декабря": "12"}
-        for month in months:
-            if month in a_date:
-                a_date = a_date.replace(month, months[month])
-        self.article.date = datetime.strptime(a_date, '%H:%M, %d %m %Y')
+        date_parent = article_bs.find('div', class_='article__header__info-block')
+        date = date_parent.find('span', class_='article__header__date')
+        self.article.date = datetime.strptime(date.text, '%d.%m.%Y')
 
     def _fill_article_with_text(self, article_bs):
-        texts = article_bs.find('div', class_='article__text article__text_free')
+        block_1 = article_bs.find('div', class_='article__text article__text_free')
+        txt_group1 = block_1.find_all('p')
+        txt_group1 = txt_group1.select_one('a').decompose()
 
-        inner_blocks_1 = texts.find('div', class_='article__text__overview')
-        for inner_block_1 in inner_blocks_1:
-            overview_texts = inner_block_1.find_all('span')
-            for overview_text in overview_texts:
-                self.article.text += overview_text.text.strip()
+        block_2 = article_bs.find('div', class_='article__text')
+        txt_group2 = block_2.find_all('p')
+        txt_group2 = txt_group2.select_one('a').decompose()  # delete irrelevant tag
 
-        for text in texts:
-            paragraphs_1 = text.find_all('p')
-            for paragraph_1 in paragraphs_1:
-                self.article.text += paragraph_1.text.strip()
-
-        additional_blocks = article_bs.find('div', class_='l-col-center-590 article__content')
-        inner_blocks_2 = additional_blocks.find('div', class_='article__text')
-        for inner_block_2 in inner_blocks_2:
-            paragraphs_2 = inner_block_2.find_all('p')
-            for paragraph_2 in paragraphs_2:
-                self.article.text += paragraph_2.text.strip()
+        self.article.text = ''
+        for text in txt_group1, txt_group2:
+            self.article.text += text.text
 
     def parse(self):
         response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
-        self.article.save_raw()
+        self._fill_article_with_meta_information(article_bs)
 
         return self.article
 
@@ -142,12 +128,11 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        os.removedirs(base_path)
-    except FileNotFoundError:
-        pass
-    finally:
-        os.makedirs(base_path)
+    path = pathlib.Path(base_path)
+
+    if path.exists():
+        shutil.rmtree(base_path)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
@@ -180,7 +165,14 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    seed_links, maximum_articles = validate_config(CRAWLER_CONFIG_PATH)
+    seed_links, mx_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls=seed_links, max_articles=maximum_articles)
+    crawler = Crawler(seed_urls=seed_links, max_articles=mx_articles)
     crawler.find_articles()
+
+    counter = 0
+    for a_text in crawler.urls:
+        counter += 1
+        parser = HTMLParser(a_text, counter)
+        article = parser.parse()
+        article.save_raw()
