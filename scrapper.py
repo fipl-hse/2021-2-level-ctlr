@@ -54,7 +54,7 @@ class Crawler:
                 fulls.append(HTTP_PATTERN + part_of_url)
 
         for full in fulls:
-            if len(self.urls) < self.total_max_articles:
+            if len(self.urls) < self.total_max_articles and full not in self.urls:
                 self.urls.append(full)
 
     def find_articles(self):
@@ -74,7 +74,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
 class HTMLParser:
@@ -150,6 +150,9 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         config = json.load(file)
 
+    if not isinstance(config["seed_urls"], list):
+        raise IncorrectURLError
+
     for url in config["seed_urls"]:
         if HTTP_PATTERN not in url:
             raise IncorrectURLError
@@ -178,10 +181,9 @@ if __name__ == '__main__':
     crawler.find_articles()
 
     print('pars')
-    ARTICLES_ID = 1
-    for test_article_url in crawler.urls:
-        article_parser = HTMLParser(article_url=test_article_url, article_id=ARTICLES_ID)
+    for id_of_article, article_url_test in enumerate(crawler.urls):
+        article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article)
         article = article_parser.parse()
         article.save_raw()
-        print(ARTICLES_ID,'done')
-        ARTICLES_ID += 1
+        print(id_of_article,'done')
+        id_of_article += 1
