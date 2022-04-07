@@ -12,7 +12,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN
 from core_utils.article import Article
 
 
@@ -44,15 +44,13 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        urls_bs = article_bs.find_all('div', class_="item__wrap l-col-center")
-        urls_bs_all = []
+        urls_bs = article_bs.find_all('a', class_="item__link")
 
         for url_bs in urls_bs:
             url = url_bs.find('a')['href']
-            urls_bs_all.append(url)
-        for link in urls_bs_all:
-            if len(self.urls) < self.max_articles:
-                self.urls.append(link)
+            if len(self.urls) >= self.max_articles:
+                break
+            self.urls.append(HTTP_PATTERN + url)
 
         return self.urls
 
@@ -69,7 +67,6 @@ class Crawler:
                 continue
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
-
             self._extract_url(soup_lib)
 
     def get_search_urls(self):
