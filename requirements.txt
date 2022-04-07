@@ -5,3 +5,9 @@ pymupdf==1.19.6
 pymystem3==0.2.0
 requests==2.27.1
 wget==3.2
+ghapi==0.1.19
+matplotlib==3.3.4
+numpy==1.20.1
+pylint==2.6.0
+pyspelling==2.7.3
+pytest==6.2.5
