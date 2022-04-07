@@ -56,15 +56,14 @@ class Crawler:
     Crawler implementation
     """
 
-    def __init__(self, seed_urls: List[str], max_articles: int, max_articles_per_seed: int):
+    def __init__(self, seed_urls: List[str], max_articles: int):
         self.seed_urls = seed_urls
         self.total_max_articles = max_articles
-        self.max_articles_per_seed = max_articles_per_seed
         self.urls = []
 
     def _extract_url(self, article_bs):
         contents_bs = article_bs.select('div.content-cont-col-text a')
-        links = ['https://alp.iling.spb.ru/' + content['href'][2:] for content in contents_bs][:max_per_seed]
+        links = ['https://alp.iling.spb.ru/' + content['href'][2:] for content in contents_bs]
         self.urls.extend(links)
 
     def find_articles(self):
@@ -173,31 +172,26 @@ def validate_config(crawler_path):
     pattern = re.compile(r'https://alp\.iling\.spb\.ru/issues/.+')
     is_seed_urls = seed_urls and all(pattern.match(str(seed)) for seed in seed_urls)
 
-    max_n_from_seed = config.get("max_number_articles_to_get_from_one_seed")
-    is_max_n = isinstance(max_n_from_seed, int)
-
     Validation = namedtuple('Validation', ['success', 'error'])
     validations = (
         Validation(is_n_articles, IncorrectNumberOfArticlesError),
         Validation(is_n_in_range, NumberOfArticlesOutOfRangeError),
         Validation(is_seed_urls, IncorrectURLError),
-        Validation(is_max_n, IncorrectNumberOfMaxArticlesFromSeedError)
     )
 
     for test in validations:
         if not test.success:
             raise test.error()
 
-    return seed_urls, n_articles, is_max_n
+    return seed_urls, n_articles
 
 
 if __name__ == '__main__':
-    start_urls, max_n_articles, max_per_seed = validate_config(CRAWLER_CONFIG_PATH)
+    start_urls, max_n_articles = validate_config(CRAWLER_CONFIG_PATH)
 
     crawler = Crawler(
         seed_urls=start_urls,
         max_articles=max_n_articles,
-        max_articles_per_seed=max_per_seed
     )
 
     prepare_environment(ASSETS_PATH)
