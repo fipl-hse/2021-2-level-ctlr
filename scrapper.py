@@ -6,11 +6,17 @@ import json
 import re
 import shutil
 import pathlib
+from time import sleep
+import random
 import requests
 from bs4 import BeautifulSoup
 
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN
 from core_utils.article import Article
+
+HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                         'Chrome/98.0.4758.119 YaBrowser/22.3.0.2430 Yowser/2.5 Safari/537.36',
+           'Accept': '*/*'}
 
 
 class IncorrectURLError(Exception):
@@ -54,7 +60,8 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            response = requests.get(url=seed_url)
+            sleep(random.randint(1, 5))
+            response = requests.get(url=seed_url, headers=HEADERS)
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
 
@@ -107,7 +114,7 @@ class HTMLParser:
             self.article.text += k.text
 
     def parse(self):
-        response = requests.get(self.article_url)
+        response = requests.get(self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
@@ -162,9 +169,7 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=seed_links, max_articles=mx_articles)
     crawler.find_articles()
 
-    COUNTER = 0
-    for a_text in crawler.urls:
-        COUNTER += 1
-        parser = HTMLParser(a_text, COUNTER)
+    for index, a_text in enumerate(crawler.urls):
+        parser = HTMLParser(a_text, index + 1)
         article = parser.parse()
         article.save_raw()
