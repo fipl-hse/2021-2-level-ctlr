@@ -63,8 +63,7 @@ class Article:
 
         self.url = meta.get('url', None)
         self.title = meta.get('title', '')
-        # self.date = date_from_meta(meta.get('date', None))
-        self.date = meta.get('date', None)
+        self.date = date_from_meta(meta.get('date', None))
         self.author = meta.get('author', None)
         self.topics = meta.get('topics', None)
 

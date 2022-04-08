@@ -7,7 +7,6 @@ import random
 import re
 import shutil
 from collections import namedtuple
-from dataclasses import dataclass, asdict
 from pathlib import Path
 from time import sleep
 from typing import List
@@ -16,7 +15,7 @@ import requests
 from bs4 import BeautifulSoup
 from requests.exceptions import RequestException
 
-from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH
+from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH, ISSUE_YEARS, ISSUE_MONTHS
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -80,16 +79,6 @@ class Crawler:
         return self.seed_urls
 
 
-@dataclass
-class Author:
-    """
-    Stores detailed information about article authors
-    """
-    name: str = 'NOT FOUND'
-    organisation: str = 'NOT FOUND'
-    email: str = 'NOT FOUND'
-
-
 class HTMLParser:
     """
     Parser implementation
@@ -109,21 +98,17 @@ class HTMLParser:
     def _fill_article_with_meta_information(self, article_bs):
         self.article.title = article_bs.select_one('h1.article-h1').text
 
-        author_names = [name.text for name in article_bs.select('span.author-name')]
-        author_organisations = [organisation.text for organisation
-                                in article_bs.select('div.author-st')]
-        author_emails = [email.text for email in article_bs.select('div.author-info-r a')]
+        author = article_bs.select_one('span.author-name').text.replace('\n', ' ')
+        if not author:
+            self.article.author = 'NOT FOUND'
+        self.article.author = author
 
-        authors = [asdict(Author(name=person, organisation=org, email=mailbox)) for person, org, mailbox
-                   in zip(author_names, author_organisations, author_emails)]
-
-        self.article.author = authors
-
-        date_raw = re.search(r'\d{4}', article_bs.select_one('div.article-text').text).group()
-        article_date = datetime.datetime.strptime(date_raw, '%Y')
+        issue = re.search(r'(?P<volume>x.+)(?P<part>\d)(?=/)', self.article_url)
+        date_raw = f"01.{ISSUE_MONTHS.get(issue.group('part'))}.{ISSUE_YEARS.get(issue.group('volume'))}"
+        article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y')
         self.article.date = article_date
 
-        self.article.topics = article_bs.select_one('div.kw-tags').text.replace('\n', ' ').split(', ')
+        self.article.topics = article_bs.select_one('div.kw-tags').text.split(', ')
 
     def parse(self):
         page = obtain_page(self.article_url)
@@ -198,5 +183,3 @@ if __name__ == '__main__':
         parser = HTMLParser(article_url=article_link, article_id=index)
         article_instance = parser.parse()
         article_instance.save_raw()
-
-        sleep(random.uniform(2, 4))
