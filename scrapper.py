@@ -209,4 +209,3 @@ if __name__ == '__main__':
         time.sleep(random.randint(1, 3))
         my_article = parser.parse()
         my_article.save_raw()
-
