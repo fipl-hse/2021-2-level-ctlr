@@ -182,6 +182,8 @@ def validate_config(crawler_path):
     if "seed_urls" not in config.keys():
         raise IncorrectURLError
     seed_urls = config["seed_urls"]
+    if "total_articles_to_find_and_parse" not in config.keys():
+        raise IncorrectURLError
     number_of_articles = config["total_articles_to_find_and_parse"]
     if not seed_urls or not isinstance(seed_urls, list):
         raise IncorrectURLError
