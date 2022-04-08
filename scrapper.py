@@ -90,7 +90,6 @@ class HTMLParser:
 
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
-        self._fill_article_with_date(article_bs)
 
         return self.article
 
@@ -103,51 +102,65 @@ class HTMLParser:
         pdf.download()
 
         pdf_text = pdf.get_text()
-        if 'Список литературы' in pdf_text:
-            split_pdf = pdf_text.split('Список литературы')
+        if 'СПИСОК ЛИТЕРАТУРЫ' in pdf_text:
+            split_pdf = pdf_text.split('СПИСОК ЛИТЕРАТУРЫ')
             self.article.text = split_pdf[0]
         else:
             self.article.text = pdf_text
 
     def _fill_article_with_meta_information(self, article_bs):
+        self._fill_article_with_date(article_bs)
         page = article_bs.find("div", {"id": "main"})
         title_and_author = page.find('h2')
         title_and_author = title_and_author.text.replace(' "', "").replace('" ', "")
 
-        title = ""
-        for ind, letter in enumerate(title_and_author[::-1]):
-            if letter == ".":
-                if title_and_author[::-1][ind + 1].isupper():
-                    break
-                title += letter
-            else:
-                title += letter
-        self.article.title = title[::-1][1:-2]
+        title_and_author_list = title_and_author.split(".")
+        title = title_and_author_list.pop(-1)
+        self.article.title = title.strip()
 
-        author = title_and_author.replace(title[::-1], "")
+        author = ".".join(title_and_author_list)
         if "," in author:
-            self.article.author = author.split(",")[0][4:]
+            self.article.author = author.split(",")[0].strip()
         else:
-            self.article.author = author[4:]
+            self.article.author = author.strip()
+
+        blocks = page.find_all("p", {"style": "text-align: justify;"})
+        topics_prob = ""
+        for block in blocks:
+            if "Ключевые слова:" in block.text:
+                topics_prob += block.text
+        topics = topics_prob.replace("Ключевые слова:", "")
+        topics_list = topics.split(",")
+        for topic in topics_list:
+            if "." in topic:
+                self.article.topics.append(topic.replace(".", "").strip())
+            else:
+                self.article.topics.append(topic.strip())
 
     def _fill_article_with_date(self, article_bs):
         page = article_bs.find("div", {"id": "main"})
         doi = page.find_all("p", {"style": "text-align: justify;"})[0]
-
+        citation = page.find_all("p", {"style": "text-align: justify;"})[-1]
         date_of_article = ""
 
-        year = re.search(r'\.\d{4}\.', doi.text).group(0)
+        year_prob = re.search(r'\.\d{4}\.', doi.text)
+        if year_prob is None:
+            year = re.search(r' \d{4}\.', citation.text).group(0)
+        else:
+            year = year_prob.group(0)
         for symbol in year:
             if symbol.isdigit():
                 date_of_article += symbol
 
-        # Well... I have only the knowledge that this journal is being published six times a year
         day_and_month = {"1": "-01-01", "2": "-01-03", "3": "-01-05",
                          "4": "-01-07", "5": "-01-09", "6": "-01-11"}
-        number_of_journal = re.search(r'\.\d{4}\.\d', doi.text).group(0)[-1]
-        for number, month in day_and_month.items():
-            if number in number_of_journal:
-                date_of_article += month
+        number_of_journal_prob = re.search(r'\.\d{4}\.\d', doi.text)
+        if number_of_journal_prob is None:
+            number_of_journal = re.search(r'№ \d', citation.text).group(0)[-1]
+        else:
+            number_of_journal = number_of_journal_prob.group(0)[-1]
+        if number_of_journal in day_and_month.keys():
+            date_of_article += day_and_month[number_of_journal]
 
         self.article.date = datetime.strptime(date_of_article, '%Y-%d-%m')
 
@@ -174,7 +187,7 @@ def validate_config(crawler_path):
     for seed_url in seed_urls:
         if not isinstance(seed_url, str):
             raise IncorrectURLError
-        norm_url = re.match(r"https?://", seed_url)
+        norm_url = re.match(URL_BEGINNING, seed_url)
         if not norm_url:
             raise IncorrectURLError
     if not isinstance(number_of_articles, int) or number_of_articles <= 0:
