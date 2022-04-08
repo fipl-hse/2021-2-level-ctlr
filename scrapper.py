@@ -85,7 +85,6 @@ class HTMLParser:
 
     def parse(self):
         response = requests.get(self.article_url, headers=HEADERS)
-        time.sleep(random.randint(1, 3))
         article_bs = BeautifulSoup(response.text, "html.parser")
 
         self._fill_article_with_text(article_bs)
@@ -180,6 +179,8 @@ def validate_config(crawler_path):
     """
     with open(crawler_path, "r", encoding="utf-8") as file:
         config = json.load(file)
+    if "seed_urls" not in config.keys():
+        raise IncorrectURLError
     seed_urls = config["seed_urls"]
     number_of_articles = config["total_articles_to_find_and_parse"]
     if not seed_urls or not isinstance(seed_urls, list):
@@ -205,5 +206,7 @@ if __name__ == '__main__':
     crawler.find_articles()
     for i, my_url in enumerate(crawler.urls):
         parser = HTMLParser(my_url, i + 1)
+        time.sleep(random.randint(1, 3))
         my_article = parser.parse()
         my_article.save_raw()
+
