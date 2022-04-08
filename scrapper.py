@@ -39,12 +39,6 @@ class IncorrectNumberOfArticlesError(Exception):
     """
 
 
-class IncorrectNumberOfMaxArticlesFromSeedError(Exception):
-    """
-    Maximum number of articles to parse from one seed is not integer
-    """
-
-
 class BadStatusCode(Exception):
     """
     Request did not give valid response
