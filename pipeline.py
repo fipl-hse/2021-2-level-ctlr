@@ -1,7 +1,6 @@
 """
 Pipeline for text processing implementation
 """
-import requests
 
 
 class EmptyDirectoryError(Exception):
