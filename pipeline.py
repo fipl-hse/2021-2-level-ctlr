@@ -1,10 +1,10 @@
 """
 Pipeline for text processing implementation
 """
-from pymystem3 import Mystem
-
 from pathlib import Path
 import re
+
+from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
 from core_utils.article import Article
