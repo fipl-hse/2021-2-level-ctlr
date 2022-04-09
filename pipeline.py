@@ -1,11 +1,14 @@
 """
 Pipeline for text processing implementation
 """
-from constants import ASSETS_PATH
-from pathlib import Path
-from core_utils.article import Article
-import re
 from pymystem3 import Mystem
+
+from pathlib import Path
+import re
+
+from constants import ASSETS_PATH
+from core_utils.article import Article
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -29,21 +32,18 @@ class MorphologicalToken:
         self.normalized_form = ''
         self.tags_mystem = ''
         self.tags_pymorphy = ''
-        pass
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
         return self.original_word.lower()
-        pass
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
         return f'{self.normalized_form}<{self.tags_mystem}>'
-        pass
 
     def get_multiple_tagged(self):
         """
