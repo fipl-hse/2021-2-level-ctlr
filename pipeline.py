@@ -177,11 +177,6 @@ def validate_dataset(path_to_validate):
     for file_path in pathlib_path_to_validate.iterdir():
         file_name = file_path.name
 
-        # In case this annoying macOS Finder system file exists locally
-        if file_name == '.DS_Store':
-            file_path.unlink()
-            continue
-
         match = re.match(r'\d+', file_name)
 
         if not match:
@@ -189,14 +184,17 @@ def validate_dataset(path_to_validate):
 
         file_id = int(match.group(0))
 
-        file_ids.append(file_id)
+        if file_id not in file_ids:
+            file_ids.append(file_id)
 
     file_ids = sorted(file_ids)
 
     last_file_id = 0
 
     for file_id in file_ids:
-        if not last_file_id and file_id != 1 or file_id - last_file_id > 1:
+        if not last_file_id and file_id != 1 or file_id - last_file_id > 1 or \
+                not (pathlib_path_to_validate / f'{file_id}_raw.txt').is_file() or \
+                not (pathlib_path_to_validate / f'{file_id}_meta.json').is_file():
             raise InconsistentDatasetError
 
         last_file_id = file_id
