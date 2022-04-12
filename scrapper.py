@@ -60,7 +60,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 8))
+            sleep(random.randint(1, 15))
             response = requests.get(url=seed_url, headers=HEADERS)
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
