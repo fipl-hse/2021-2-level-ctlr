@@ -16,8 +16,8 @@ from core_utils.article import Article
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
                          " Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.55",
-           "Accept": "*/*", "Referer": "https://s.rbk.ru/v10_rbcnews_static/common/common-10.8.121/styles/build/"
-                                       "_common.css"}
+           "Accept": "image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8", "Cookie": "wui=F4E7E177-5706-4A36-B8BF"
+                                                                                        "-8BD07C368CC9"}
 
 
 class IncorrectURLError(Exception):
@@ -61,7 +61,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 15))
+            sleep(random.randint(1, 8))
             response = requests.get(url=seed_url, headers=HEADERS)
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
