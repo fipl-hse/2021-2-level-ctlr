@@ -14,9 +14,10 @@ from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN
 from core_utils.article import Article
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                         'Chrome/98.0.4758.119 YaBrowser/22.3.0.2430 Yowser/2.5 Safari/537.36',
-           'Accept': '*/*'}
+HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)"
+                         " Chrome/97.0.4692.71 Safari/537.36 Edg/97.0.1072.55",
+           "Accept": "*/*", "Referer": "https://s.rbk.ru/v10_rbcnews_static/common/common-10.8.121/styles/build/"
+                                       "_common.css"}
 
 
 class IncorrectURLError(Exception):
@@ -60,7 +61,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 5))
+            sleep(random.randint(1, 15))
             response = requests.get(url=seed_url, headers=HEADERS)
 
             soup_lib = BeautifulSoup(response.text, 'lxml')
