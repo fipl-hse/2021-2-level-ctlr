@@ -168,11 +168,11 @@ if __name__ == '__main__':
     crawler = Crawler(config_seed_urls, config_total_articles)
     crawler.find_articles()
 
-    Counter = 1
-    for n_article_url in crawler.urls:
-        article_parser = HTMLParser(n_article_url=n_article_url, article_id=Counter)
+    COUNTER = 1
+    for article_url in crawler.urls:
+        article_parser = HTMLParser(article_url=article_url, article_id=COUNTER)
         article = article_parser.parse()
         article.save_raw()
-        Counter += 1
+        COUNTER += 1
 
-    print('Number of parsed articles', Counter-1)
+    print('Number of parsed articles', COUNTER-1)
