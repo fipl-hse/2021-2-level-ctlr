@@ -7,7 +7,7 @@ from pathlib import Path
 import random
 import shutil
 from time import sleep
-import re
+
 
 from bs4 import BeautifulSoup
 import requests
@@ -115,7 +115,7 @@ class HTMLParser:
                           '(KHTML, like Gecko) Chrome/98.0.4758.109 Safari/537.36'
         })
         if not response.ok:
-            return
+            return None
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
@@ -168,11 +168,11 @@ if __name__ == '__main__':
     crawler = Crawler(config_seed_urls, config_total_articles)
     crawler.find_articles()
 
-    counter = 1
-    for article_url in crawler.urls:
-        article_parser = HTMLParser(article_url=article_url, article_id=counter)
+    Counter = 1
+    for n_article_url in crawler.urls:
+        article_parser = HTMLParser(n_article_url=n_article_url, article_id=Counter)
         article = article_parser.parse()
         article.save_raw()
-        counter += 1
+        Counter += 1
 
-    print('Number of parsed articles', counter-1)
+    print('Number of parsed articles', Counter-1)
