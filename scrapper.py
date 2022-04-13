@@ -181,4 +181,3 @@ if __name__ == '__main__':
     crawler.find_articles()
 
     parse_articles(crawler.urls)
-
