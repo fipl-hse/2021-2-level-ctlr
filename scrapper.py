@@ -1,4 +1,4 @@
-"""
+""""
 Scrapper implementation
 """
 from datetime import datetime
@@ -160,6 +160,18 @@ def validate_config(crawler_path):
 
     return seed_urls, total_articles_to_find_and_parse
 
+def parse_articles(urls):
+    """
+    Parses all collected articles using their URLs
+    """
+    nbarticles = 1
+    for a_url in urls:
+        article_parser = HTMLParser(article_url=a_url, article_id=nbarticles)
+        article = article_parser.parse()
+        article.save_raw()
+        nbarticles += 1
+
+    print('Number of parsed articles', nbarticles-1)
 
 if __name__ == '__main__':
     config_seed_urls, config_total_articles = validate_config(CRAWLER_CONFIG_PATH)
@@ -168,12 +180,5 @@ if __name__ == '__main__':
     crawler = Crawler(config_seed_urls, config_total_articles)
     crawler.find_articles()
 
-    nbarticles = 1
-    for a_url in crawler.urls:
-        article_parser = HTMLParser(article_url=a_url, article_id=nbarticles)
-        article = article_parser.parse()
-        article.save_raw()
-        nbarticles += 1
-
-    print('Number of parsed articles', nbarticles - 1)
+    parse_articles(crawler.urls)
 
