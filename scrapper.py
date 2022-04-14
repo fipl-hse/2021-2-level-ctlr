@@ -85,15 +85,13 @@ class HTMLParser:
         if article_urls_bs is None:
             title_no_file = article_bs.find('h1', class_='page_title').text.strip()
             back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
-            final_seed = requests.get(back_to_seed)
-            seed_bs = BeautifulSoup(final_seed.text, 'lxml')
+            seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
             sections = seed_bs.find_all("div", class_="obj_article_summary")
             for section in sections:
                 if title_no_file in section.text:
                     found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
                     if found_article_url_bs:
-                        article_response = requests.get(found_article_url_bs['href'])
-                        art_soup = BeautifulSoup(article_response.text, 'lxml')
+                        art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
                         download_pdf = art_soup.find('a', class_='download')['href']
                         pdf = PDFRawFile(download_pdf, self.article_id)
                         pdf.download()
@@ -135,6 +133,7 @@ class HTMLParser:
         if self.article.text:
             self._fill_article_with_meta_information(article_bs)
             return self.article
+        return None
 
 
 def prepare_environment(base_path):
@@ -186,6 +185,7 @@ def validate_config(crawler_path):
 def check_saved_number(tmp_path):
     if len([path for path in Path(tmp_path).iterdir() if path.is_file()]) == 300:
         return True
+    return False
 
 
 if __name__ == '__main__':
@@ -194,9 +194,9 @@ if __name__ == '__main__':
     crawler = Crawler(new_seed_urls, new_total_articles)
     crawler.find_articles()
     ID_OF_ARTICLE = 1
-    for article_url in crawler.urls:
+    for art_url in crawler.urls:
         if not check_saved_number(ASSETS_PATH):
-            parser = HTMLParser(article_url=article_url, article_id=ID_OF_ARTICLE)
+            parser = HTMLParser(article_url=art_url, article_id=ID_OF_ARTICLE)
             article = parser.parse()
             if article:
                 article.save_raw()
