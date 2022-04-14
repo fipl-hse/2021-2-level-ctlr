@@ -51,7 +51,10 @@ def main():
     print(f'Time for analyzing big text as a whole: {time.time() - start : .2f} sec')
 
     # Task 1. Cleanup text from any punctuation marks
+    # Task 1. Find all unique punctuation marks
+    # Task 1. Calculate unique punctuation marks
     # Task 1. Calculate number of nouns
+    # Task 1. Are there more nouns than adjectives in a given text?
 
 
 if __name__ == '__main__':
