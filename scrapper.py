@@ -12,7 +12,7 @@ from time import sleep
 from bs4 import BeautifulSoup
 import requests
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN, BLACK_LIST
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, DOMAIN
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
@@ -48,12 +48,8 @@ class Crawler:
     def _extract_url(self, article_bs):
         article_summaries_bs = article_bs.find_all("div", class_="obj_article_summary")
         for article_summary_bs in article_summaries_bs:
-            if len(self.urls) < self.total_max_articles:
-                url_link = article_summary_bs.find('div', class_='title').find('a')['href']
-                self.urls.append(url_link)
-                for url_link in self.urls:
-                    if url_link in BLACK_LIST:
-                        self.urls.remove(url_link)
+            url_link = article_summary_bs.find('div', class_='title').find('a')['href']
+            self.urls.append(url_link)
 
     def find_articles(self):
         """
@@ -85,14 +81,32 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        article_urls_bs = article_bs.find('a', class_='obj_galley_link pdf')['href']
-        response = requests.get(article_urls_bs)
-        soup = BeautifulSoup(response.text, 'lxml')
-        url_download_pdf = soup.find('a', class_='download')['href']
-        pdf = PDFRawFile(url_download_pdf, self.article_id)
-        pdf.download()
-
-        self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
+        article_urls_bs = article_bs.find('a', class_='obj_galley_link pdf')
+        if article_urls_bs is None:
+            title_no_file = article_bs.find('h1', class_='page_title').text.strip()
+            back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
+            final_seed = requests.get(back_to_seed)
+            seed_bs = BeautifulSoup(final_seed.text, 'lxml')
+            sections = seed_bs.find_all("div", class_="obj_article_summary")
+            for section in sections:
+                if title_no_file in section.text:
+                    found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
+                    if found_article_url_bs:
+                        article_response = requests.get(found_article_url_bs['href'])
+                        art_soup = BeautifulSoup(article_response.text, 'lxml')
+                        download_pdf = art_soup.find('a', class_='download')['href']
+                        pdf = PDFRawFile(download_pdf, self.article_id)
+                        pdf.download()
+                        self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
+        if article_urls_bs is not None:
+            response = requests.get(article_urls_bs['href'])
+            soup = BeautifulSoup(response.text, 'lxml')
+            url_download_pdf = soup.find('a', class_='download')['href']
+        # file_type = response.headers['content-type']
+        # if not file_type == 'application/msword':
+            pdf = PDFRawFile(url_download_pdf, self.article_id)
+            pdf.download()
+            self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
 
     def _fill_article_with_meta_information(self, article_bs):
         # title
@@ -118,8 +132,9 @@ class HTMLParser:
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
-        self._fill_article_with_meta_information(article_bs)
-        return self.article
+        if self.article.text:
+            self._fill_article_with_meta_information(article_bs)
+            return self.article
 
 
 def prepare_environment(base_path):
@@ -139,6 +154,12 @@ def validate_config(crawler_path):
     """
     with open(crawler_path, 'r', encoding='utf-8') as file:
         config = json.load(file)
+
+    if "seed_urls" not in config:
+        raise IncorrectURLError
+
+    if "total_articles_to_find_and_parse" not in config:
+        raise IncorrectNumberOfArticlesError
 
     for seed_url in config["seed_urls"]:
         if not re.match(DOMAIN, seed_url):
@@ -162,16 +183,24 @@ def validate_config(crawler_path):
     return seed_urls, total_articles
 
 
+def check_saved_number(tmp_path):
+    if len([path for path in Path(tmp_path).iterdir() if path.is_file()]) == 300:
+        return True
+
+
 if __name__ == '__main__':
     new_seed_urls, new_total_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(new_seed_urls, new_total_articles)
     crawler.find_articles()
-
-    for ind, art_url in enumerate(crawler.urls):
-        parser = HTMLParser(art_url, ind + 1)
-        article = parser.parse()
-        article.save_raw()
-        print(f'the {ind + 1} article is successfully downloaded')
+    ID_OF_ARTICLE = 1
+    for article_url in crawler.urls:
+        if not check_saved_number(ASSETS_PATH):
+            parser = HTMLParser(article_url=article_url, article_id=ID_OF_ARTICLE)
+            article = parser.parse()
+            if article:
+                article.save_raw()
+                print(f'the {ID_OF_ARTICLE} article is successfully downloaded')
+                ID_OF_ARTICLE += 1
 
     print("That's all!")
