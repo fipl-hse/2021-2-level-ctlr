@@ -68,7 +68,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
 class HTMLParser:
@@ -81,8 +81,17 @@ class HTMLParser:
         pdf_url = article_bs.find('iframe', class_='pdf')['data-src']
         pdf = PDFRawFile(pdf_url, self.article_id)
         pdf.download()
-        article_text = pdf.get_text().split('Литература')[0]
+        full_text = pdf.get_text().split('Литература')
+        article_text = full_text[0]
         self.article.text = article_text
+
+        try:
+            text_lst = full_text[-1].split('\n')
+            literature_lst = [i for i in text_lst if i[0].isdigit()]
+            last_source = literature_lst[-1][:3]
+            self.article.number_of_sources = last_source.strip('.')
+        except IndexError:
+            self.article.number_of_sources = 0
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.author = article_bs.find('span', class_='field__item-wrapper').text
@@ -91,8 +100,14 @@ class HTMLParser:
                                                             'field-type-string field-label-hidden').text
 
         node_content = article_bs.find('div', class_='node__content clearfix')
-        year = node_content.find('div').find_next_siblings()[2].text.strip('\n').strip(' ')[:4]
-        self.article.date = datetime.date(int(year), 1, 1)
+
+        year = node_content.find('div').find_next_siblings()[2].text.strip()[:4]
+        month = node_content.find('div').find_next_siblings()[2].text.strip()[8]
+        self.article.date = datetime.date(int(year), int(month), 1)
+
+        node_pages = node_content.find('div').find_next_siblings()[2].text.strip()[11:]
+        lst_with_pages = [int(i) for i in node_pages.split('-')]
+        self.article.pages = lst_with_pages[1] - lst_with_pages[0]
 
         topics_bs = article_bs.find_all('span', class_='field__item-wrapper')[1:]
         self.article.topics = [topic.text for topic in topics_bs]
