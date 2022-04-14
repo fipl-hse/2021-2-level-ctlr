@@ -81,17 +81,19 @@ class HTMLParser:
         pdf_url = article_bs.find('iframe', class_='pdf')['data-src']
         pdf = PDFRawFile(pdf_url, self.article_id)
         pdf.download()
-        full_text = pdf.get_text().split('Литература')
-        article_text = full_text[0]
-        self.article.text = article_text
-
-        try:
-            text_lst = full_text[-1].split('\n')
-            literature_lst = [i for i in text_lst if i[0].isdigit()]
-            last_source = literature_lst[-1][:3]
-            self.article.number_of_sources = last_source.strip('.')
-        except IndexError:
+        full_text = pdf.get_text()
+        if 'Литература\n' in full_text:
+            text_lst = full_text.split('Литература\n')
+            self.article.text = text_lst[0]
+            liter_lst = re.findall("^\d{1,2}[\.]", text_lst[1], flags=re.MULTILINE)
+            if liter_lst:
+                last_source = int(liter_lst[-1].split('.')[0])
+                self.article.number_of_sources = last_source
+            else:
+                self.article.number_of_sources = 0
+        else:
             self.article.number_of_sources = 0
+            self.article.text = full_text
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.author = article_bs.find('span', class_='field__item-wrapper').text
