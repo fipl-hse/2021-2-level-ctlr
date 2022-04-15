@@ -85,7 +85,7 @@ class HTMLParser:
         if 'Литература\n' in full_text:
             text_lst = full_text.split('Литература\n')
             self.article.text = text_lst[0]
-            liter_lst = re.findall("^\d{1,2}[\.]", text_lst[1], flags=re.MULTILINE)
+            liter_lst = re.findall(r'^\d{1,2}[\.]', text_lst[1], flags=re.MULTILINE)
             if liter_lst:
                 last_source = int(liter_lst[-1].split('.')[0])
                 print(f'Number of sources of {self.article_id} article is {last_source}')
