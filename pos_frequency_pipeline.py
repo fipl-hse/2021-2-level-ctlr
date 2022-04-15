@@ -2,6 +2,8 @@
 Implementation of POSFrequencyPipeline for score ten only.
 """
 
+from pipeline import CorpusManager
+
 
 class EmptyFileError(Exception):
     """
