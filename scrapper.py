@@ -100,6 +100,7 @@ class HTMLParser:
             response = requests.get(article_urls_bs['href'])
             soup = BeautifulSoup(response.text, 'lxml')
             url_download_pdf = soup.find('a', class_='download')['href']
+
         # file_type = response.headers['content-type']
         # if not file_type == 'application/msword':
             pdf = PDFRawFile(url_download_pdf, self.article_id)
