@@ -35,8 +35,6 @@ class Article:
         self.author = ''
         self.topics = []
         self.text = ''
-        self.pages = ''
-        self.number_of_sources = ''
 
         meta_file = self.get_meta_file_path()
         if meta_file.exists():
@@ -68,8 +66,6 @@ class Article:
         self.date = date_from_meta(meta.get('date', None))
         self.author = meta.get('author', None)
         self.topics = meta.get('topics', None)
-        self.pages = meta.get('pages', None)
-        self.number_of_sources = meta.get('pages', None)
 
         # intentionally leave it empty
         self.text = None
@@ -100,9 +96,7 @@ class Article:
             'title': self.title,
             'date': self._date_to_text(),
             'author': self.author,
-            'topics': self.topics,
-            'pages': self.pages,
-            'number of sources': self.number_of_sources
+            'topics': self.topics
         }
 
     def _date_to_text(self):

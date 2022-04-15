@@ -88,11 +88,11 @@ class HTMLParser:
             liter_lst = re.findall("^\d{1,2}[\.]", text_lst[1], flags=re.MULTILINE)
             if liter_lst:
                 last_source = int(liter_lst[-1].split('.')[0])
-                self.article.number_of_sources = last_source
+                print(f'Number of sources of {self.article_id} article is {last_source}')
             else:
-                self.article.number_of_sources = 0
+                print(f'Number of sources of {self.article_id} article is 0')
         else:
-            self.article.number_of_sources = 0
+            print(f'Number of sources of {self.article_id} article is 0')
             self.article.text = full_text
 
     def _fill_article_with_meta_information(self, article_bs):
@@ -109,7 +109,7 @@ class HTMLParser:
 
         node_pages = node_content.find('div').find_next_siblings()[2].text.strip()[11:]
         lst_with_pages = [int(i) for i in node_pages.split('-')]
-        self.article.pages = lst_with_pages[1] - lst_with_pages[0]
+        print(f'Number of pages of {self.article_id} article is {lst_with_pages[1] - lst_with_pages[0]}')
 
         topics_bs = article_bs.find_all('span', class_='field__item-wrapper')[1:]
         self.article.topics = [topic.text for topic in topics_bs]
