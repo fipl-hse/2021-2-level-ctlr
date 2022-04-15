@@ -49,7 +49,7 @@ Instructors:
 |25.03.2022|**First deadline:** crawler assignment|**N/A**|
 |01.04.2022|**EXAM WEEK:** skipping lecture and seminars|**N/A**|
 |08.04.2022|**Lecture:** Programming assignment (Part 2): main concept and implementation details. Lemmatization and stemming. Existing tools for morphological analysis|**N/A**|
-|15.04.2022|**Lecture:** morphological analysis via `pymystem3`, `pymorphy2`. **Practice:** analyzing words|[`pymystem3` basics](./seminars/04.15.2022/try_mystem.py)|
+|15.04.2022|**Lecture:** morphological analysis via `pymystem3`, `pymorphy2`. **Practice:** analyzing words|[`pymystem3` basics](./seminars/04.15.2022/try_mystem.py), [`pymorphy2` basics](./seminars/04.15.2022/try_pymorphy.py)|
 
 ## Technical solution
 
