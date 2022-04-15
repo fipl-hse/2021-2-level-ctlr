@@ -10,7 +10,7 @@ class EmptyFileError(Exception):
 
 
 class POSFrequencyPipeline:
-    def __init__(self, corpus):
+    def __init__(self, corpus_manager: CorpusManager):
         pass
 
     def run(self):
