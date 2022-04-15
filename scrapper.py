@@ -133,7 +133,7 @@ class HTMLParser:
         if self.article.text:
             self._fill_article_with_meta_information(article_bs)
             return self.article
-        return None
+        return self.article
 
 
 def prepare_environment(base_path):
@@ -198,7 +198,7 @@ if __name__ == '__main__':
         if not check_saved_number(ASSETS_PATH):
             parser = HTMLParser(article_url=art_url, article_id=ID_OF_ARTICLE)
             article = parser.parse()
-            if article:
+            if article.text:
                 article.save_raw()
                 print(f'the {ID_OF_ARTICLE} article is successfully downloaded')
                 ID_OF_ARTICLE += 1
