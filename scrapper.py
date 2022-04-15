@@ -26,7 +26,7 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
-        self.urls = seed_urls
+        pass
 
     def _extract_url(self, article_bs):
         pass
@@ -40,20 +40,6 @@ class Crawler:
     def get_search_urls(self):
         """
         Returns seed_urls param
-        """
-        pass
-
-
-class HTMLParser:
-    """
-    ArticleParser implementation
-    """
-    def __init__(self, full_url: str, article_id: int):
-        self.article = Article(full_url, self.article_id)
-
-    def parse(self):
-        """
-        Parses each article
         """
         pass
 
