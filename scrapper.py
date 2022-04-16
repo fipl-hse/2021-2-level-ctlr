@@ -34,7 +34,7 @@ class NumberOfArticlesOutOfRangeError(Exception):
 
 class IncorrectNumberOfArticlesError(Exception):
     """
-    Total number of articles to parse is not integer  # in|is !typo
+    Total number of articles to parse in not integer
     """
 
 
