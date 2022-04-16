@@ -60,7 +60,7 @@ class Crawler:
         """
         Finds articles
         """
-        for url in self.seed_urls:
+        for url in self.get_search_urls():
             page = obtain_page(url)
             if page:
                 soup = BeautifulSoup(page, 'lxml')

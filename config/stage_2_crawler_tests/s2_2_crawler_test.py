@@ -7,7 +7,7 @@ import unittest
 
 import pytest
 
-from scrapper import validate_config, Crawler
+from scrapper import validate_config, CrawlerRecursive
 from constants import CRAWLER_CONFIG_PATH
 
 
@@ -32,7 +32,7 @@ class CrawlerTest(unittest.TestCase):
         """
         Ensure that field 'urls' is not filled initially
         """
-        crawler = Crawler(self.seed, self.total_number)
+        crawler = CrawlerRecursive(self.seed, self.total_number)
         error_msg = 'Check Crawler constructor: field "urls" ' \
                     'is supposed to initially be empty'
         self.assertFalse(crawler.urls, error_msg)
@@ -46,7 +46,7 @@ class CrawlerTest(unittest.TestCase):
         """
         Ensure find_articles() fills 'urls' field
         """
-        crawler = Crawler(self.seed, self.total_number)
+        crawler = CrawlerRecursive(self.seed, self.total_number)
         crawler.find_articles()
         error_msg = 'Method find_articles() must fill field "urls" ' \
                     'with links found with the help of seed URLs'
@@ -61,7 +61,7 @@ class CrawlerTest(unittest.TestCase):
         """
         Ensure URLs from 'urls' field are valid
         """
-        crawler = Crawler(self.seed, self.total_number)
+        crawler = CrawlerRecursive(self.seed, self.total_number)
         crawler.find_articles()
         error_msg = 'Method find_articles() must fill field ' \
                     '"urls" with ready-to-use full links with http'
@@ -74,7 +74,7 @@ class CrawlerTest(unittest.TestCase):
         """
         Ensure Crawler is capable to collect required number of articles
         """
-        crawler = Crawler(self.seed, self.total_number)
+        crawler = CrawlerRecursive(self.seed, self.total_number)
         crawler.find_articles()
         error_msg = 'Method find_articles() must fill field "urls" ' \
                     'with not less articles than specified in config file'
