@@ -115,7 +115,7 @@ class RawMediumDataValidator(unittest.TestCase):
 
             self.assertTrue(metadata[1]['title'] in
                             html_source.text,
-                            msg= msg=msg % metadata[1]['url'])
+                            msg=msg % metadata[1]['url'])
 
             # author is presented? NOT FOUND otherwise?
             try:

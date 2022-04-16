@@ -51,7 +51,10 @@ class Crawler:
     @staticmethod
     def _extract_url(article_bs):
         contents_bs = article_bs.select('div.content-cont-col-text a')
-        links = ['https://alp.iling.spb.ru/' + content['href'][2:] for content in contents_bs if not 'static' in content['href']]
+        links = [
+            'https://alp.iling.spb.ru/' + content['href'][2:] for content in contents_bs
+            if 'static' not in content['href']
+        ]
         return links
 
     def find_articles(self):
@@ -65,7 +68,7 @@ class Crawler:
                 seed_pages = self._extract_url(soup)[:self.total_max_articles - len(self.urls)]
                 self.urls.extend(seed_pages)
                 if len(self.urls) == self.total_max_articles:
-                    return
+                    return None
 
     def get_search_urls(self):
         """
@@ -80,7 +83,7 @@ class CrawlerRecursive(Crawler):
     """
     def find_articles(self):
         try:
-            seed, self.seed_urls = self.get_search_urls()
+            self.seed_urls = self.get_search_urls()
             for next_seed in self.seed_urls:
                 page = obtain_page(next_seed)
                 if page:
@@ -90,7 +93,7 @@ class CrawlerRecursive(Crawler):
                     if len(self.urls) == self.total_max_articles:
                         return
         except TypeError:
-            return
+            return None
 
     def get_search_urls(self):
         seed = self.seed_urls[0]
@@ -98,8 +101,11 @@ class CrawlerRecursive(Crawler):
         if page:
             soup = BeautifulSoup(page, 'lxml')
             next_pages = soup.select('div.archive-tom-one a')
-            links_to_follow = ['https://alp.iling.spb.ru/' + next_page['href'] for next_page in next_pages if not next_page['href'].endswith('.pdf')]
-            return seed, links_to_follow
+            links_to_follow = [
+                'https://alp.iling.spb.ru/' + next_page['href'] for next_page in next_pages
+                if not next_page['href'].endswith('.pdf')
+            ]
+            return links_to_follow
 
 
 class HTMLParser:
@@ -130,7 +136,6 @@ class HTMLParser:
         date_raw = f"01.{ISSUE_MONTHS.get(issue.group('part'))}.{ISSUE_YEARS.get(issue.group('volume'))}"
         article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y')
         self.article.date = article_date
-
         self.article.topics = article_bs.select_one('div.kw-tags').text.split(', ')
 
     def parse(self):
