@@ -13,7 +13,6 @@ from typing import List
 
 import requests
 from bs4 import BeautifulSoup
-from requests.exceptions import RequestException
 
 from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH, ISSUE_YEARS, ISSUE_MONTHS
 from core_utils.article import Article
