@@ -68,7 +68,8 @@ class Crawler:
                 seed_pages = self._extract_url(soup)[:self.total_max_articles - len(self.urls)]
                 self.urls.extend(seed_pages)
                 if len(self.urls) == self.total_max_articles:
-                    return None
+                    return
+        return
 
     def get_search_urls(self):
         """
@@ -92,8 +93,9 @@ class CrawlerRecursive(Crawler):
                     self.urls.extend(seed_pages)
                     if len(self.urls) == self.total_max_articles:
                         return
+            return
         except TypeError:
-            return None
+            return
 
     def get_search_urls(self):
         seed = self.seed_urls[0]
@@ -106,6 +108,7 @@ class CrawlerRecursive(Crawler):
                 if not next_page['href'].endswith('.pdf')
             ]
             return links_to_follow
+        return None
 
 
 class HTMLParser:
@@ -150,13 +153,10 @@ def obtain_page(url):
     """
     Reaches seed url and returns its content
     """
-    try:
-        response = requests.get(url, headers=HEADERS)
-        sleep(random.uniform(2, 4))
-        response.encoding = 'UTF-8'
-        return response.text
-    except RequestException:
-        return
+    response = requests.get(url, headers=HEADERS)
+    sleep(random.uniform(2, 4))
+    response.encoding = 'UTF-8'
+    return response.text
 
 
 def prepare_environment(base_path):
