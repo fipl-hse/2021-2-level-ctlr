@@ -1,12 +1,4 @@
 {
-    "seed_urls": [
-        "https://alp.iling.spb.ru/issues/xvii1.ru.html",
-        "https://alp.iling.spb.ru/issues/xvii2.ru.html",
-        "https://alp.iling.spb.ru/issues/xvii3.ru.html",
-        "https://alp.iling.spb.ru/issues/xvi1.ru.html",
-        "https://alp.iling.spb.ru/issues/xvi3.ru.html",
-        "https://alp.iling.spb.ru/issues/xiv2.ru.html",
-        "https://alp.iling.spb.ru/issues/xiii1.ru.html"
-    ],
+    "seed_urls": ["https://alp.iling.spb.ru/issues.ru.html"],
     "total_articles_to_find_and_parse": 100
 }

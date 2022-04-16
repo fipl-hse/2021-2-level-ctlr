@@ -38,12 +38,6 @@ class IncorrectNumberOfArticlesError(Exception):
     """
 
 
-class BadStatusCode(Exception):
-    """
-    Request did not give valid response
-    """
-
-
 class Crawler:
     """
     Crawler implementation
@@ -54,10 +48,11 @@ class Crawler:
         self.total_max_articles = max_articles
         self.urls = []
 
-    def _extract_url(self, article_bs):
+    @staticmethod
+    def _extract_url(article_bs):
         contents_bs = article_bs.select('div.content-cont-col-text a')
-        links = ['https://alp.iling.spb.ru/' + content['href'][2:] for content in contents_bs]
-        self.urls.extend(links)
+        links = ['https://alp.iling.spb.ru/' + content['href'][2:] for content in contents_bs if not 'static' in content['href']]
+        return links
 
     def find_articles(self):
         """
@@ -65,18 +60,46 @@ class Crawler:
         """
         for url in self.seed_urls:
             page = obtain_page(url)
-            soup = BeautifulSoup(page, 'lxml')
-            self._extract_url(soup)
-            sleep(random.uniform(2, 4))
-            if len(self.urls) < self.total_max_articles:
-                continue
-            self.urls = self.urls[:self.total_max_articles]
+            if page:
+                soup = BeautifulSoup(page, 'lxml')
+                seed_pages = self._extract_url(soup)[:self.total_max_articles - len(self.urls)]
+                self.urls.extend(seed_pages)
+                if len(self.urls) == self.total_max_articles:
+                    return
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
         return self.seed_urls
+
+
+class CrawlerRecursive(Crawler):
+    """
+    Recursive Crawler
+    """
+    def find_articles(self):
+        try:
+            seed, self.seed_urls = self.get_search_urls()
+            for next_seed in self.seed_urls:
+                page = obtain_page(next_seed)
+                if page:
+                    soup = BeautifulSoup(page, 'lxml')
+                    seed_pages = self._extract_url(soup)[:self.total_max_articles - len(self.urls)]
+                    self.urls.extend(seed_pages)
+                    if len(self.urls) == self.total_max_articles:
+                        return
+        except TypeError:
+            return
+
+    def get_search_urls(self):
+        seed = self.seed_urls[0]
+        page = obtain_page(seed)
+        if page:
+            soup = BeautifulSoup(page, 'lxml')
+            next_pages = soup.select('div.archive-tom-one a')
+            links_to_follow = ['https://alp.iling.spb.ru/' + next_page['href'] for next_page in next_pages if not next_page['href'].endswith('.pdf')]
+            return seed, links_to_follow
 
 
 class HTMLParser:
@@ -124,10 +147,11 @@ def obtain_page(url):
     """
     try:
         response = requests.get(url, headers=HEADERS)
+        sleep(random.uniform(2, 4))
         response.encoding = 'UTF-8'
         return response.text
     except RequestException:
-        return None
+        return
 
 
 def prepare_environment(base_path):
@@ -150,7 +174,7 @@ def validate_config(crawler_path):
     is_n_in_range = is_n_articles and n_articles < 1000
 
     seed_urls = config.get("seed_urls")
-    pattern = re.compile(r'https://alp\.iling\.spb\.ru/issues/.+')
+    pattern = re.compile(r'https://alp\.iling\.spb\.ru/issues')
     is_seed_urls = seed_urls and all(pattern.match(str(seed)) for seed in seed_urls)
 
     Validation = namedtuple('Validation', ['success', 'error'])
@@ -170,7 +194,7 @@ def validate_config(crawler_path):
 if __name__ == '__main__':
     start_urls, max_n_articles = validate_config(CRAWLER_CONFIG_PATH)
 
-    crawler = Crawler(
+    crawler = CrawlerRecursive(
         seed_urls=start_urls,
         max_articles=max_n_articles,
     )
@@ -183,3 +207,4 @@ if __name__ == '__main__':
         parser = HTMLParser(article_url=article_link, article_id=index)
         article_instance = parser.parse()
         article_instance.save_raw()
+        print(f'Article #{index} is successfully loaded')
