@@ -56,6 +56,13 @@ class RawBasicDataValidator(unittest.TestCase):
                             msg=msg % file_name[0])
 
 
+def check_title_in_html(title, html):
+    split_markers = "&nbsp;|&#160;|&#32;|&#9248;|&#9248;" \
+                    r"|&#xA0;|&#x20;|&#x2420;|&#x2423;|&#9251;|\s"
+    split_title = re.split(split_markers, title)
+    return all(chunk in html for chunk in split_title)
+
+
 class RawMediumDataValidator(unittest.TestCase):
     """
     Ensure collected data includes extended information
@@ -90,7 +97,6 @@ class RawMediumDataValidator(unittest.TestCase):
                             msg="Meta file ids are not homogeneous. "
                                 "E.g. numbers are not from 1 to N")
 
-
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
@@ -110,16 +116,25 @@ class RawMediumDataValidator(unittest.TestCase):
             html_source = requests.get(metadata[1]['url']).text
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
-            print(metadata[1]['title'])
-            self.assertTrue(metadata[1]['title'] in
-                            html_source,
+            self.assertTrue(check_title_in_html(metadata[1]['title'],
+                                                html_source),
                             msg=msg % metadata[1]['url'])
 
             # author is presented? NOT FOUND otherwise?
             try:
-                self.assertTrue(metadata[1]['author'] in html_source)
+                if isinstance(metadata[1]['author'], str):
+                    self.assertTrue(metadata[1]['author'] in html_source)
+                elif isinstance(metadata[1]['author'], list):
+                    self.assertTrue(all(author in html_source
+                                        for author in metadata[1]['author']))
+                else:
+                    error_message = f"Author field {metadata[1]['author']} has " \
+                                    f"incorrect type. String or list are " \
+                                    f"expected, {type(metadata[1]['author'])} " \
+                                    f"is received."
+                    raise TypeError(error_message)
             except AssertionError:
-                message = f"Author field <{metadata[1]['author']}> " \
+                message = f"Author field {metadata[1]['author']} " \
                           f"(url <{metadata[1]['url']}>) is incorrect. " \
                           "Collect author from the page or specify it " \
                           "with special keyword <NOT FOUND> " \
