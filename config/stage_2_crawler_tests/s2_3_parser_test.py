@@ -9,7 +9,7 @@ import unittest
 import pytest
 
 from core_utils.article import Article
-from scrapper import validate_config, Crawler, HTMLParser
+from scrapper import validate_config, CrawlerRecursive, HTMLParser
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 
 
@@ -26,8 +26,8 @@ class HTMLParserTest(unittest.TestCase):
         if not ASSETS_PATH.exists():
             ASSETS_PATH.mkdir(parents=True)
 
-        self.crawler = Crawler(data['seed_urls'],
-                               data['total_articles_to_find_and_parse'])
+        self.crawler = CrawlerRecursive(data['seed_urls'],
+                                        data['total_articles_to_find_and_parse'])
         self.crawler.find_articles()
         self.parser = HTMLParser(random.choice(self.crawler.urls), 1)
         self.return_value = self.parser.parse()
