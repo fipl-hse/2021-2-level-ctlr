@@ -81,9 +81,10 @@ would mean that you have made tasks for mark `6` and request mentors to check if
       meta file to contain reduced number of keys: `id`, `title`, `author`, `url`;
 1. Desired mark: **8**:
    1. `pylint` level: `10/10`;
-   1. all requirements for the mark **6**;
-   1. scrapper produces `_meta.json` files for each article, meta file should be full: 
-      `id`, `title`, `author`, `url`, `date`. The difference with mark **6** is inclusion of date;
+   2. all requirements for the mark **6**;
+   3. scrapper produces `_meta.json` files for each article, meta file should be full: 
+      `id`, `title`, `author`, `url`, `date`, `topics`. In contrast to the task for mark **6**,
+       it is mandatory to collect a date for each of the articles in the appropriate format.
 1. Desired mark: **10**:
    1. `pylint` level: `10/10`;
    1. all requirements for the mark **8**;
@@ -120,10 +121,7 @@ def validate_config(crawler_path):
     pass
 ```
 
-`crawler_path` is the path to the config of the crawler. 
-> NOTE: to specify a path, it is mandatory to use `pathlib` library 
-
-It is mandatory to call `validate_config()` 
+`crawler_path` is the path to the config of the crawler. It is mandatory to call `validate_config()` 
 with passing a global variable `CRAWLER_CONFIG_PATH` that should be properly
 imported from the [`constants.py`](../constants.py) module.
 
@@ -155,8 +153,7 @@ def prepare_environment(base_path):
     pass
 ```
 It is mandatory to call this function after the config file is validated and before crawler is run.
-Also, do not forget that in order to specify a path it is required to use
-`pathlib`.
+
 > NOTE: you need to remove the folder if it exists and is not empty, then create an empty folder with this name
 
 ### Stage 2. Find necessary number of article URLs
@@ -265,7 +262,7 @@ Then you need to follow certain steps:
 
 1. find a URL to PDF using the `article_bs`
 2. create instance of `PDFRawFile` defined in [`core_utils/pdf_utils.py`](../core_utils/pdf_utils.py)
-   by passing an URL to the PDF file and the article ID (look into the interface of `PDFRawFile.__init__` method)
+   by passing an url to the PDF file and the article ID (look into the interface of `PDFRawFile.__init__` method)
 3. download a file with `PDFRawFile.download` method
 4. get a text from PDF by calling `pdf_file.get_text` method
 
@@ -306,15 +303,18 @@ A call to this method results in filling the internal Article instance with meta
 
 > NOTE: if there is no author in your newspaper, contact your mentor to find possible workarounds.
 
+> NOTE: if your source provides information about just one author, save it as a string. 
+> However, in case there are several authors, you are expected to store their names as a list of strings. 
+
 > NOTE: for those who have chosen a scientific web resource metadata should be extracted from the 
 > HTML page, and NOT from PDF file
 
-### Stage 6. Collect advanced metadata: publication date
+### Stage 6. Collect advanced metadata: publication date and topics
 
 There is plenty of information that can be collected from each page, much more than title and
 author. It is very common to also collect publication date. Working with dates often becomes
 a nightmare for a data scientist. It can be represented very differently: `2009Feb17`, 
-`2009/02/17`, `20130623T13:22-0500`, or even `48/2009` (do you understand what 48 stands for?). 
+`2009/02/17`, `20130623T13:22-0500`, or even `48/2009` (do you understand what 48 stand for?). 
 
 The task is to ensure that each article metadata is extended with dates. However, the task is
 even harder as you have to follow the required format. In particular, you need to translate 
@@ -331,8 +331,14 @@ be written as`2021-01-26 07:30:00`.
 
 > HINT #2: inspect Article class for any date transformations
 
+Except for that, you are also expected to extract information about topics, or 
+keywords, which relate to the article you are parsing. You are expected to store
+them in a meta-information file as a list-like value for the key `topics`.
+In case there are not any topics or keywords present in your source,
+leave this list empty. 
+
 You should extend `HTMLParser` method `_fill_article_with_meta_information`
-with date manipulations.
+with date manipulations and topics extraction.
 
 ### Stage 7. Determine the optimal number of seed URLs (Stages 0-7 are required to get the mark 8)
 
