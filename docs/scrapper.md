@@ -84,8 +84,7 @@ would mean that you have made tasks for mark `6` and request mentors to check if
    2. all requirements for the mark **6**;
    3. scrapper produces `_meta.json` files for each article, meta file should be full: 
       `id`, `title`, `author`, `url`, `date`, `topics`. In contrast to the task for mark **6**,
-       it is mandatory to collect a date for each of the articles
-in     in the appropriate format.
+       it is mandatory to collect a date for each of the articles in the appropriate format.
 1. Desired mark: **10**:
    1. `pylint` level: `10/10`;
    1. all requirements for the mark **8**;
