@@ -81,9 +81,10 @@ would mean that you have made tasks for mark `6` and request mentors to check if
       meta file to contain reduced number of keys: `id`, `title`, `author`, `url`;
 1. Desired mark: **8**:
    1. `pylint` level: `10/10`;
-   1. all requirements for the mark **6**;
-   1. scrapper produces `_meta.json` files for each article, meta file should be full: 
-      `id`, `title`, `author`, `url`, `date`. The difference with mark **6** is inclusion of date;
+   2. all requirements for the mark **6**;
+   3. scrapper produces `_meta.json` files for each article, meta file should be full: 
+      `id`, `title`, `author`, `url`, `date`, `topics`. In contrast to the task for mark **6**,
+       it is mandatory to collect a date for each of the articles in the appropriate format.
 1. Desired mark: **10**:
    1. `pylint` level: `10/10`;
    1. all requirements for the mark **8**;
@@ -265,6 +266,8 @@ Then you need to follow certain steps:
 3. download a file with `PDFRawFile.download` method
 4. get a text from PDF by calling `pdf_file.get_text` method
 
+> NOTE: Make sure you have installed `PyMuPDF` library (not `fitz` itself!) so that `PDFRawFile` works correctly
+
 > IMPORTANT: when retrieving text from PDF files, you SHOULD NOT include references section, which contains 
 > all related works that were cited in this article. This section is always the last section of a scientific paper
 
@@ -300,10 +303,13 @@ A call to this method results in filling the internal Article instance with meta
 
 > NOTE: if there is no author in your newspaper, contact your mentor to find possible workarounds.
 
+> NOTE: if your source provides information about just one author, save it as a string. 
+> However, in case there are several authors, you are expected to store their names as a list of strings. 
+
 > NOTE: for those who have chosen a scientific web resource metadata should be extracted from the 
 > HTML page, and NOT from PDF file
 
-### Stage 6. Collect advanced metadata: publication date
+### Stage 6. Collect advanced metadata: publication date and topics
 
 There is plenty of information that can be collected from each page, much more than title and
 author. It is very common to also collect publication date. Working with dates often becomes
@@ -325,8 +331,14 @@ be written as`2021-01-26 07:30:00`.
 
 > HINT #2: inspect Article class for any date transformations
 
+Except for that, you are also expected to extract information about topics, or 
+keywords, which relate to the article you are parsing. You are expected to store
+them in a meta-information file as a list-like value for the key `topics`.
+In case there are not any topics or keywords present in your source,
+leave this list empty. 
+
 You should extend `HTMLParser` method `_fill_article_with_meta_information`
-with date manipulations.
+with date manipulations and topics extraction.
 
 ### Stage 7. Determine the optimal number of seed URLs (Stages 0-7 are required to get the mark 8)
 
