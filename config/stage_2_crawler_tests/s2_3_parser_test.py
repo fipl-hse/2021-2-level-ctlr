@@ -1,3 +1,4 @@
+# pylint: disable=no-member, no-name-in-module
 """
 Parser realization validation
 """
