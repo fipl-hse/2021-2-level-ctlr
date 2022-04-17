@@ -1,4 +1,4 @@
-# pylint: skip-file
+# pylint: disable=no-member
 """
 Crawler instantiation validation
 """

@@ -1,4 +1,3 @@
-# pylint: skip-file
 """
 Tests for POS frequency pipeline
 """
