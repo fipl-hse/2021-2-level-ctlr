@@ -1,4 +1,3 @@
-# pylint: skip-file
 """
 Crawler instantiation validation
 """
