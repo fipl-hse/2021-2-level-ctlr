@@ -109,7 +109,7 @@ class HTMLParser:
 
         node_pages = node_content.find('div').find_next_siblings()[2].text.strip()[11:]
         lst_with_pages = [int(i) for i in node_pages.split('-')]
-        print(f'Number of pages of {self.article_id} article is {lst_with_pages[1] - lst_with_pages[0]}')
+        print(f'Number of pages of {self.article_id} article is {lst_with_pages[1] - lst_with_pages[0] + 1}')
 
         topics_bs = article_bs.find_all('span', class_='field__item-wrapper')[1:]
         self.article.topics = [topic.text for topic in topics_bs]
