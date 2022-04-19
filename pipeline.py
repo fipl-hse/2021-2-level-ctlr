@@ -2,13 +2,13 @@
 Pipeline for text processing implementation
 """
 
-from pymystem3 import Mystem
-import pymorphy2
-from pathlib import Path
 import re
+from pathlib import Path
+
+from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from core_utils.article import Article, ArtifactType
+from core_utils.article import Article
 
 
 class EmptyDirectoryError(Exception):
