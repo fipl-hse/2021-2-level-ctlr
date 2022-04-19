@@ -2,14 +2,12 @@
 Pipeline for text processing implementation
 """
 import re
-import time
 
 from pathlib import Path
-import pymorphy2
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from core_utils.article import Article, ArtifactType
+from core_utils.article import Article
 
 
 class EmptyDirectoryError(Exception):
@@ -98,7 +96,7 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        for i_d, article_item in self.corpus_manager.get_articles().items():
+        for article_item in self.corpus_manager.get_articles().values():
             article_text = article_item.get_raw_text()
             article_text = article_text.replace('-\n', '')
             for symbol in ['\n', '\r']:
@@ -114,7 +112,6 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        pymorphy_analyzer = pymorphy2.MorphAnalyzer()
         m_tokens_list = []
         analyzed_text_mystem = Mystem().analyze(raw_text)
         for analyzed_word in analyzed_text_mystem:
@@ -139,7 +136,6 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    correct_file_multiples = 3
     path_to_validate = Path(path_to_validate)
     if not path_to_validate.is_dir():
         raise NotADirectoryError
@@ -147,23 +143,19 @@ def validate_dataset(path_to_validate):
     children_files.extend(list(path_to_validate.glob('*.json')))
     if not children_files:
         raise EmptyDirectoryError
-    else:
-        file_names = []
-        for files_path in children_files:
-
-            file_names.append(files_path.name)
-        if len(file_names) % 2 != 0:
-            raise InconsistentDatasetError
-        for i in range(1, int(len(list(children_files))/2)+1):
-            if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
-                raise FileNotFoundError
-    return None
+    file_names = []
+    for files_path in children_files:
+        file_names.append(files_path.name)
+    if len(file_names) % 2 != 0:
+        raise InconsistentDatasetError
+    for i in range(1, int(len(list(children_files)) / 2) + 1):
+        if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
+            raise FileNotFoundError
 
 
 def main():
     # YOUR CODE HERE
     validate_dataset(ASSETS_PATH)
-    manager = CorpusManager(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
     pipeline.run()
