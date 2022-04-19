@@ -131,10 +131,12 @@ class HTMLParser:
         topics = topics_prob.replace("Ключевые слова:", "")
         topics_list = topics.split(",")
         for topic in topics_list:
-            if "." in topic:
-                self.article.topics.append(topic.replace(".", "").strip())
-            else:
-                self.article.topics.append(topic.strip())
+            if "&nbsp;" in topic:
+                topic = topic.replace("&nbsp;", " ")
+                if "." in topic:
+                    self.article.topics.append(topic.replace(".", "").strip())
+                else:
+                    self.article.topics.append(topic.strip())
 
     def _fill_article_with_date(self, article_bs):
         page = article_bs.find("div", {"id": "main"})
