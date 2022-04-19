@@ -2,6 +2,7 @@
 Scrapper implementation
 """
 
+import datetime
 import json
 import re
 import shutil
@@ -11,7 +12,7 @@ import requests
 
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH, ROOT_URL, HEADERS
 from core_utils import pdf_utils
-from core_utils.article import Article
+from core_utils.article import Article, date_from_meta
 
 
 class IncorrectURLError(Exception):
@@ -94,18 +95,68 @@ class HTMLParser:
         self.article.text = article_text
 
     def _fill_article_with_meta_information(self, article_bs):
-        main_body_bs = article_bs.find('div', {'class': 'two_thirds'})
-        self.article.title = main_body_bs.find('h1').text
+        self.article.title = self._find_article_title(article_bs)
+        self.article.date = datetime.datetime.strptime(self._find_article_date(article_bs),
+                                                       "%Y-%m-%d")
+        self.article.author = self._find_article_author(article_bs)
+        self.article.topics = self._find_article_topics(article_bs)
 
+    def _find_article_author(self, article_bs):
+        main_body_bs = article_bs.find('div', {'class': 'two_thirds'})
         authors_table_bs = main_body_bs.find('table', {'class': 'content_table otvet_list'})
         authors_table_raws_bs = authors_table_bs.find_all('tr')[1:]
         authors_list = []
         for table_raw in authors_table_raws_bs:
             authors_list.append(table_raw.find('td').text)
-        self.article.author = ', '.join(authors_list)
+        return ', '.join(authors_list)
 
+    def _find_article_date(self, article_bs):
+        article_year = self._extract_publication_year(article_bs)
+        article_month = self._extract_publication_month(
+            article_year, self._extract_publication_number(article_bs))
+        return f'{article_year}-{article_month}-01'
+
+    def _find_article_title(self, article_bs):
+        main_body_bs = article_bs.find('div', {'class': 'two_thirds'})
+        return main_body_bs.find('h1').text
+
+    def _find_article_topics(self, article_bs):
         topics = article_bs.find('meta', {'name': 'keywords'})['content']
-        self.article.topics = topics.split(', ')
+        return topics.split(', ')
+
+    def _extract_publication_month(self, publication_year, publication_number):
+        publication_month = '01'
+        archive = requests.get('http://journals.tsu.ru/philology/&journal_page=archive',
+                               headers=HEADERS)
+        archive_bs = BeautifulSoup(archive.text, 'lxml')
+        table_bs = archive_bs.find('table')
+        table_raws_bs = [list(raw) for raw in table_bs.find_all('tr')[2:]]
+        for table_raw_bs in table_raws_bs:
+            if publication_year in table_raw_bs[1].text:
+                year_publications_bs = [month for month in table_raw_bs[2:] if
+                                        not isinstance(month, str)]
+                for month_number, month_publication in enumerate(year_publications_bs, start=1):
+                    if publication_number in month_publication.text:
+                        publication_month = str(month_number)
+        if len(publication_month) == 1:
+            publication_month = publication_month.rjust(2, '0')
+        return publication_month
+
+    def _extract_publication_number(self, article_bs):
+        publication_header = article_bs.find('h1').text.split('.')
+        if 'DOI' in publication_header[-2]:
+            number = publication_header[-3].split()[-1]
+        else:
+            number = publication_header[-2].split()[-1]
+        if '(' in number:
+            return number[1:3]
+        return number
+
+    def _extract_publication_year(self, article_bs):
+        publication_header = article_bs.find('h1').text.split('.')
+        if 'DOI' in publication_header[-2]:
+            return publication_header[-4].lstrip()
+        return publication_header[-3].lstrip()
 
     def parse(self):
         web_page = requests.get(self.article_url, headers=HEADERS)
