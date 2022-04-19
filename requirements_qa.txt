@@ -1,6 +1,6 @@
 ghapi==0.1.19
 matplotlib==3.3.4
 numpy==1.20.1
-pylint==2.13.5
+pylint==2.6.0
 pyspelling==2.7.3
 pytest==6.2.5
