@@ -128,15 +128,14 @@ class HTMLParser:
         for block in blocks:
             if "Ключевые слова:" in block.text:
                 topics_prob += block.text
-        topics = topics_prob.replace("Ключевые слова:", "")
-        topics_list = topics.split(",")
-        for topic in topics_list:
-            if "&nbsp;" in topic:
-                topic = topic.replace("&nbsp;", " ")
-            if "." in topic:
-                self.article.topics.append(topic.replace(".", "").strip())
-            else:
-                self.article.topics.append(topic.strip())
+        if "\xa0" not in topics_prob:
+            topics = topics_prob.replace("Ключевые слова:", "")
+            topics_list = topics.split(",")
+            for topic in topics_list:
+                if "." in topic:
+                    self.article.topics.append(topic.replace(".", "").strip())
+                else:
+                    self.article.topics.append(topic.strip())
 
     def _fill_article_with_date(self, article_bs):
         page = article_bs.find("div", {"id": "main"})
