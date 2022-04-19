@@ -111,18 +111,6 @@ class TextProcessingPipeline:
             article.save_as(' '.join(cleaned_tokens), 'cleaned')
             article.save_as(' '.join(single_tagged), 'single_tagged')
 
-        #articles = self.corpus_manager.get_articles().values()
-        #for article in articles:
-        #    raw_text = article.get_raw_text()
-        #    tokens = self._process(raw_text)
-        #    cleaned_tokens = []
-        #    single_tagged_tokens = []
-        #    for token in tokens:
-        #        cleaned_tokens.append(token.get_cleaned())
-        #        single_tagged_tokens.append(token.get_single_tagged())
-        #    article.save_as(' '.join(cleaned_tokens), 'cleaned')
-        #    article.save_as(' '.join(single_tagged_tokens), 'single_tagged')
-
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
