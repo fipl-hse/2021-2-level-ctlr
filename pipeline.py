@@ -88,7 +88,15 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    if not path_to_validate.exists():
+        raise FileNotFoundError
+
+    if not path_to_validate.is_dir():
+        raise NotADirectoryError
+
+    children = [child for child in path_to_validate.glob('*')]
+    if not children:
+        raise EmptyDirectoryError
 
 
 def main():
