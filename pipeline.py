@@ -1,8 +1,12 @@
 """
 Pipeline for text processing implementation
 """
-
 from pathlib import Path
+import re
+
+from pymystem3 import Mystem
+
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -26,25 +30,28 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_pymorphy}>'
 
 
 class CorpusManager:
@@ -53,19 +60,27 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
+        files = [file for file in path_to_raw_txt_data.glob('*')]
+
+        for file in files:
+            if '_raw.txt' in str(file):
+                article_id = int(re.search(r'\d+_raw', str(file))[0][:-4])
+                self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -74,19 +89,59 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        pass
+        articles = self.corpus_manager.get_articles().values()
+
+        for article in articles:
+            raw_text = article.get_raw_text()
+            tokens = self._process(raw_text)
+
+            cleaned_tokens = []
+
+            for token in tokens:
+                cleaned_tokens.append(token.get_cleaned())
+
+            article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        '''
+        mystem = Mystem()
+        raw_text_analysis = mystem.analyze(raw_text)
+
+        tokens = []
+
+        for single_word_analysis in raw_text_analysis:
+            if single_word_analysis['text'].isalpha():
+                token = MorphologicalToken(single_word_analysis['text'])
+                tokens.append(token)
+
+        return tokens
+
+
+        '''
+        invaluable_trash = ['`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '-', '+',
+                            '=', '{', '[', ']', '}', '|', '\\', ':', ';', '"', "'", '<', ',', '>',
+                            '.', '?', '/', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
+        for symbols in invaluable_trash:
+            raw_text = raw_text.replace(symbols, '')
+        tokens = raw_text.split()
+
+        processed_tokens = []
+
+        for token in tokens:
+            token = MorphologicalToken(token)
+            processed_tokens.append(token)
+
+        return processed_tokens
+
 
 
 def validate_dataset(path_to_validate):
@@ -110,11 +165,8 @@ def validate_dataset(path_to_validate):
     counter_meta = 0
 
     for file in files:
-        if str(file)[-4:] == '.txt':
+        if str(file)[-7:] == 'raw.txt':
             counter_txt += 1
-
-            if f'\{counter_txt}_raw' not in str(file):
-                raise InconsistentDatasetError
 
             with open(file, 'r', encoding='utf-8') as current_file:
                 text = current_file.read()
@@ -123,8 +175,6 @@ def validate_dataset(path_to_validate):
 
         if str(file)[-9:] == 'meta.json':
             counter_meta += 1
-            if f'\{counter_meta}_meta' not in str(file):
-                raise InconsistentDatasetError
 
     if counter_txt != counter_meta:
         raise InconsistentDatasetError
