@@ -2,6 +2,8 @@
 Pipeline for text processing implementation
 """
 
+from pathlib import Path
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -91,15 +93,41 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
+    if isinstance(path_to_validate, str):
+        path_to_validate = Path(path_to_validate)
+
     if not path_to_validate.exists():
         raise FileNotFoundError
 
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    children = [child for child in path_to_validate.glob('*')]
-    if not children:
+    files = [file for file in path_to_validate.glob('*')]
+    if not files:
         raise EmptyDirectoryError
+
+    counter_txt = 0
+    counter_meta = 0
+
+    for file in files:
+        if str(file)[-4:] == '.txt':
+            counter_txt += 1
+
+            if f'\{counter_txt}_raw' not in str(file):
+                raise InconsistentDatasetError
+
+            with open(file, 'r', encoding='utf-8') as current_file:
+                text = current_file.read()
+            if not text:
+                raise InconsistentDatasetError
+
+        if str(file)[-9:] == 'meta.json':
+            counter_meta += 1
+            if f'\{counter_meta}_meta' not in str(file):
+                raise InconsistentDatasetError
+
+    if counter_txt != counter_meta:
+        raise InconsistentDatasetError
 
 
 def main():
