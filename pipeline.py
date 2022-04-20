@@ -1,13 +1,9 @@
 """
 Pipeline for text processing implementation
 """
-from pymorphy2 import MorphAnalyzer
-from pymystem3 import Mystem
-
 from pathlib import Path
 import re
 
-from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
 
 
