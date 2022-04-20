@@ -123,7 +123,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        cleaned_text = re.sub(r"[^а-яА-Я\s]", "", raw_text)
+        cleaned_text = raw_text.replace('-\n', '')
         analyzed_cleaned_text = Mystem().analyze(cleaned_text)
         morph = pymorphy2.MorphAnalyzer()
         tokens = []
