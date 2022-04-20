@@ -71,13 +71,18 @@ class CorpusManager:
         Register each dataset entry
         """
         path = Path(self.path_to_raw_txt_data)
+        visited_ids = []
         for file in path.iterdir():
             file_name = file.name
             pattern = re.search(r'\d+', file_name)
-            if pattern:
-                article_id = int(pattern.group(0))
-                article = Article(url=None, article_id=article_id)
-                self._storage[article_id] = article
+            if not pattern:
+                continue
+            article_id = int(pattern.group(0))
+            if article_id in visited_ids:
+                continue
+            article = Article(url=None, article_id=article_id)
+            visited_ids.append(article_id)
+            self._storage[article_id] = article
 
     def get_articles(self):
         """
@@ -123,9 +128,7 @@ class TextProcessingPipeline:
         morph = pymorphy2.MorphAnalyzer()
         tokens = []
         for token in analyzed_cleaned_text:
-            if 'analysis' not in token:
-                continue
-            if not token['analysis']:
+            if not token.get('analysis'):
                 continue
             if 'lex' not in token['analysis'][0] or 'gr' not in token['analysis'][0]:
                 continue
@@ -176,8 +179,8 @@ def validate_dataset(path_to_validate):
         if not raw_path.exists() or not meta_path.exists():
             raise InconsistentDatasetError(f"There are not meta or raw files for an article ID: {number}")
         with open(raw_path, 'r') as file:
-            if not file.readlines():
-                raise InconsistentDatasetError(f"Empty raw file for an article ID: {number}")
+            if not file.read():
+                raise InconsistentDatasetError(f"There are no meta or raw files for an article ID: {number}")
 
 
 def main():
