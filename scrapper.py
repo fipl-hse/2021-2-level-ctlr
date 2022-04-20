@@ -105,6 +105,13 @@ class HTMLParser:
                 date_bs = date_bs.replace(month, months[month])
         self.article.date = datetime.strptime(date_bs, '\n%d %m %Y, %H:%M\n')
 
+        sm_links_bs = article_bs.find('div', class_='b_social_sharing')
+        items_bs = sm_links_bs.find_all("div", class_="item")
+        links = []
+        for item in items_bs:
+            links.append(item["data-sharego"])
+        print(links)
+
     def parse(self):
         response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')

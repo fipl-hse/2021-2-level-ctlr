@@ -2,6 +2,13 @@
 Pipeline for text processing implementation
 """
 
+from pathlib import Path
+import re
+
+from pymystem3 import Mystem
+
+from constants import ASSETS_PATH
+from core_utils.article import Article
 
 class EmptyDirectoryError(Exception):
     """
@@ -21,25 +28,28 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}'
 
     def get_multiple_tagged(self):
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_pymorphy}'
 
 
 class CorpusManager:
@@ -48,19 +58,29 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        path = Path(self.path_to_raw_txt_data)
+        for file in path.glob('*'):
+            file = file.name
+            for elem in file:
+                if not elem.isdigit():
+                    continue
+                article_id = int(elem)
+                article = Article(None, article_id)
+                self._storage[article_id] = article
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -69,7 +89,7 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
@@ -88,7 +108,18 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    path = Path(path_to_validate)
+    if not path.exists():
+        raise FileNotFoundError
+    if not path.is_dir():
+        raise NotADirectoryError
+    ids = []
+    for file in path.iterdir():
+        if not file.stem[0].isdigit():
+            raise InconsistentDatasetError
+        ids.append(int(file.stem[0]))
+    if not ids:
+        raise EmptyDirectoryError
 
 
 def main():
