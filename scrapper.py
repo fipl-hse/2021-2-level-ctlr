@@ -4,8 +4,13 @@ Scrapper implementation
 
 import json
 from pathlib import Path
+import shutil
 
-from constants import CRAWLER_CONFIG_PATH
+from constants import (
+    ASSETS_PATH,
+    CRAWLER_CONFIG_PATH,
+)
+
 
 class IncorrectURLError(Exception):
     """
@@ -29,6 +34,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         pass
 
@@ -52,7 +58,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    pass
+    assets = Path(base_path)
+    if assets.exists():
+        shutil.rmtree(assets)
+    assets.mkdir(parents=True)
 
 
 def validate_config(crawler_path: Path):
@@ -71,3 +80,4 @@ def validate_config(crawler_path: Path):
 if __name__ == '__main__':
     # YOUR CODE HERE
     _seed_urls, _max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
