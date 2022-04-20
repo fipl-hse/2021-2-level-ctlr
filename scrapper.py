@@ -105,9 +105,8 @@ class HTMLParser:
         article_date = datetime.strptime(article_date, '%d.%m.%Y %H:%M')
         self.article.date = article_date
 
-        article_topics = article_bs.find('a', class_='tag')
-        self.article.topics = article_topics
-
+        article_topics = soup.find_all('a', class_='tag') 
+        self.article.topics = [article_topic.text for article_topic in article_topics]
 
 def prepare_environment(base_path):
     """
