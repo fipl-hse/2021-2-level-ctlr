@@ -4,10 +4,11 @@ Pipeline for text processing implementation
 from pathlib import Path
 import re
 
+import pymorphy2
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from core_utils.article import Article
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -49,7 +50,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -101,11 +102,14 @@ class TextProcessingPipeline:
             tokens = self._process(raw_text)
             cleaned_tokens = []
             single_tagged_tokens = []
+            multiple_tagged_tokens = []
             for token in tokens:
                 cleaned_tokens.append(token.get_cleaned())
                 single_tagged_tokens.append(token.get_single_tagged())
-            article.save_as(' '.join(cleaned_tokens), 'cleaned')
-            article.save_as(' '.join(single_tagged_tokens), 'single_tagged')
+                multiple_tagged_tokens.append(token.get_multiple_tagged())
+            article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -113,6 +117,7 @@ class TextProcessingPipeline:
         """
         cleaned_text = re.sub(r"[^а-яА-Я\s]", "", raw_text)
         analyzed_cleaned_text = Mystem().analyze(cleaned_text)
+        morph = pymorphy2.MorphAnalyzer()
         tokens = []
         for token in analyzed_cleaned_text:
             if 'analysis' not in token:
@@ -124,6 +129,7 @@ class TextProcessingPipeline:
             morphological_token = MorphologicalToken(original_word=token['text'])
             morphological_token.normalized_form = token['analysis'][0]['lex']
             morphological_token.tags_mystem = token['analysis'][0]['gr']
+            morphological_token.tags_pymorphy = morph.parse(token['text'])[0].tag
             tokens.append(morphological_token)
         return tokens
 
@@ -158,7 +164,6 @@ def validate_dataset(path_to_validate):
         if article_id - previous_article_id > 1:
             raise InconsistentDatasetError
         previous_article_id = article_id
-    print(sorted_all_ids)
     if sorted_all_ids[0] != 1:
         raise InconsistentDatasetError
     for number in set(sorted_all_ids):
