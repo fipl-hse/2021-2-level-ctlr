@@ -125,24 +125,6 @@ class TextProcessingPipeline:
         return tokens
 
 
-        '''
-        invaluable_trash = ['`', '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '-', '+',
-                            '=', '{', '[', ']', '}', '|', '\\', ':', ';', '"', "'", '<', ',', '>',
-                            '.', '?', '/', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0']
-        for symbols in invaluable_trash:
-            raw_text = raw_text.replace(symbols, '')
-        tokens = raw_text.split()
-
-        processed_tokens = []
-
-        for token in tokens:
-            token = MorphologicalToken(token)
-            processed_tokens.append(token)
-
-        return processed_tokens
-'''
-
-
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
@@ -156,14 +138,13 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    files = [file for file in path_to_validate.glob('*')]
-    if not files:
+    if len(list(path_to_validate.glob('*'))) == 0:
         raise EmptyDirectoryError
 
     counter_txt = 0
     counter_meta = 0
 
-    for file in files:
+    for file in path_to_validate.glob('*'):
         if str(file)[-7:] == 'raw.txt':
             counter_txt += 1
 
