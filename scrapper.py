@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 import shutil
 
+import requests
+
 from constants import (
     ASSETS_PATH,
     CRAWLER_CONFIG_PATH,
@@ -36,7 +38,9 @@ class Crawler:
     """
 
     def __init__(self, seed_urls, max_articles: int):
-        pass
+        self.seed_urls = seed_urls
+        self.max_articles = max_articles
+        self.urls = []
 
     def _extract_url(self, article_bs):
         pass
@@ -45,7 +49,8 @@ class Crawler:
         """
         Finds articles
         """
-        pass
+        for seed in self.seed_urls:
+            response = requests.get(seed)
 
     def get_search_urls(self):
         """
@@ -71,13 +76,16 @@ def validate_config(crawler_path: Path):
     with open(crawler_path) as file:
         config = json.load(file)
 
-    seed_urls = config["seed_urls"]
-    max_articles = config["total_articles_to_find_and_parse"]
+    config_seed_urls = config["seed_urls"]
+    config_max_articles = config["total_articles_to_find_and_parse"]
 
-    return seed_urls, max_articles
+    return config_seed_urls, config_max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    _seed_urls, _max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
+    crawler = Crawler(seed_urls=seed_urls,
+                      max_articles=max_articles)
+    crawler.find_articles()
