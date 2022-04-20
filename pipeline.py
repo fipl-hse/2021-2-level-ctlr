@@ -69,9 +69,8 @@ class CorpusManager:
         Register each dataset entry
         """
         path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
-        files = [file for file in path_to_raw_txt_data.glob('*')]
 
-        for file in files:
+        for file in path_to_raw_txt_data.glob('*'):
             if '_raw.txt' in str(file):
                 article_id = int(re.search(r'\d+_raw', str(file))[0][:-4])
                 self._storage[article_id] = Article(url=None, article_id=article_id)
@@ -112,7 +111,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        '''
+
         mystem = Mystem()
         raw_text_analysis = mystem.analyze(raw_text)
 
@@ -141,7 +140,7 @@ class TextProcessingPipeline:
             processed_tokens.append(token)
 
         return processed_tokens
-
+'''
 
 
 def validate_dataset(path_to_validate):
