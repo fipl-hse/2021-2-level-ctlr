@@ -53,8 +53,7 @@ class Crawler:
         for journal_link in links_bs:
             if len(journal_link) > 1:
                 raw_journal_link = journal_link.find_all('a')[1]['href']
-                journal_pattern = "//iling-ran.ru/web/news/"
-                if raw_journal_link[:len(journal_pattern)] == journal_pattern:
+                if raw_journal_link[:len("//iling-ran.ru/web/news/")] == "//iling-ran.ru/web/news/":
                     journal_url = f"https:{raw_journal_link}"
                     journals_urls.append(journal_url)
         counter = 0
@@ -145,7 +144,8 @@ class HTMLParser:
         response_jour = requests.get(url=self.journal_url, headers=HEADERS)
         article_bs_jour = BeautifulSoup(response_jour.text, 'lxml')
         date_raw = article_bs_jour.find('span',
-                                        class_="field field--name-created field--type-created field--label-hidden").text[4:]
+                                        class_="field field--name-created field--type-created field--label-hidden")
+        date_raw = date_raw.text[4:]
         article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y - %H:%M')
         self.article.date = article_date
 
@@ -191,10 +191,10 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
-    num_article = 1
+    NUM_ARTICLE = 1
     for journal, articles in crawler.urls.items():
         for article in articles:
-            parser = HTMLParser(article, num_article, journal)
+            parser = HTMLParser(article, NUM_ARTICLE, journal)
             my_article = parser.parse()
             my_article.save_raw()
-            num_article += 1
+            NUM_ARTICLE += 1
