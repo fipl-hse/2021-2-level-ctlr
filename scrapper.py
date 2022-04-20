@@ -48,7 +48,7 @@ class Crawler:
             if len(self.urls) >= self.total_max_articles:
                 break
             link = cell.find('a')
-            self.urls.append(link['href'])
+            self.urls.append('https://pravdasevera.ru' + link['href'])
 
     def find_articles(self):
         """
