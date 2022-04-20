@@ -95,7 +95,7 @@ class HTMLParser:
 
         article_date = article_bs.find('span', class_='date')
         article_date = article_date.text.strip()
-        article_date = datetime.strptime(article_date, '%Y-%m-%d')
+        article_date = datetime.strptime(article_date, '%d.%m.%Y %H:%M')
         self.article.date = article_date
 
         article_topics = article_bs.find('a', class_='tag')
