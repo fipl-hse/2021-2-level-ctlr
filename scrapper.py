@@ -74,11 +74,11 @@ class HTMLParser:
         self.article_id = article_id
         self.article = Article(article_url, article_id)
 
-def _fill_article_with_text(self, article_bs): 
-    self.article.text = ""
-    texts_bs = article_bs.find_all('p') 
-    for text_bs in texts_bs:
-        self.article.text += text_bs.text
+    def _fill_article_with_text(self, article_bs): 
+        self.article.text = ""
+        texts_bs = article_bs.find_all('p') 
+        for text_bs in texts_bs:
+            self.article.text += text_bs.text
 
     def parse(self):
         response = requests.get(self.article_url, headers=HEADERS)
