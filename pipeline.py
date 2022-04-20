@@ -148,16 +148,15 @@ def validate_dataset(path_to_validate):
         raise NotADirectoryError
     all_ids = []
     for file in path.iterdir():
-        file_name = file.name
         full_pattern = re.match(r'\d+_(raw.txt|meta.json|raw.pdf'
                                 r'|cleaned.txt|single_tagged.txt'
-                                r'|multiple_tagged.txt|image.png)', file_name)
+                                r'|multiple_tagged.txt|image.png)', file.name)
         if not full_pattern:
-            raise InconsistentDatasetError
-        pattern = re.match(r'\d+', file_name)
+            raise InconsistentDatasetError("Incorrect file name")
+        pattern = re.match(r'\d+', file.name)
         article_id = int(pattern.group(0))
         if article_id < 1:
-            raise InconsistentDatasetError
+            raise InconsistentDatasetError("Article ids do not start from 1")
         all_ids.append(article_id)
     if not all_ids:
         raise EmptyDirectoryError
@@ -165,17 +164,20 @@ def validate_dataset(path_to_validate):
     sorted_all_ids = sorted(all_ids)
     for article_id in sorted_all_ids:
         if article_id - previous_article_id > 1:
-            raise InconsistentDatasetError
+            raise InconsistentDatasetError("Article ids are not consistent")
         previous_article_id = article_id
     if sorted_all_ids[0] != 1:
-        raise InconsistentDatasetError
+        raise InconsistentDatasetError("Article ids do not start from 1")
     for number in set(sorted_all_ids):
         name_for_raw = f'{number}_raw.txt'
         name_for_meta = f'{number}_meta.json'
         raw_path = path / name_for_raw
         meta_path = path / name_for_meta
         if not raw_path.exists() or not meta_path.exists():
-            raise InconsistentDatasetError
+            raise InconsistentDatasetError(f"There are not meta or raw files for an article ID: {number}")
+        with open(raw_path, 'r') as file:
+            if not file.readlines():
+                raise InconsistentDatasetError(f"Empty raw file for an article ID: {number}")
 
 
 def main():
