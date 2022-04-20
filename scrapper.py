@@ -2,6 +2,10 @@
 Scrapper implementation
 """
 
+import json
+from pathlib import Path
+
+from constants import CRAWLER_CONFIG_PATH
 
 class IncorrectURLError(Exception):
     """
@@ -51,13 +55,16 @@ def prepare_environment(base_path):
     pass
 
 
-def validate_config(crawler_path):
+def validate_config(crawler_path: Path):
     """
     Validates given config
     """
-    pass
+    with open(crawler_path) as file:
+        config = json.load(file)
+
+    return config["seed_urls"], config["total_articles_to_find_and_parse"]
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    pass
+    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
