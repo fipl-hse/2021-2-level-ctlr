@@ -5,7 +5,7 @@ import json
 import pathlib
 import re
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import CRAWLER_CONFIG_PATH
 
 
 class EmptyDirectoryError(Exception):
