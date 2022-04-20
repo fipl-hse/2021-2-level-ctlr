@@ -62,9 +62,12 @@ def validate_config(crawler_path: Path):
     with open(crawler_path) as file:
         config = json.load(file)
 
-    return config["seed_urls"], config["total_articles_to_find_and_parse"]
+    seed_urls = config["seed_urls"]
+    max_articles = config["total_articles_to_find_and_parse"]
+
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    _seed_urls, _max_articles = validate_config(CRAWLER_CONFIG_PATH)
