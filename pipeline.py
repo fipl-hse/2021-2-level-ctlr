@@ -1,6 +1,11 @@
 """
 Pipeline for text processing implementation
 """
+import json
+import pathlib
+import re
+
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 
 class EmptyDirectoryError(Exception):
@@ -88,7 +93,41 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    path = pathlib.Path(path_to_validate)
+
+    if not path_to_validate.exists():
+        raise FileNotFoundError
+
+    if not path.is_dir():
+        raise NotADirectoryError
+
+    if not path.glob('*'):
+        raise EmptyDirectoryError
+
+    files = {
+        "json": 0,
+        "pdf": 0,
+        "txt": 0
+    }
+    for file in path.iterdir():
+        file_name = file.name
+        if not re.match(r'\d+_(raw\.(txt|pdf)|meta\.json)', file_name):
+            raise InconsistentDatasetError
+
+        file_number = int(re.findall(r'\d+', file_name)[0])
+        current_file_number = files.get(file.suffix)
+        if file_number - current_file_number != 1:
+            raise InconsistentDatasetError
+        files[file.suffix] = file_number
+
+    with open(CRAWLER_CONFIG_PATH) as file:
+        config = json.load(file)
+
+    # нужна проверка на порядок, чтобы нумерация начиналась с единицы
+
+    for number_of_files in files.values():
+        if number_of_files != config['total_articles_to_find_and_parse']:
+            raise InconsistentDatasetError
 
 
 def main():

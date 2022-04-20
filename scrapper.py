@@ -132,7 +132,7 @@ class HTMLParser:
         article_topics_bs = article_bs.find('div', {'class': 'main_entry'})
         item_abstract_bs = article_topics_bs.find_all('div', {'class': 'item abstract'})[1]
         value_bs = item_abstract_bs.find('span', {'class': 'value'})
-        self.article.topics = value_bs.text.strip().replace('\t', '')
+        self.article.topics = value_bs.text.strip().replace('\t', '').split(', ')
 
         date_raw_bs = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
         article_date_bs = datetime.datetime.strptime(date_raw_bs, '%Y-%m-%d')
