@@ -41,23 +41,38 @@ class Crawler:
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
-        self.urls = []
+        self.urls = {}
 
-    def _extract_url(self, article_bs):
+    def _extract_url(self, scheme_bs):
         """
         Extracts articles
         """
-        content_bs = article_bs.find_all('div', class_="clearfix text-formatted")[1]
+        journals_urls = []
+        content_bs = scheme_bs.find_all('div', class_="clearfix text-formatted")[1]
         links_bs = content_bs.find_all('li')
         for journal_link in links_bs:
             if len(journal_link) > 1:
-                raw_journal_url = journal_link.find_all('a')[1]['href']
+                raw_journal_link = journal_link.find_all('a')[1]['href']
                 journal_pattern = "//iling-ran.ru/web/news/"
-                if len(self.urls) < self.max_articles:
-                    if raw_journal_url[:len(journal_pattern)] == journal_pattern:
-                        journal_url = f"https:{raw_journal_url}"
-                        if not journal_url in self.urls:
-                            self.urls.append(journal_url)
+                if raw_journal_link[:len(journal_pattern)] == journal_pattern:
+                    journal_url = f"https:{raw_journal_link}"
+                    journals_urls.append(journal_url)
+        counter = 0
+        for jrnl_url in journals_urls:
+            response_jour = requests.get(url=jrnl_url, headers=HEADERS)
+            article_bs_jour = BeautifulSoup(response_jour.text, 'lxml')
+            content_bs_jour = article_bs_jour.find_all('div', class_="clearfix text-formatted")[1]
+            links_bs_jour = content_bs_jour.find_all('li')
+            for link in links_bs_jour:
+                if link.find('a')['href'][-4:] == '.pdf':
+                    if counter < self.max_articles:
+                        if jrnl_url not in self.urls:
+                            self.urls[jrnl_url] = [link]
+                        else:
+                            self.urls[jrnl_url].append(link)
+                        counter += 1
+                    else:
+                        break
 
     def find_articles(self):
         """
@@ -67,8 +82,8 @@ class Crawler:
             response = requests.get(url=seed_url, headers=HEADERS)
             sleep(random.randint(1, 5))
 
-            article_bs = BeautifulSoup(response.text, 'lxml')
-            self._extract_url(article_bs)
+            scheme_bs = BeautifulSoup(response.text, 'lxml')
+            self._extract_url(scheme_bs)
 
     def get_search_urls(self):
         """
@@ -81,57 +96,56 @@ class HTMLParser:
     """
     Parser implementation
     """
-    def __init__(self, article_url, article_id):
-        self.article_url = article_url
+    def __init__(self, article_url, article_id, journal_url):
+        self.journal_url = journal_url
+        self.raw_article = article_url
         self.article_id = article_id
-        self.article = Article(self.article_url, self.article_id)
+        self.article = Article(f'https:{article_url.find("a")["href"]}', self.article_id)
 
     def parse(self):
         """
         Extracts all necessary data from the article web page
         """
-        response = requests.get(self.article_url, HEADERS)
-        article_bs = BeautifulSoup(response.text, 'html.parser')
-
-        self._fill_article_with_text(article_bs)
-        self._fill_article_with_meta_information(article_bs)
+        self._fill_article_with_text(self.raw_article)
+        self._fill_article_with_meta_information(self.raw_article)
         return self.article
 
     def _fill_article_with_text(self, article_bs):
         """
         Fills the Article instance with text
         """
-        content_bs = article_bs.find_all('div', class_="clearfix text-formatted")[1]
-        raw_download_page = content_bs.find_all('p')[1].find('a')['href']
+        raw_download_page = article_bs.find('a')['href']
         download_page = f'https:{raw_download_page}'
-        pdf = PDFRawFile(download_page, self.article_id)
-        pdf.download()
-        self.article.text = pdf.get_text()
+        pdf_raw = PDFRawFile(download_page, self.article_id)
+        pdf_raw.download()
+        pdf_raw_text = pdf_raw.get_text()
+        if 'литература' in pdf_raw_text:
+            pdf_text = pdf_raw_text.split('литература')
+            self.article.text = "".join(pdf_text[:-1])
+        else:
+            self.article.text = pdf_raw_text
 
     def _fill_article_with_meta_information(self, article_bs):
         """
         Fills the Article instance with meta information
         """
-        journal_title = article_bs.find('span',
-                                        class_='field field--name-title field--type-string field--label-hidden')
-        self.article.title = journal_title.text
-        article_title = article_bs.find_all('div', class_="clearfix text-formatted")[1]
-        links_bs = article_title.find_all('li')
-        for link in links_bs:
-            author_bald = link.find('b')
-            author_strong = link.find('strong')
+        article_title = article_bs.find('a').text
+        self.article.title = article_title
 
-            if author_bald:
-                self.article.author = author_bald.text
-            elif author_strong:
-                self.article.author = author_strong.text
-            else:
-                self.article.author = 'NOT FOUND'
+        author_bald = article_bs.find('b')
+        author_strong = article_bs.find('strong')
 
-            if link.find("a")["href"][-4:] == ".pdf":
-                self.article.url = f'https:{link.find("a")["href"]}'
-        date_raw = article_bs.find('span',
-                                   class_="field field--name-created field--type-created field--label-hidden").text[4:]
+        if author_bald:
+            self.article.author = author_bald.text
+        elif author_strong:
+            self.article.author = author_strong.text
+        else:
+            self.article.author = 'NOT FOUND'
+
+        response_jour = requests.get(url=self.journal_url, headers=HEADERS)
+        article_bs_jour = BeautifulSoup(response_jour.text, 'lxml')
+        date_raw = article_bs_jour.find('span',
+                                        class_="field field--name-created field--type-created field--label-hidden").text[4:]
         article_date = datetime.datetime.strptime(date_raw, '%d.%m.%Y - %H:%M')
         self.article.date = article_date
 
@@ -177,7 +191,10 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(my_seed_urls, my_max_articles)
     crawler.find_articles()
-    for i, my_url in enumerate(crawler.urls):
-        parser = HTMLParser(my_url, i + 1)
-        my_article = parser.parse()
-        my_article.save_raw()
+    num_article = 1
+    for journal, articles in crawler.urls.items():
+        for article in articles:
+            parser = HTMLParser(article, num_article, journal)
+            my_article = parser.parse()
+            my_article.save_raw()
+            num_article += 1
