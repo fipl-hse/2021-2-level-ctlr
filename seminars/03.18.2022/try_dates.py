@@ -3,6 +3,34 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 
+def time():
+    date_raw = '2022-03-10T11:00:00'
+    date_parsed = datetime.strptime(date_raw, '%Y-%m-%dT%H:%M:%S')
+    print(date_parsed)
+
+    print(datetime.now() - date_parsed)
+
+    processed_date_str = datetime.strftime(date_parsed, '%d-%y')
+    print(processed_date_str)
+
+#time()
+
+def rusdate():
+    date_raw_russian = '5 фев 2022'
+    months = {
+        'янв': '01',
+        'фев': '02',
+        'мар': '03'
+    }
+
+    for month in months.keys():
+        if month in date_raw_russian:
+            date_raw_alnum = date_raw_russian.replace(month, months[month])
+
+    date_alnum_parsed = datetime.strptime(date_raw_alnum, '%d %m %Y')
+    print(date_alnum_parsed)
+
+rusdate()
 
 def main():
     # 1. datetime manual creation - rarely needed in web scrapping
@@ -98,5 +126,5 @@ def main():
     print(date_str)
 
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()

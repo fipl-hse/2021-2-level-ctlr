@@ -5,9 +5,10 @@ from pathlib import Path
 def main():
     # 1. Filesystem basics
     # 1.1. Creating a path
-    current_path = Path('.')
+    current_path = Path(__file__)
     print(current_path)
     print(current_path.resolve())
+    print(current_path.parent)
 
     # 1.2. Checking a path exists
     print(f'Path {current_path} exists: {current_path.exists()}')
@@ -102,5 +103,23 @@ def main():
     # Task 1. Print the longest name in a given folder 'config'
 
 
+
 if __name__ == '__main__':
-    main()
+    # main()
+
+    def task1():
+        current_path = Path('.')
+        print(current_path.resolve())
+        config_path = current_path.resolve().parent.parent / 'config'
+        print(current_path.resolve().parent.parent)
+        print(config_path.resolve())
+
+        if config_path.exists():
+            print(config_path.resolve())
+        dirs = 0
+        for child in config_path.iterdir():
+            if child.is_dir():
+                dirs += 1
+        print(dirs)
+
+    task1()

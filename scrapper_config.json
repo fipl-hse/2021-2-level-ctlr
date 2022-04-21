@@ -1,4 +1,8 @@
 {
-    "seed_urls": ['https://tomari.ru/news'],
+    "seed_urls": ["https://tomari.ru/news",
+        "https://tomari.ru/news/?list=2",
+        "https://tomari.ru/news/?list=3",
+        "https://tomari.ru/news/?list=4",
+        "https://tomari.ru/news/?list=5"],
     "total_articles_to_find_and_parse": 5
 }

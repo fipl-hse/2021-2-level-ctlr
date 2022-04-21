@@ -2,10 +2,16 @@
 Scrapper implementation
 """
 import json
-import re
 from pathlib import Path
+import shutil
+import lxml
+
 import requests
-from constants import ASSETS_PATH
+from bs4 import BeautifulSoup
+
+from core_utils.article import Article
+from constants import HEADERS, CRAWLER_CONFIG_PATH, ASSETS_PATH, HTTP_MAIN
+
 
 class IncorrectURLError(Exception):
     """
@@ -36,59 +42,108 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        main_bs = article_bs.find('div', {'class': 'news-list-left'})
+        links = main_bs.find_all('a', {'class': 'news-list-item'})
+        for link in links:
+            if len(self.urls) < self.max_articles:
+                full_link = link['href']
+                self.urls.append(HTTP_MAIN + full_link)
+
 
     def find_articles(self):
         """
         Finds articles
         """
-        pass
+        for seed_url in self.seed_urls:
+            response = requests.get(url=seed_url, headers=HEADERS)
+            if not response.ok:
+                continue
+            soup = BeautifulSoup(response.text, 'lxml')
+            self._extract_url(soup)
+
+
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
+
+
+class HTMLParser():
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(self.article_url, self.article_id)
+
+    def _fill_article_with_text(self, article_bs):
+        text = article_bs.find('div', {'class': 'text'}).text
+        self.article.text = text
+
+    def parse(self):
+        response = requests.get(self.article_url, HEADERS)
+        article_bs = BeautifulSoup(response.text, 'lxml')
+
+        self._fill_article_with_text(article_bs)
+
+        return self.article
+
 
 
 def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    try:
-        Path.rmdir(base_path)
-    except FileNotFoundError:
-        Path.mkdir(base_path)
+    path = Path(base_path)
+    if path.exists():
+        shutil.rmtree(base_path)
+    path.mkdir(parents=True, exist_ok=True)
 
 
 def validate_config(crawler_path):
     """
     Validates given config
     """
-    try:
-        with open(crawler_path) as file:
-            config = json.load(file)
+    with open(crawler_path) as file:
+        config = json.load(file)
 
-        seed_urls = config["seed_url"]
-        max_articles = config["total_articles_to find_and_parse"]
+    seed_urls = config["seed_urls"]
+    total_articles = config["total_articles_to_find_and_parse"]
 
-        if not isinstance(seed_urls, list) or not seed_urls:
+    for url in seed_urls:
+        pattern = 'https://tomari.ru/news'
+        if pattern not in url:
             raise IncorrectURLError
 
-        for url in seed_urls:
-            validation = re.match(r'https?://', url)
-            if not validation:
-                raise IncorrectURLError
+    if not seed_urls:
+        raise IncorrectURLError
 
-        if not isinstance(max_articles, int) or max_articles <= 0:
-            raise IncorrectNumberOfArticlesError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
 
-        if max_articles > 300:
-            raise NumberOfArticlesOutOfRangeError
+    if not isinstance(total_articles, int):
+        raise IncorrectNumberOfArticlesError
 
-        return seed_urls, max_articles
+    if total_articles <= 0:
+        raise IncorrectNumberOfArticlesError
+
+    if total_articles > 100:
+        raise NumberOfArticlesOutOfRangeError
+
+    return seed_urls, total_articles
+
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    pass
+    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+
+    crawler = Crawler(seed_urls, max_articles)
+    crawler.find_articles()
+
+    for article_id, url in enumerate(crawler.urls):
+        article_parser = HTMLParser(url, article_id + 1)
+        article = article_parser.parse()
+        article.save_raw()
+
