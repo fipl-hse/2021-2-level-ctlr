@@ -4,7 +4,6 @@ Scrapper implementation
 import json
 from pathlib import Path
 import shutil
-import lxml
 
 import requests
 from bs4 import BeautifulSoup
@@ -107,12 +106,12 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         config = json.load(file)
 
-    seed_urls = config["seed_urls"]
+    config_seed_urls = config["seed_urls"]
     total_articles = config["total_articles_to_find_and_parse"]
 
-    for url in seed_urls:
+    for seed_url in config_seed_urls:
         pattern = 'https://tomari.ru/news'
-        if pattern not in url:
+        if pattern not in seed_url:
             raise IncorrectURLError
 
     if not seed_urls:
@@ -136,14 +135,13 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    seed_urls, articles_to_parse = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
 
-    crawler = Crawler(seed_urls, max_articles)
+    crawler = Crawler(seed_urls, articles_to_parse)
     crawler.find_articles()
 
-    for article_id, url in enumerate(crawler.urls):
-        article_parser = HTMLParser(url, article_id + 1)
+    for id_of_artcile, url in enumerate(crawler.urls):
+        article_parser = HTMLParser(url, id_of_artcile + 1)
         article = article_parser.parse()
         article.save_raw()
-
