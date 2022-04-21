@@ -183,17 +183,16 @@ def validate_config(crawler_path):
     return seed_urls, total_articles
 
 
-
 if __name__ == '__main__':
     new_seed_urls, new_total_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(new_seed_urls, new_total_articles)
     crawler.find_articles()
     for art_id, art_url in enumerate(crawler.urls):
-            article_parser = HTMLParser(article_url=art_url, article_id=art_id+1)
-            article = article_parser.parse()
-            if article.text:
-                article.save_raw()
-                print(f'the {art_id+1} article is successfully downloaded')
+        article_parser = HTMLParser(article_url=art_url, article_id=art_id + 1)
+        article = article_parser.parse()
+        if article.text:
+            article.save_raw()
+            print(f'the {art_id + 1} article is successfully downloaded')
 
     print("That's all!")
