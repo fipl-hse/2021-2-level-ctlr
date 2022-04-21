@@ -84,34 +84,7 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        # article_urls_bs = article_bs.find('a', class_='obj_galley_link pdf')
-        # if True:
-        # # if article_urls_bs is None:
-        #     title_no_file = article_bs.find('h1', class_='page_title').text.strip()
-        #     back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
-        #     seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
-        #     sections = seed_bs.find_all("div", class_="obj_article_summary")
-        #     for section in sections:
-        #         if title_no_file in section.text:
-        #             found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
-        #             if found_article_url_bs:
-        #                 art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
-        #                 download_pdf = art_soup.find('a', class_='download')['href']
-        #                 pdf = PDFRawFile(download_pdf, self.article_id)
-        #                 pdf.download()
-        #                 self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
-        # if article_urls_bs is not None:
-        #     response = requests.get(article_urls_bs['href'])
-        #     soup = BeautifulSoup(response.text, 'lxml')
-        #     url_download_pdf = soup.find('a', class_='download')['href']
-        # # file_type = response.headers['content-type']
-        # # if not file_type == 'application/msword':
-        #     pdf = PDFRawFile(url_download_pdf, self.article_id)
-        #     pdf.download()
-        #     self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
-        article_urls_bs = article_bs.find('a', class_='obj_galley_link pdf')
         if True:
-            # if article_urls_bs is None:
             title = article_bs.find('h1', class_='page_title').text.strip()
             back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
             seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
