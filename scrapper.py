@@ -48,8 +48,11 @@ class Crawler:
     def _extract_url(self, article_bs):
         article_summaries_bs = article_bs.find_all("div", class_="obj_article_summary")
         for article_summary_bs in article_summaries_bs:
-            url_link = article_summary_bs.find('div', class_='title').find('a')['href']
-            self.urls.append(url_link)
+            link_to_pdf = article_summary_bs.find('a', class_='obj_galley_link pdf')
+            if link_to_pdf:
+                url_link = article_summary_bs.find('div', class_='title').find('a')['href']
+                if len(self.urls) < self.total_max_articles:
+                    self.urls.append(url_link)
 
     def find_articles(self):
         """
@@ -81,14 +84,40 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
+        # article_urls_bs = article_bs.find('a', class_='obj_galley_link pdf')
+        # if True:
+        # # if article_urls_bs is None:
+        #     title_no_file = article_bs.find('h1', class_='page_title').text.strip()
+        #     back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
+        #     seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
+        #     sections = seed_bs.find_all("div", class_="obj_article_summary")
+        #     for section in sections:
+        #         if title_no_file in section.text:
+        #             found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
+        #             if found_article_url_bs:
+        #                 art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
+        #                 download_pdf = art_soup.find('a', class_='download')['href']
+        #                 pdf = PDFRawFile(download_pdf, self.article_id)
+        #                 pdf.download()
+        #                 self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
+        # if article_urls_bs is not None:
+        #     response = requests.get(article_urls_bs['href'])
+        #     soup = BeautifulSoup(response.text, 'lxml')
+        #     url_download_pdf = soup.find('a', class_='download')['href']
+        # # file_type = response.headers['content-type']
+        # # if not file_type == 'application/msword':
+        #     pdf = PDFRawFile(url_download_pdf, self.article_id)
+        #     pdf.download()
+        #     self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
         article_urls_bs = article_bs.find('a', class_='obj_galley_link pdf')
-        if article_urls_bs is None:
-            title_no_file = article_bs.find('h1', class_='page_title').text.strip()
+        if True:
+            # if article_urls_bs is None:
+            title = article_bs.find('h1', class_='page_title').text.strip()
             back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
             seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
             sections = seed_bs.find_all("div", class_="obj_article_summary")
             for section in sections:
-                if title_no_file in section.text:
+                if title in section.text:
                     found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
                     if found_article_url_bs:
                         art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
@@ -96,26 +125,25 @@ class HTMLParser:
                         pdf = PDFRawFile(download_pdf, self.article_id)
                         pdf.download()
                         self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
-        if article_urls_bs is not None:
-            response = requests.get(article_urls_bs['href'])
-            soup = BeautifulSoup(response.text, 'lxml')
-            url_download_pdf = soup.find('a', class_='download')['href']
-        # file_type = response.headers['content-type']
-        # if not file_type == 'application/msword':
-            pdf = PDFRawFile(url_download_pdf, self.article_id)
-            pdf.download()
-            self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
 
     def _fill_article_with_meta_information(self, article_bs):
         # title
-        self.article.title = article_bs.find('h1', class_='page_title').text.strip()
-
+        try:
+            self.article.title = article_bs.find('h1', class_='page_title').text.strip()
+        except AttributeError:
+            self.article.title = 'NOT FOUND'
         # author
-        self.article.author = article_bs.find('ul', class_='item authors').find('li').find('span').text.strip()
+        try:
+            self.article.author = article_bs.find('ul', class_='item authors').find('li').find('span').text.strip()
+        except AttributeError:
+            self.article.title = 'NOT FOUND'
 
         # topics
-        self.article.topics = article_bs.find('div', class_='item keywords').find(
-            'span', class_='value').text.strip().replace('\t', "").split(', ')
+        try:
+            self.article.topics = article_bs.find('div', class_='item keywords').find(
+                'span', class_='value').text.strip().replace('\t', "").split(', ')
+        except AttributeError:
+            self.article.title = 'NOT FOUND'
 
         # date
         try:
@@ -182,25 +210,17 @@ def validate_config(crawler_path):
     return seed_urls, total_articles
 
 
-def check_saved_number(tmp_path):
-    if len([path for path in Path(tmp_path).iterdir() if path.is_file()]) == 300:
-        return True
-    return False
-
 
 if __name__ == '__main__':
     new_seed_urls, new_total_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(new_seed_urls, new_total_articles)
     crawler.find_articles()
-    ID_OF_ARTICLE = 1
-    for art_url in crawler.urls:
-        if not check_saved_number(ASSETS_PATH):
-            parser = HTMLParser(article_url=art_url, article_id=ID_OF_ARTICLE)
-            article = parser.parse()
+    for art_id, art_url in enumerate(crawler.urls):
+            article_parser = HTMLParser(article_url=art_url, article_id=art_id+1)
+            article = article_parser.parse()
             if article.text:
                 article.save_raw()
-                print(f'the {ID_OF_ARTICLE} article is successfully downloaded')
-                ID_OF_ARTICLE += 1
+                print(f'the {art_id+1} article is successfully downloaded')
 
     print("That's all!")
