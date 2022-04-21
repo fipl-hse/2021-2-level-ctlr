@@ -84,20 +84,19 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_text(self, article_bs):
-        if True:
-            title = article_bs.find('h1', class_='page_title').text.strip()
-            back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
-            seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
-            sections = seed_bs.find_all("div", class_="obj_article_summary")
-            for section in sections:
-                if title in section.text:
-                    found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
-                    if found_article_url_bs:
-                        art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
-                        download_pdf = art_soup.find('a', class_='download')['href']
-                        pdf = PDFRawFile(download_pdf, self.article_id)
-                        pdf.download()
-                        self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
+        title = article_bs.find('h1', class_='page_title').text.strip()
+        back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
+        seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
+        sections = seed_bs.find_all("div", class_="obj_article_summary")
+        for section in sections:
+            if title in section.text:
+                found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
+                if found_article_url_bs:
+                    art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
+                    download_pdf = art_soup.find('a', class_='download')['href']
+                    pdf = PDFRawFile(download_pdf, self.article_id)
+                    pdf.download()
+                    self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
 
     def _fill_article_with_meta_information(self, article_bs):
         # title
