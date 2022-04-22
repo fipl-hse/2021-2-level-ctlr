@@ -32,8 +32,8 @@ class MorphologicalToken:
 
     def __init__(self, original_word):
         self.normalized_form = ''
-        self.mystem_tags = ''
-        self.pymorphy_tags = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
         self.original_word = ''
 
     def get_cleaned(self):
@@ -46,7 +46,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with MyStem tags
         """
-        return self.normalized_form, self.mystem_tags
+        return self.normalized_form, self.tags_mystem
 
     def get_multiple_tagged(self):
         """
@@ -101,12 +101,10 @@ class TextProcessingPipeline:
             article_text = article_text.replace('-\n', '')
             for symbol in ['\n', '\r']:
                 article_text = article_text.replace(symbol, ' ')
-            re_tokens = re. findall(r'[а-я]+-?[а-я]*', article_text, flags=re.IGNORECASE)
+            re_tokens = re.findall(r'[а-яё_]+-?[а-яё_]*', article_text, flags=re.IGNORECASE)
             cleaned_text = ' '.join(re_tokens)
             article_item.save_as(cleaned_text.lower(), 'cleaned')
             self._process(cleaned_text)
-
-
 
     def _process(self, raw_text: str):
         """
@@ -128,7 +126,7 @@ class TextProcessingPipeline:
             token.normalized_form = analyzed_word['analysis'][0].get('lex')
             if 'gr' not in analyzed_word['analysis'][0].keys():
                 continue
-            token.mystem_tags = analyzed_word['analysis'][0].get('gr')
+            token.tags_mystem = analyzed_word['analysis'][0].get('gr')
             m_tokens_list.append(token)
 
 
@@ -142,7 +140,7 @@ def validate_dataset(path_to_validate):
     children_files = list(path_to_validate.glob('*raw.txt'))
     children_files.extend(list(path_to_validate.glob('*.json')))
     if not children_files:
-        raise EmptyDirectoryError
+        raise InconsistentDatasetError
     file_names = []
     for files_path in children_files:
         file_names.append(files_path.name)
@@ -150,6 +148,11 @@ def validate_dataset(path_to_validate):
         raise InconsistentDatasetError
     for i in range(1, int(len(list(children_files)) / 2) + 1):
         if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
+            raise FileNotFoundError
+    for file in children_files:
+        with open(file, 'r', encoding='utf-8') as f:
+            text = f.read()
+        if text is '':
             raise FileNotFoundError
 
 
