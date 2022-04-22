@@ -77,17 +77,17 @@ class HTMLParser():
         self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_text(self, article_bs):
-        text = article_bs.find('div', {'class': 'text'}).text
-        self.article.text = text
+        whole_text = article_bs.find_all('div', {'class': 'text'})
+        text = []
+        for text_part in whole_text:
+            text.append(text_part.text)
+        self.article.text = '\n'.join(text)
 
     def _fill_article_with_meta_information(self, article_bs):
         article_title = article_bs.find('h2', {'class': 'news-title'})
         self.article.title = article_title.text
 
-        #instead if author name
-        #page_title = article_bs.find('h1', {'class': 'page-title'})
         self.article.author = 'NOT FOUND'
-
 
         date = '01/01/2022'
         compare_url = {}
