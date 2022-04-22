@@ -84,8 +84,7 @@ class HTMLParser():
         self.article.text = '\n'.join(text)
 
     def _fill_article_with_meta_information(self, article_bs):
-        article_title = article_bs.find('h2', {'class': 'news-title'})
-        self.article.title = article_title.text
+        self.article.title = article_bs.find('h2', {'class': 'news-title'}).text
 
         self.article.author = 'NOT FOUND'
 
@@ -110,7 +109,7 @@ class HTMLParser():
             article_header = link.find('h3')
             if article_header is None:
                 article_header = link.find('article')
-            if article_title.text in article_header.text:
+            if self.article.title in article_header.text:
                 date = link.find_all('time')[0].text + '/2022'
                 break
         self.article.date = datetime.datetime.strptime(date, '%d/%m/%Y')
