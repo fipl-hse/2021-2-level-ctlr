@@ -115,7 +115,8 @@ class HTMLParser():
                 break
         self.article.date = datetime.datetime.strptime(date, '%d/%m/%Y')
 
-        self.article.topics = [topic for topic in article_bs.find('meta', {'name': 'keywords'})['content'].split(', ')]
+        for topic in article_bs.find('meta', {'name': 'keywords'})['content'].split(', '):
+            self.article.topics = topic
 
 
     def parse(self):
