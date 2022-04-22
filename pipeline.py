@@ -152,7 +152,7 @@ def validate_dataset(path_to_validate):
     for file in children_files:
         with open(file, 'r', encoding='utf-8') as text_file:
             text = text_file.read()
-        if text is '':
+        if not text:
             raise FileNotFoundError
 
 
