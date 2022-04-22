@@ -79,14 +79,22 @@ class HTMLParser():
         text = article_bs.find('div', {'class': 'text'}).text
         self.article.text = text
 
+    def _fill_article_with_meta_information(self, article_bs):
+        article_name = article_bs.find('h2', {'class': 'news-title'})
+        self.article.name = article_name
+
+        #instead if author name
+        page_title = article_bs.find('h1', {'class': 'page-title'})
+        self.article.page_title = page_title
+
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
 
         return self.article
-
 
 
 def prepare_environment(base_path):
@@ -145,3 +153,4 @@ if __name__ == '__main__':
         article_parser = HTMLParser(url, id_of_article + 1)
         article = article_parser.parse()
         article.save_raw()
+
