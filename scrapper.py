@@ -1,6 +1,7 @@
 """
 Scrapper implementation
 """
+import datetime
 import json
 from pathlib import Path
 import shutil
@@ -81,11 +82,41 @@ class HTMLParser():
 
     def _fill_article_with_meta_information(self, article_bs):
         article_title = article_bs.find('h2', {'class': 'news-title'})
-        self.article.title = article_title
+        self.article.title = article_title.text
 
         #instead if author name
-        page_title = article_bs.find('h1', {'class': 'page-title'})
-        self.article.author = page_title
+        #page_title = article_bs.find('h1', {'class': 'page-title'})
+        self.article.author = 'NOT FOUND'
+
+
+        date = '01/01/2022'
+        compare_url = {}
+        with open(CRAWLER_CONFIG_PATH) as file:
+            config = json.load(file)
+        config_seed_urls = config["seed_urls"]
+        counter = 1
+        response = config_seed_urls[0]
+        for seed_url in config_seed_urls:
+            compare_url[tuple(i for i in range(counter, counter+20))] = seed_url
+            counter += 20
+        for key in compare_url:
+            if self.article_id in key:
+                response = requests.get(url=compare_url.get(key), headers=HEADERS)
+                break
+        soup = BeautifulSoup(response.text, 'lxml')
+        main_bs = soup.find('div', {'class': 'news-list-left'})
+        links = main_bs.find_all('a', {'class': 'news-list-item'})
+        for link in links:
+            article_header = link.find('h3')
+            if article_header is None:
+                article_header = link.find('article')
+            if article_title.text in article_header.text:
+                date = link.find_all('time')[0].text + '/2022'
+                break
+        self.article.date = datetime.datetime.strptime(date, '%d/%m/%Y')
+
+        self.article.topics = [topic for topic in article_bs.find('meta', {'name': 'keywords'})['content'].split(', ')]
+
 
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
