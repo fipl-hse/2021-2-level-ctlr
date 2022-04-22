@@ -4,5 +4,5 @@
         "https://tomari.ru/news/?list=3",
         "https://tomari.ru/news/?list=4",
         "https://tomari.ru/news/?list=5"],
-    "total_articles_to_find_and_parse": 1
+    "total_articles_to_find_and_parse": 100
 }
