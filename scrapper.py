@@ -103,8 +103,8 @@ class HTMLParser():
             if self.article_id in key:
                 response = requests.get(url=compare_url.get(key), headers=HEADERS)
                 break
-        soup = BeautifulSoup(response.text, 'lxml')
-        main_bs = soup.find('div', {'class': 'news-list-left'})
+
+        main_bs = BeautifulSoup(response.text, 'lxml').find('div', {'class': 'news-list-left'})
         links = main_bs.find_all('a', {'class': 'news-list-item'})
         for link in links:
             article_header = link.find('h3')
