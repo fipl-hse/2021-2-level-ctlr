@@ -80,12 +80,12 @@ class HTMLParser():
         self.article.text = text
 
     def _fill_article_with_meta_information(self, article_bs):
-        article_name = article_bs.find('h2', {'class': 'news-title'})
-        self.article.name = article_name
+        article_title = article_bs.find('h2', {'class': 'news-title'})
+        self.article.title = article_title
 
         #instead if author name
         page_title = article_bs.find('h1', {'class': 'page-title'})
-        self.article.page_title = page_title
+        self.article.author = page_title
 
     def parse(self):
         response = requests.get(self.article_url, HEADERS)
@@ -153,4 +153,3 @@ if __name__ == '__main__':
         article_parser = HTMLParser(url, id_of_article + 1)
         article = article_parser.parse()
         article.save_raw()
-
