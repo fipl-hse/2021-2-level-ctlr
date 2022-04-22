@@ -150,8 +150,8 @@ def validate_dataset(path_to_validate):
         if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
             raise FileNotFoundError
     for file in children_files:
-        with open(file, 'r', encoding='utf-8') as f:
-            text = f.read()
+        with open(file, 'r', encoding='utf-8') as text_file:
+            text = text_file.read()
         if text is '':
             raise FileNotFoundError
 
