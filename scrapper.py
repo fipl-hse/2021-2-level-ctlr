@@ -105,8 +105,8 @@ class HTMLParser():
                 break
 
         main_bs = BeautifulSoup(response.text, 'lxml').find('div', {'class': 'news-list-left'})
-        links = main_bs.find_all('a', {'class': 'news-list-item'})
-        for link in links:
+
+        for link in main_bs.find_all('a', {'class': 'news-list-item'}):
             article_header = link.find('h3')
             if article_header is None:
                 article_header = link.find('article')
