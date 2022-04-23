@@ -1,9 +1,9 @@
 """
 Pipeline for text processing implementation
 """
-from core_utils.article import Article, ArtifactType
-from pathlib import Path
 import re
+from pathlib import Path
+from core_utils.article import Article, ArtifactType
 # from pymystem3 import Mystem
 
 
@@ -65,11 +65,12 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        children = [child for child in self.path.glob('*')]
+        dataset = list(self.path.glob('*'))
+        pattern = re.compile(r'([0-9]+)_raw')
 
-        for child in children:
-            if 'raw.txt' in str(child):
-                article_id = re.search(r'[0-9]+_raw', str(child)).group(0)[:-4]
+        for file in dataset:
+            if 'raw.txt' in file.name:
+                article_id = pattern.search(file.name).group(1)
                 self._storage[int(article_id)] = Article(url=None, article_id=int(article_id))
 
     def get_articles(self):
@@ -122,20 +123,6 @@ class TextProcessingPipeline:
             token = MorphologicalToken(original_word=word)
             morph_tokens.append(token)
 
-        '''
-        raw_text = raw_text.replace('-\n', '')
-        result = Mystem().analyze(raw_text)
-        morph_tokens = []
-
-        for element in result:
-            word = element['text']
-            if not word.isalpha():
-                continue
-
-            token = MorphologicalToken(original_word=word)
-            morph_tokens.append(token)
-        '''
-
         return morph_tokens
 
 
@@ -152,23 +139,23 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    children = [child for child in path_to_validate.glob('*')]
-    if not children:
+    dataset = list(path_to_validate.glob('*'))
+    if not dataset:
         raise EmptyDirectoryError
 
-    for child in children:
-        if 'raw.txt' in str(child):
-            with open(child, 'r', encoding='utf-8') as file:
-                text = file.read()
+    for file in dataset:
+        if 'raw.txt' in file.name:
+            with open(file, 'r', encoding='utf-8') as text_file:
+                text = text_file.read()
                 if not text:
                     raise InconsistentDatasetError
 
     counter_t = 0
     counter_m = 0
-    for file_name in children:
-        if 'meta' in str(file_name):
+    for file in dataset:
+        if 'meta' in file.name:
             counter_m += 1
-        elif 'raw.txt' in str(file_name):
+        elif 'raw.txt' in file.name:
             counter_t += 1
 
     if counter_t != counter_m:
