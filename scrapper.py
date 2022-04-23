@@ -143,15 +143,17 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         scrapper_config = json.load(file)
 
-    for url in scrapper_config["seed_urls"]:
+    seed_urls = scrapper_config["seed_urls"]
+    if not seed_urls:
+        raise IncorrectURLError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
+
+    for url in seed_urls:
         if HTTP_PATTERN not in url:
             raise IncorrectURLError
 
-    seed_urls = scrapper_config["seed_urls"]
     total_articles_to_find_and_parse = scrapper_config["total_articles_to_find_and_parse"]
-
-    if not seed_urls:
-        raise IncorrectURLError
 
     if not isinstance(total_articles_to_find_and_parse, int) or total_articles_to_find_and_parse <= 0:
         raise IncorrectNumberOfArticlesError
