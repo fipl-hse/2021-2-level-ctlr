@@ -5,7 +5,6 @@ Pipeline for text processing implementation
 from pathlib import Path
 
 from core_utils.article import Article
-from constants import ASSETS_PATH
 
 
 class EmptyDirectoryError(Exception):
@@ -58,6 +57,7 @@ class CorpusManager:
     def __init__(self, path_to_raw_txt_data: str):
         self.path_to_raw_txt_data = path_to_raw_txt_data
         self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
@@ -68,8 +68,8 @@ class CorpusManager:
         files = [file for file in path_raw.glob('*_raw.txt')]
 
         for file in files:
-            file_number = file.stem.split('_')[0]
-            self._storage[file_number] = Article(url=None, article_id=file_number)
+            article_id = int(file.stem.split('_')[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
