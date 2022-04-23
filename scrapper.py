@@ -39,6 +39,7 @@ class Crawler:
     """
     Crawler implementation
     """
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
@@ -47,7 +48,7 @@ class Crawler:
     def _extract_url(self, article_bs):
         articles = article_bs.find('div', {'class': 'entry-content'})
         all_links = articles.find_all('a')[1:]
-        domain_for_match = re.findall(r'.*(:.*)', DOMAIN_NAME)[0]
+        domain_for_match = DOMAIN_NAME[5:]
         for link in all_links:
             if len(self.urls) < self.max_articles:
                 if re.match(r'https?' + domain_for_match, link['href']):
@@ -95,19 +96,27 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        download_pdf = article_bs.find('a', {'class': 'aligncenter download-button'})['href']
+        article_issue = article_bs.find_all('a', {'rel': 'v:url'})[3].text
 
-        pdf = PDFRawFile(download_pdf, self.article_id)
-
-        pdf.download()
-        full_article = pdf.get_text()
-
-        reference = 'Список литературы / References'
-        if reference in full_article:
-            split_article = full_article.split(reference)
-            self.article.text = ''.join(split_article[:-1])
+        if '2021' not in article_issue:  # abstracts instead of pdfs before 2021
+            if len(article_bs.find('div', {'class': 'entry-content'}).find_all('p')) < 6:
+                self.article.text = article_bs.find('div', {'class': 'entry-content'}).find_all('p')[3].text
+            else:
+                self.article.text = article_bs.find('div', {'class': 'entry-content'}).find_all('p')[4].text
         else:
-            self.article.text = full_article
+            download_pdf = article_bs.find('a', {'class': 'aligncenter download-button'})['href']
+
+            pdf = PDFRawFile(download_pdf, self.article_id)
+
+            pdf.download()
+            full_article = pdf.get_text()
+
+            reference = 'Список литературы / References'
+            if reference in full_article:
+                split_article = full_article.split(reference)
+                self.article.text = ''.join(split_article[:-1])
+            else:
+                self.article.text = full_article
 
     def _fill_article_with_meta_information(self, article_bs):
         self.article.title = article_bs.find('h1', {'class': 'entry-title'}).text
