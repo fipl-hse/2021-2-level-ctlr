@@ -96,7 +96,8 @@ class HTMLParser:
         except AttributeError:
             self.article.author = 'NOT FOUND'
         # TOPICS
-        self.article.topics = 'NOT FOUND'
+        # self.article.topics = 'NOT FOUND'
+        self.article.topics = []
 
         # TITLE
         self.article.title = article_bs.find('div', class_="post-title")
