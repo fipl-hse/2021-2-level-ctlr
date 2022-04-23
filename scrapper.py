@@ -240,5 +240,4 @@ if __name__ == '__main__':
         if len(crawler.urls) < number_of_articles:
             print("ERROR. NO MORE ARTICLES TO PARSE")
             raise NotEnoughArticles
-        else:
-            print('DONE')
+        print('DONE')
