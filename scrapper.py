@@ -36,6 +36,13 @@ class IncorrectNumberOfArticlesError(Exception):
     pass
 
 
+class NotEnoughArticles(Exception):
+    """
+    Failed to find expected number of articles
+    """
+    pass
+
+
 class Crawler:
     """
     Crawler implementation
@@ -108,7 +115,9 @@ class HTMLParser:
         authors_list = []
         for table_raw in authors_table_raws_bs:
             authors_list.append(table_raw.find('td').text)
-        return ', '.join(authors_list)
+        if len(authors_list) == 1:
+            return authors_list[0]
+        return authors_list
 
     def _find_article_date(self, article_bs):
         article_year = self._extract_publication_year(article_bs)
@@ -227,7 +236,9 @@ if __name__ == '__main__':
             article = article_parser.parse()
             article.save_raw()
             print(f'Article {article_parser.article_id} of {number_of_articles} is done.')
-            if article_parser.article_id == number_of_articles:
-                break
 
-        print('DONE')
+        if len(crawler.urls) < number_of_articles:
+            print("ERROR. NO MORE ARTICLES TO PARSE")
+            raise NotEnoughArticles
+        else:
+            print('DONE')

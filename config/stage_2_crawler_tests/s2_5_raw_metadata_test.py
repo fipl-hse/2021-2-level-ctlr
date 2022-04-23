@@ -9,6 +9,8 @@ import pytest
 import requests
 from constants import ASSETS_PATH
 
+from constants import HEADERS
+
 
 class RawBasicDataValidator(unittest.TestCase):
     """
@@ -178,7 +180,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
 
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
