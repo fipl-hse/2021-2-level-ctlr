@@ -4,6 +4,9 @@ Pipeline for text processing implementation
 
 from pathlib import Path
 
+from core_utils.article import Article
+from constants import ASSETS_PATH
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -53,19 +56,26 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._storage = {}
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        path_raw = Path(self.path_to_raw_txt_data)
+
+        files = [file for file in path_raw.glob('*_raw.txt')]
+
+        for file in files:
+            file_number = file.stem.split('_')[0]
+            self._storage[file_number] = Article(url=None, article_id=file_number)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -96,6 +106,7 @@ def validate_dataset(path_to_validate):
     path_to_validate = Path(path_to_validate)
 
     files = [file for file in path_to_validate.glob('*')]
+    stems = [file.stem for file in files]
     raw_txt = 0
     meta_json = 0
 
@@ -109,23 +120,17 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError
 
     for file in files:
-        if file.suffix == '.txt':
-            raw_txt += 1
-
-            if f'{raw_txt}_raw' not in files:
-                raise InconsistentDatasetError
-
-        if f'{raw_txt}_raw' not in [file.stem for file in files]:
-            raise InconsistentDatasetError
-
         if file.suffix == '.json':
             meta_json += 1
 
-            if f'{meta_json}_raw' not in files:
+            if f'{meta_json}_meta' not in stems:
                 raise InconsistentDatasetError
 
-        if f'{meta_json}_raw' not in [file.stem for file in files]:
-            raise InconsistentDatasetError
+        if file.suffix == '.txt':
+            raw_txt += 1
+
+            if f'{raw_txt}_raw' not in stems:
+                raise InconsistentDatasetError
 
     if raw_txt != meta_json:
         raise InconsistentDatasetError
