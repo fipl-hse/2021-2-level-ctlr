@@ -34,7 +34,7 @@ class MorphologicalToken:
         self.normalized_form = ''
         self.tags_mystem = ''
         self.tags_pymorphy = ''
-        self.original_word = ''
+        self.original_word = 'original_token'
 
     def get_cleaned(self):
         """
@@ -46,7 +46,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with MyStem tags
         """
-        return self.normalized_form, self.tags_mystem
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
@@ -72,7 +72,7 @@ class CorpusManager:
         paths_to_files = list(Path(self.path_to_raw_txt_data).glob('*_raw.txt'))
         id_template = re.compile(r'\d+')
         for file_path in paths_to_files:
-            file_id = int(re.search(id_template, str(file_path.name)).group())
+            file_id = int(id_template.search(file_path.name).group())
             article_object = Article(url=None, article_id=file_id)
             self._storage[file_id] = article_object
 
@@ -90,28 +90,24 @@ class TextProcessingPipeline:
 
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
-        pass
+
 
     def run(self):
         """
         Runs pipeline process scenario
         """
         for article_item in self.corpus_manager.get_articles().values():
-            article_text = article_item.get_raw_text()
-            article_text = article_text.replace('-\n', '')
-            for symbol in ['\n', '\r']:
-                article_text = article_text.replace(symbol, ' ')
-            re_tokens = re.findall(r'[а-яё_]+-?[а-яё_]*', article_text, flags=re.IGNORECASE)
-            cleaned_text = ' '.join(re_tokens)
-            article_item.save_as(cleaned_text.lower(), 'cleaned')
-            self._process(cleaned_text)
+            list_of_tokens = self._process(article_item.get_raw_text())
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
+        article_text = raw_text.replace('-\n', '')
+        for symbol in ['\n', '\r']:
+            article_text = article_text.replace(symbol, ' ')
         m_tokens_list = []
-        analyzed_text_mystem = Mystem().analyze(raw_text)
+        analyzed_text_mystem = Mystem().analyze(article_text)
         for analyzed_word in analyzed_text_mystem:
             if analyzed_word['text'] == ' ':
                 continue
@@ -128,6 +124,7 @@ class TextProcessingPipeline:
                 continue
             token.tags_mystem = analyzed_word['analysis'][0].get('gr')
             m_tokens_list.append(token)
+        return m_tokens_list
 
 
 def validate_dataset(path_to_validate):
@@ -135,12 +132,14 @@ def validate_dataset(path_to_validate):
     Validates folder with assets
     """
     path_to_validate = Path(path_to_validate)
+    if not path_to_validate.exists():
+        raise FileNotFoundError
     if not path_to_validate.is_dir():
         raise NotADirectoryError
     children_files = list(path_to_validate.glob('*raw.txt'))
     children_files.extend(list(path_to_validate.glob('*.json')))
     if not children_files:
-        raise InconsistentDatasetError
+        raise EmptyDirectoryError
     file_names = []
     for files_path in children_files:
         file_names.append(files_path.name)
@@ -148,12 +147,12 @@ def validate_dataset(path_to_validate):
         raise InconsistentDatasetError
     for i in range(1, int(len(list(children_files)) / 2) + 1):
         if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
-            raise FileNotFoundError
+            raise InconsistentDatasetError
     for file in children_files:
         with open(file, 'r', encoding='utf-8') as text_file:
             text = text_file.read()
         if not text:
-            raise FileNotFoundError
+            raise InconsistentDatasetError
 
 
 def main():
