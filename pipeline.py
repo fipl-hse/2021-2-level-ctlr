@@ -118,26 +118,23 @@ class TextProcessingPipeline:
         article_text = raw_text.replace('-\n', '')
         for symbol in ['\n', '\r']:
             article_text = article_text.replace(symbol, ' ')
-        word_pattern = re.compile(r'[а-яА-яё_]+-?[а-яА-яё_]*')
-        re_tokens = word_pattern.findall(article_text)
-        text_cleaned = ' '.join(re_tokens)
         m_tokens_list = []
-        analyzed_text_mystem = Mystem().analyze(text_cleaned)
+        analyzed_text_mystem = Mystem().analyze(article_text)
         pymorphy2_analyzer = pymorphy2.MorphAnalyzer()
         for analyzed_word in analyzed_text_mystem:
             if analyzed_word['text'] == ' ':
                 continue
             original_word = analyzed_word['text']
-            token = MorphologicalToken(original_word)
             if 'analysis' not in analyzed_word.keys():
                 continue
             if not analyzed_word['analysis']:
                 continue
             if 'lex' not in analyzed_word['analysis'][0].keys():
                 continue
-            token.normalized_form = analyzed_word['analysis'][0].get('lex')
             if 'gr' not in analyzed_word['analysis'][0].keys():
                 continue
+            token = MorphologicalToken(original_word)
+            token.normalized_form = analyzed_word['analysis'][0].get('lex')
             token.tags_mystem = analyzed_word['analysis'][0].get('gr')
             m_tokens_list.append(token)
             token.tags_pymorphy = pymorphy2_analyzer.parse(original_word)[0].tag
