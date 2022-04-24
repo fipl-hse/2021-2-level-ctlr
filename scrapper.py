@@ -11,9 +11,8 @@ from bs4 import BeautifulSoup
 import requests
 
 from core_utils.article import Article
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PATTERN
 
-PATTERN = 'https://rg.ru'
 
 
 class IncorrectURLError(Exception):
