@@ -5,6 +5,7 @@ import re
 
 from pathlib import Path
 from pymystem3 import Mystem
+import pymorphy2
 
 from constants import ASSETS_PATH
 from core_utils.article import Article
@@ -34,7 +35,7 @@ class MorphologicalToken:
         self.normalized_form = ''
         self.tags_mystem = ''
         self.tags_pymorphy = ''
-        self.original_word = 'original_token'
+        self.original_word = original_word
 
     def get_cleaned(self):
         """
@@ -52,7 +53,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -97,7 +98,18 @@ class TextProcessingPipeline:
         Runs pipeline process scenario
         """
         for article_item in self.corpus_manager.get_articles().values():
-            self._process(article_item.get_raw_text())
+            tokens = self._process(article_item.get_raw_text())
+            tokens_for_article = []
+            single_tagged_tokens = []
+            multiple_tagged_tokens = []
+            for token in tokens:
+                tokens_for_article.append(token.get_cleaned())
+                single_tagged_tokens.append(token.get_single_tagged())
+                multiple_tagged_tokens.append(token.get_multiple_tagged())
+            article_item.save_as(' '.join(tokens_for_article), kind='cleaned')
+            article_item.save_as(' '.join(single_tagged_tokens), kind='single_tagged')
+            article_item.save_as(' '.join(multiple_tagged_tokens), kind='multiple_tagged')
+
 
     def _process(self, raw_text: str):
         """
@@ -106,8 +118,12 @@ class TextProcessingPipeline:
         article_text = raw_text.replace('-\n', '')
         for symbol in ['\n', '\r']:
             article_text = article_text.replace(symbol, ' ')
+        word_pattern = re.compile(r'[а-яА-яё_]+-?[а-яА-яё_]*')
+        re_tokens = word_pattern.findall(article_text)
+        text_cleaned = ' '.join(re_tokens)
         m_tokens_list = []
-        analyzed_text_mystem = Mystem().analyze(article_text)
+        analyzed_text_mystem = Mystem().analyze(text_cleaned)
+        pymorphy2_analyzer = pymorphy2.MorphAnalyzer()
         for analyzed_word in analyzed_text_mystem:
             if analyzed_word['text'] == ' ':
                 continue
@@ -124,6 +140,7 @@ class TextProcessingPipeline:
                 continue
             token.tags_mystem = analyzed_word['analysis'][0].get('gr')
             m_tokens_list.append(token)
+            token.tags_pymorphy = pymorphy2_analyzer.parse(original_word)[0].tag
         return m_tokens_list
 
 
