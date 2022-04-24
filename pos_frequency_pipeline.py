@@ -25,7 +25,7 @@ class POSFrequencyPipeline:
                         'PART': 0, 'PR': 0, 'S': 0, 'SPRO': 0, 'V': 0}
             with open(article_tag_path, 'r', encoding='utf-8') as text:
                 text_n_tags = text.read()
-                for pos in frequencies_dict.keys():
+                for pos in frequencies_dict:
                     frequencies_dict[pos] = text_n_tags.count(pos)
             visualize(statistics=frequencies_dict,
                       path_to_save=ASSETS_PATH / f'{article_item.article_id}_image.png')
