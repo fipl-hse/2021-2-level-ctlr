@@ -3,8 +3,8 @@ Pipeline for text processing implementation
 """
 import re
 from pathlib import Path
-from core_utils.article import Article, ArtifactType
 from pymystem3 import Mystem
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -130,13 +130,10 @@ class TextProcessingPipeline:
             morph_tokens.append(token)
         return morph_tokens
 
-
-'''
-        morph_tokens = []
-        for word in clean_list:
-            token = MorphologicalToken(original_word=word)
-            morph_tokens.append(token)
-'''
+        # morph_tokens = []
+        # for word in clean_list:
+        # token = MorphologicalToken(original_word=word)
+        # morph_tokens.append(token)
 
 
 def validate_dataset(path_to_validate):
