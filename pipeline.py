@@ -5,6 +5,7 @@ Pipeline for text processing implementation
 import re
 from pathlib import Path
 
+import pymorphy2
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
@@ -71,14 +72,14 @@ class CorpusManager:
         Register each dataset entry
         """
         path = Path(self.path_to_raw_txt_data)
+        digit = re.compile(r'\d')
         for file in path.glob('*'):
-            file = file.name
-            for element in file:
-                if not element.isdigit():
-                    continue
-                article_id = int(element)
-                article = Article(None, article_id)
-                self._storage[article_id] = article
+            digit_in_title = digit.match(file.name)
+            if not digit_in_title:
+                continue
+            article_id = int(digit_in_title.group())
+            article = Article(None, article_id)
+            self._storage[article_id] = article
 
     def get_articles(self):
         """
@@ -102,22 +103,26 @@ class TextProcessingPipeline:
         articles = self.corpus_manager.get_articles().values()
         cleaned_tokens = []
         single_tagged = []
+        multiple_tagged = []
         for article in articles:
             raw_text = article.get_raw_text()
             tokens = self._process(raw_text)
             for token in tokens:
                 cleaned_tokens.append(token.get_cleaned())
                 single_tagged.append(token.get_single_tagged())
+                multiple_tagged.append(token.get_multiple_tagged())
             article.save_as(' '.join(cleaned_tokens), 'cleaned')
             article.save_as(' '.join(single_tagged), 'single_tagged')
+            article.save_as(' '.join(multiple_tagged), 'multiple_tagged')
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        cleaned_text = ' '.join(re.findall(r'[а-яА-Яa-zA-Z]+', raw_text))
+        cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁa-zA-Z]+', raw_text))
         analyzed_cleaned_text = Mystem().analyze(cleaned_text)
         tokens = []
+        morph = pymorphy2.MorphAnalyzer()
         for token in analyzed_cleaned_text:
             if ('analysis' not in token) \
                     or (not token['analysis']) \
@@ -127,6 +132,7 @@ class TextProcessingPipeline:
             morphological_token = MorphologicalToken(token['text'])
             morphological_token.normalized_form = token['analysis'][0]['lex']
             morphological_token.tags_mystem = token['analysis'][0]['gr']
+            morphological_token.tags_pymorphy = morph.parse(token['text'])[0].tag
             tokens.append(morphological_token)
         return tokens
 
@@ -140,14 +146,29 @@ def validate_dataset(path_to_validate):
         raise FileNotFoundError
     if not dataset_path.is_dir():
         raise NotADirectoryError
-    index = []
+    indices = []
+    digit_pattern = re.compile(r'\d')
     for files in dataset_path.glob('*'):
-        if not files.stem[0].isdigit():
+        digit = digit_pattern.match(files.stem)
+        if not digit:
             raise InconsistentDatasetError
-        index.append(int(files.stem[0]))
-    if not index:
+        index = int(digit.group())
+        if index not in indices:
+            indices.append(index)
+    if not indices:
         raise EmptyDirectoryError
-
+    previous_index = 0
+    for index in indices:
+        if index - previous_index != 1 or indices[0] != 1:
+            raise InconsistentDatasetError
+        previous_index = index
+        raw_path = dataset_path / f'{index}_raw.txt'
+        meta_path = dataset_path / f'{index}_meta.json'
+        if not raw_path.exists() or not meta_path.exists():
+            raise InconsistentDatasetError
+        with open(raw_path, 'r', encoding='utf-8') as file:
+            if not file.read():
+                raise InconsistentDatasetError
 
 
 def main():
