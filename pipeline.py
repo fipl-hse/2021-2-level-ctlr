@@ -4,7 +4,7 @@ Pipeline for text processing implementation
 import re
 from pathlib import Path
 from core_utils.article import Article, ArtifactType
-# from pymystem3 import Mystem
+from pymystem3 import Mystem
 
 
 class EmptyDirectoryError(Exception):
@@ -66,12 +66,12 @@ class CorpusManager:
         Register each dataset entry
         """
         dataset = list(self.path.glob('*'))
-        pattern = re.compile(r'([0-9]+)_raw')
+        pattern = re.compile(r'[0-9]+')
 
         for file in dataset:
             if 'raw.txt' in file.name:
-                article_id = pattern.search(file.name).group(1)
-                self._storage[int(article_id)] = Article(url=None, article_id=int(article_id))
+                article_id = int(pattern.search(file.name).group(0))
+                self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -116,14 +116,27 @@ class TextProcessingPipeline:
                 clean_text += ' '
             if symbol == '-\n':
                 clean_text += ''
-        clean_list = clean_text.split()
+        # clean_list = clean_text.split()
 
+        result = Mystem().analyze(raw_text)
+        morph_tokens = []
+
+        for element in result:
+            word = element['text']
+            if not word.isalpha():
+                continue
+
+            token = MorphologicalToken(original_word=word)
+            morph_tokens.append(token)
+        return morph_tokens
+
+
+'''
         morph_tokens = []
         for word in clean_list:
             token = MorphologicalToken(original_word=word)
             morph_tokens.append(token)
-
-        return morph_tokens
+'''
 
 
 def validate_dataset(path_to_validate):
@@ -150,16 +163,17 @@ def validate_dataset(path_to_validate):
                 if not text:
                     raise InconsistentDatasetError
 
-    counter_t = 0
-    counter_m = 0
-    for file in dataset:
-        if 'meta' in file.name:
-            counter_m += 1
-        elif 'raw.txt' in file.name:
-            counter_t += 1
+    pattern = re.compile(r'[0-9]+')
+    sorted_dataset = sorted(dataset, key=lambda x: int(pattern.search(x.name).group(0)))
 
-    if counter_t != counter_m:
-        raise InconsistentDatasetError
+    true_id = 0
+    for file in sorted_dataset:
+        file_id = int(pattern.search(file.name).group(0))
+        if file_id == 0 or file_id - true_id > 1 or \
+                not (path_to_validate / f'{file_id}_raw.txt').is_file() or \
+                not (path_to_validate / f'{file_id}_meta.json').is_file():
+            raise InconsistentDatasetError
+        true_id = file_id
 
 
 def main():

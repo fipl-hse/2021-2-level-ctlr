@@ -5,3 +5,4 @@ wget
 datetime
 pymystem3==0.1.10
 pymorphy2==0.9.1
+pytest
