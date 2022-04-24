@@ -1,6 +1,8 @@
 """
 Pipeline for text processing implementation
 """
+import re
+from pathlib import Path
 
 
 class EmptyDirectoryError(Exception):
@@ -91,7 +93,49 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    if isinstance(path_to_validate, str):
+        path_to_validate = Path(path_to_validate)
+    if not path_to_validate.exists():
+        raise FileNotFoundError
+    if not path_to_validate.is_dir():
+        raise NotADirectoryError
+    if not list(path_to_validate.glob('**/*')):
+        raise EmptyDirectoryError
+    if check_dataset_numeration(path_to_validate) == -1:
+        raise InconsistentDatasetError
+    if check_txt_files(path_to_validate) == -1:
+        raise InconsistentDatasetError
+
+
+def check_dataset_numeration(dataset_path):
+    """
+    Checks that the dataset is valid
+    """
+    files = {
+        '.json': [],
+        '.txt': [],
+        '.pdf': []
+    }
+    pattern = re.compile(r'\d+')
+    for file in list(dataset_path.glob('*')):
+        files.get(file.suffix).append(int(pattern.match(file.stem).group()))
+    for files_suffix, ids_list in files.items():
+        ids_list.sort()
+        for file_number in range(1, len(ids_list) - 1):
+            if ids_list[file_number - 1] != file_number:
+                print(f'Missing file № {file_number} with {files_suffix} suffix')
+                return -1
+    return 0
+
+
+def check_txt_files(dataset_path):
+    for file in list(dataset_path.glob('*')):
+        if file.suffix == '.txt':
+            file_content = file.open('r', encoding='utf-8')
+            file_text = file_content.read()
+            if not file_text:
+                return -1
+    return 0
 
 
 def main():
