@@ -1,5 +1,6 @@
 {
-    "seed_urls": ["https://esquire.ru/news/politics-news/",
+    "seed_urls": [
+        "https://esquire.ru/news/politics-news/",
         "https://esquire.ru/news/business-news/",
         "https://esquire.ru/news/fashion-news/",
         "https://esquire.ru/news/offtop/",
@@ -9,6 +10,22 @@
         "https://esquire.ru/news/sports-news/",
         "https://esquire.ru/news/society-news/",
         "https://esquire.ru/news/esquire-news/",
-    "https://esquire.ru/news/partner-news/"],
-    "total_articles_to_find_and_parse": 20
+        "https://esquire.ru/news/partner-news/",
+        "https://esquire.ru/articles/opinions/",
+        "https://esquire.ru/articles/experience/",
+        "https://esquire.ru/articles/politika/",
+        "https://esquire.ru/articles/internet/",
+        "https://esquire.ru/articles/business/",
+        "https://esquire.ru/articles/nauka/",
+        "https://esquire.ru/articles/ekonomika/",
+        "https://esquire.ru/articles/fotografii/",
+        "https://esquire.ru/letters/reading/",
+        "https://esquire.ru/letters/preprint/",
+        "https://esquire.ru/letters/rasskazy/",
+        "https://esquire.ru/hero/dialogi/",
+        "https://esquire.ru/hero/rules/",
+        "https://esquire.ru/editorial-blog/kolonka-glavnogo-redaktora/"
+
+    ],
+    "total_articles_to_find_and_parse": 100
 }

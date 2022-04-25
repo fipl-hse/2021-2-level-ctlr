@@ -7,7 +7,8 @@ import json
 from pathlib import Path
 import shutil
 
-from bs4 import BeautifulSoup
+
+from bs4 import BeautifulSoup, element
 import requests
 
 from core_utils.article import Article
@@ -41,14 +42,18 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         main_bs = article_bs.find('div', {'class': 'article-tile-news'})
+        if main_bs is None:
+            main_bs = article_bs.find('div', {'class': 'wrap preview-section__rows preview-section__rows_3'})
         for url_bs in main_bs:
             if len(self.urls) < self.max_articles:
+                if isinstance(url_bs, element.NavigableString):
+                    break
                 link = url_bs.find('a')
                 full_link = link['href']
-                self.urls.append(HTTP_MAIN + full_link)
+                pattern_and_link = HTTP_MAIN + full_link
+                if pattern_and_link not in self.urls:
+                    self.urls.append(pattern_and_link)
 
-    # if 'https://esquire.ru/' + url_bs['href'] not in self.urls:
-    # urls_bs = main_bs.find_all('а')
     def find_articles(self):
         """
         Finds articles
@@ -73,24 +78,29 @@ class HTMLParser:
         self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_text(self, article_bs):
-        text = article_bs.find('div', {'class': 'article-detail__content'}).text
-        self.article.text = text
+        text_bs = article_bs.find('div', {'class': 'article-detail__content'})
+        if text_bs is not None:
+            self.article.text = text_bs.text
 
     def _fill_article_with_meta_information(self, article_bs):
         date = article_bs.find('div', {'class': 'breadcrumbs__date'})
-        date_for_meta = datetime.strptime(date.text, '%Y-%m-%d %H:%M')
-        self.article.date = date_for_meta
+        if date is not None:
+            date_test = date.text.strip()
+            date_for_meta = datetime.strptime(date_test, "%d.%m.%Y, %H:%M")
+            self.article.date = date_for_meta
 
         author = article_bs.find('div', {'class': 'author-wrapper article-detail__author'})
-        if not author:
-            author = 'Not Found'
-        self.article.author = author
+        author_name = author.find('span', {'field': 'name'})
+        if not author_name:
+            author_name = 'Not Found'
+        self.article.author = author_name.text.strip()
 
-        title = article_bs.find('h1', {'class': 'article-detail__title'}).text
-        self.article.title = title
+        title = article_bs.find('h1', {'class': 'article-detail__title'})
+        if title is not None:
+            self.article.title = title.text
 
     def parse(self):
-        response = requests.get(self.article_url, HEADERS)
+        response = requests.get(url=self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
