@@ -2,6 +2,15 @@
 Pipeline for text processing implementation
 """
 
+from pathlib import Path
+import re
+
+# import pymorphy2
+# from pymystem3 import Mystem
+
+from constants import ASSETS_PATH
+from core_utils.article import Article
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -51,19 +60,26 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        path_to_raws = Path(self.path_to_raw_txt_data)
+        dataset = [file for file in path_to_raws.rglob('*_raw.txt')]
+
+        for file in dataset:
+            article_id = int(file.parts[-1].split('_')[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -84,19 +100,40 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        # cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁ]+', raw_text))
+        # analyzed_cleaned_text = Mystem().analyze(cleaned_text)
 
 
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    path_to_dataset = Path(path_to_validate)
+
+    if not path_to_dataset.exists():
+        raise FileNotFoundError
+
+    if not path_to_dataset.is_dir():
+        raise NotADirectoryError
+
+    list_of_txts = list(path_to_dataset.glob('*_raw.txt'))
+    list_of_jsons = list(path_to_dataset.glob('*_meta.json'))
+    if not len(list_of_txts) == len(list_of_jsons):
+        raise InconsistentDatasetError
+
+    txt_indices = [int(txt.parts[-1].split('_')[0]) for txt, json in zip(list_of_txts, list_of_jsons)]
+    json_indices = [int(json.parts[-1].split('_')[0]) for txt, json in zip(list_of_txts, list_of_jsons)]
+
+    if sorted(txt_indices) != sorted(json_indices):
+        raise InconsistentDatasetError
+
+    if not list(path_to_dataset.iterdir()):
+        raise EmptyDirectoryError
 
 
 def main():
-    # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
 
 
 if __name__ == "__main__":

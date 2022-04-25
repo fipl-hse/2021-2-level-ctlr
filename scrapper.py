@@ -49,10 +49,8 @@ class Crawler:
         article_summaries_bs = article_bs.find_all("div", class_="obj_article_summary")
         for article_summary_bs in article_summaries_bs:
             link_to_pdf = article_summary_bs.find('a', class_='obj_galley_link pdf')
-            if link_to_pdf:
-                url_link = article_summary_bs.find('div', class_='title').find('a')['href']
-                if len(self.urls) < self.total_max_articles:
-                    self.urls.append(url_link)
+            if link_to_pdf and len(self.urls) < self.total_max_articles:
+                self.urls.append(article_summary_bs.find('div', class_='title').find('a')['href'])
 
     def find_articles(self):
         """
@@ -88,15 +86,13 @@ class HTMLParser:
         back_to_seed = article_bs.select_one('nav ol li:nth-child(3) a')['href']
         seed_bs = BeautifulSoup(requests.get(back_to_seed).text, 'lxml')
         sections = seed_bs.find_all("div", class_="obj_article_summary")
-        for section in sections:
-            if title in section.text:
-                found_article_url_bs = section.find('a', class_='obj_galley_link pdf')
-                if found_article_url_bs:
-                    art_soup = BeautifulSoup(requests.get(found_article_url_bs['href']).text, 'lxml')
-                    download_pdf = art_soup.find('a', class_='download')['href']
-                    pdf = PDFRawFile(download_pdf, self.article_id)
-                    pdf.download()
-                    self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
+        urls_bs = [section.find('a', class_='obj_galley_link pdf') for section in sections if title in section.text]
+        for url_bs in urls_bs:
+            art_soup = BeautifulSoup(requests.get(url_bs['href']).text, 'lxml')
+            download_pdf = art_soup.find('a', class_='download')['href']
+            pdf = PDFRawFile(download_pdf, self.article_id)
+            pdf.download()
+            self.article.text = pdf.get_text().split('СПИСОК ЛИТЕРАТУРЫ')[0]
 
     def _fill_article_with_meta_information(self, article_bs):
         # title
