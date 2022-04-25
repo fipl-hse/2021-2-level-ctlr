@@ -50,6 +50,7 @@ Instructors:
 |01.04.2022|**EXAM WEEK:** skipping lecture and seminars|**N/A**|
 |08.04.2022|**Lecture:** Programming assignment (Part 2): main concept and implementation details. Lemmatization and stemming. Existing tools for morphological analysis|**N/A**|
 |15.04.2022|**Lecture:** morphological analysis via `pymystem3`, `pymorphy2`. **Practice:** analyzing words|[`pymystem3` basics](./seminars/04.15.2022/try_mystem.py), [`pymorphy2` basics](./seminars/04.15.2022/try_pymorphy.py)|
+|22.04.2022|**Lecture:** information retrieval with `re`. **Practice:** analyzing web server logs|[`re` basics](./seminars/04.22.2022/try_re.py)|
 
 ## Technical solution
 
