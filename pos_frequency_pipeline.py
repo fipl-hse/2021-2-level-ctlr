@@ -3,6 +3,8 @@ Implementation of POSFrequencyPipeline for score ten only.
 """
 
 import json
+import re
+
 from pipeline import CorpusManager
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
@@ -21,12 +23,17 @@ class POSFrequencyPipeline:
     def run(self):
         for article_item in self.corpus_manager.get_articles().values():
             article_tag_path = article_item.get_file_path('single_tagged')
-            frequencies_dict = {'ADV': 0, 'ADVPRO': 0, 'APRO': 0, 'COM': 0, 'CONJ': 0, 'INTJ': 0, 'NUM': 0,
-                        'PART': 0, 'PR': 0, 'S': 0, 'SPRO': 0, 'V': 0}
+            frequencies_dict = {}
+            pos_pattern = re.compile(r'[A-Z]+')
             with open(article_tag_path, 'r', encoding='utf-8') as text:
                 text_n_tags = text.read()
-                for pos in frequencies_dict:
-                    frequencies_dict[pos] = text_n_tags.count(pos)
+                if not text_n_tags:
+                    raise EmptyFileError
+            pos_all = pos_pattern.findall(text_n_tags)
+            print(len(pos_all))
+            for pos in pos_all:
+                if pos not in frequencies_dict:
+                    frequencies_dict[pos] = pos_all.count(pos)
             visualize(statistics=frequencies_dict,
                       path_to_save=ASSETS_PATH / f'{article_item.article_id}_image.png')
             with open(article_item.get_meta_file_path(), "r", encoding='utf-8') as meta_file:
