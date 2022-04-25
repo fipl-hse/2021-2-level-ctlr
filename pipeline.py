@@ -1,7 +1,8 @@
 """
 Pipeline for text processing implementation
 """
-
+from core_utils.article import Article
+from pathlib import Path
 
 class EmptyDirectoryError(Exception):
     """
@@ -24,13 +25,17 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self.processed_word = ''
+        self.mystem_tags = ''
+        self.pymorphy_tags = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        lowercased = self.original_word.lower()
+        return lowercased
 
     def get_single_tagged(self):
         """
@@ -51,19 +56,26 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self._storage = {}
+        self.path = Path(path_to_raw_txt_data)
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        path_to_raw = Path(self.path)
+        files = list(path_to_raw.glob('*_raw.txt'))
+        for file in files:
+            article_id = int(file.stem.split('_')[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
+
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -72,7 +84,7 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = CorpusManager
 
     def run(self):
         """
@@ -91,7 +103,39 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    path_to_validate = Path(path_to_validate)
+
+    if not path_to_validate.exists():
+        raise FileNotFoundError
+
+    if not path_to_validate.is_dir():
+        raise NotADirectoryError
+
+    files = list(path_to_validate.glob('*'))
+    if not files:
+        raise EmptyDirectoryError
+    roots = [file.stem for file in files]
+
+    json_counter = 0
+    raw_counter = 0
+
+    for file in files:
+        if file.suffix == '.json':
+            json_counter += 1
+            if f'{json_counter}_meta' not in roots:
+                raise InconsistentDatasetError
+
+        if file.suffix == '.txt':
+            raw_counter += 1
+            if f'{raw_counter}_raw' not in roots:
+                raise InconsistentDatasetError
+            with open(file, 'r', encoding='utf-8') as raw_file:
+                read_file = raw_file.read()
+            if not read_file:
+                raise InconsistentDatasetError
+
+    if json_counter != raw_counter:
+        raise InconsistentDatasetError
 
 
 def main():
