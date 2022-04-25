@@ -7,7 +7,7 @@ import re
 import pymorphy2
 from pymystem3 import Mystem
 
-from constants import ASSETS_PATH, RAW_FILE_PATH_ENDING
+from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
 
 

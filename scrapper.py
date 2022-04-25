@@ -218,23 +218,25 @@ class CrawlerRecursive(Crawler):
             if RUSSIAN_ROOT_URL not in link or 'eng' in link:
                 continue
 
-            if link not in self.crawled_urls:
-                self.crawled_urls.append(link)
-                match = re.search(r'\?jnum=', link)
+            if link in self.crawled_urls:
+                continue
 
-                if match:
-                    self._seed_urls.append(link)
+            self.crawled_urls.append(link)
+            match = re.search(r'\?jnum=', link)
 
-                    response = requests.get(link)
-                    article_bs = BeautifulSoup(response.text, features="html.parser")
+            if match:
+                self._seed_urls.append(link)
 
-                    self.urls.extend(self._extract_url(article_bs))
+                response = requests.get(link)
+                article_bs = BeautifulSoup(response.text, features="html.parser")
 
-                    if len(self.urls) + 1 > self.max_articles:
-                        break
-                else:
-                    # Recursion
-                    self.crawl(link)
+                self.urls.extend(self._extract_url(article_bs))
+
+                if len(self.urls) + 1 > self.max_articles:
+                    break
+            else:
+                # Recursion
+                self.crawl(link)
 
 
 def prepare_environment(base_path):
