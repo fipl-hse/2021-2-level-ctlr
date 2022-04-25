@@ -55,13 +55,15 @@ class Crawler:
                 link = article.find('a')
                 href = link['href']
                 self.urls.append(href)
+            else:
+                break
 
     def find_articles(self):
         """
         Finds articles
         """
         for url in self.seed_urls:
-            response = requests.get(url, HEADERS)  # get html code
+            response = requests.get(url, headers=HEADERS)  # get html code
             sleep(random.randrange(2, 5))
 
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object

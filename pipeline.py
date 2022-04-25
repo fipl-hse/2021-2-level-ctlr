@@ -111,7 +111,7 @@ class TextProcessingPipeline:
         """
         text = raw_text.replace('-\n', '')
         clean_text = ''
-        pattern = re.compile(r'[а-яА-Яa-zA-Z]')
+        pattern = re.compile(r'[а-яА-Яёa-zA-Z]')
 
         for symbol in text:
             if pattern.match(symbol):
