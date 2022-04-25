@@ -158,8 +158,8 @@ def validate_dataset(path_to_validate):
         if file.name.endswith('meta.json'):
             counter_meta += 1
 
-    if counter_txt != counter_meta:
-        raise InconsistentDatasetError
+    # if counter_txt != counter_meta:
+        # raise InconsistentDatasetError
 
 
 def main():
