@@ -29,7 +29,9 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.normalized_form = None
+        self.mystem_tags = None
+        self.pymorphy_tags = None
 
     def get_cleaned(self):
         """
