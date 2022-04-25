@@ -14,7 +14,6 @@ from core_utils.article import Article
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PATTERN
 
 
-
 class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
