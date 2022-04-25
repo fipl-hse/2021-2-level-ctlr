@@ -117,11 +117,20 @@ def validate_dataset(path_to_validate):
 
     list_of_txts = list(path_to_dataset.glob('*_raw.txt'))
     list_of_jsons = list(path_to_dataset.glob('*_meta.json'))
+
     if not len(list_of_txts) == len(list_of_jsons):
         raise InconsistentDatasetError
 
-    txt_indices = [int(txt.parts[-1].split('_')[0]) for txt, json in zip(list_of_txts, list_of_jsons)]
-    json_indices = [int(json.parts[-1].split('_')[0]) for txt, json in zip(list_of_txts, list_of_jsons)]
+    txt_indices = []
+    json_indices = []
+    for txt, json in zip(list_of_txts, list_of_jsons):
+        txt_indices.append(int(txt.parts[-1].split('_')[0]))
+        json_indices.append(int(json.parts[-1].split('_')[0]))
+
+        with open(txt, 'r', encoding='utf-8') as txt_file:
+            text = txt_file.read()
+        if not text:
+            raise InconsistentDatasetError
 
     if sorted(txt_indices) != sorted(json_indices):
         raise InconsistentDatasetError
