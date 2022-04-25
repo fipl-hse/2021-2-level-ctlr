@@ -6,12 +6,14 @@ import json
 from pathlib import Path
 import shutil
 
+from bs4 import BeautifulSoup
 import requests
 
 from constants import (
     ASSETS_PATH,
     CRAWLER_CONFIG_PATH,
 )
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
@@ -43,7 +45,9 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
-        pass
+        for node in article_bs.find_all("a", {"class": "file"}):
+            self.urls.append(node["href"])
+
 
     def find_articles(self):
         """
@@ -51,12 +55,21 @@ class Crawler:
         """
         for seed in self.seed_urls:
             response = requests.get(seed)
+            article_bs = BeautifulSoup(response.text, features="html.parser")
+            self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
+
+
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(url=article_url, article_id=article_id)
 
 
 def prepare_environment(base_path):
@@ -89,3 +102,6 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=seed_urls,
                       max_articles=max_articles)
     crawler.find_articles()
+
+    for index, article_url in enumerate(crawler.urls):
+        parser = HTMLParser(article_url=article_url, article_id=index)
