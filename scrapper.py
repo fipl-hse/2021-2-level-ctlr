@@ -9,7 +9,6 @@ import datetime
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
-# cheeeeeeecks
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
@@ -103,11 +102,7 @@ class HTMLParser:
         fulltext = article_bs.find('div', {'class': 'fulltext'})
         page_link = fulltext.find('a')['href']  # link to a page with pdf
 
-        response_pdf = requests.get(page_link, HEADERS)  # downloads page with pdf to find a link for download pdf
-        pdf_bs = BeautifulSoup(response_pdf.text, 'html.parser')
-
-        container = pdf_bs.find('div', id='pdfDownloadLinkContainer')
-        download_link = container.find('a')['href']
+        download_link = page_link.replace('view', 'download')
 
         pdf = PDFRawFile(download_link, self.article_id)
 
