@@ -1,8 +1,8 @@
 """
 Pipeline for text processing implementation
 """
-from core_utils.article import Article
 from pathlib import Path
+from core_utils.article import Article
 
 class EmptyDirectoryError(Exception):
     """
