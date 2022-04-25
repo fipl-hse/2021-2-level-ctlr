@@ -6,6 +6,7 @@ from pathlib import Path
 # from pymystem3 import Mystem
 from core_utils.article import Article, ArtifactType
 from constants import ASSETS_PATH
+# check
 
 
 class EmptyDirectoryError(Exception):
