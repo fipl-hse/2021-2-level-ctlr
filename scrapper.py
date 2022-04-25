@@ -42,24 +42,26 @@ class Crawler:
         self.total_max_articles = max_articles
         self.urls = []
 
+    def is_urls_less_than_max_articles(self):
+        return len(self.urls) < self.total_max_articles
+    
+
     def _extract_url(self, article_bs):
         cells = article_bs.find_all("div", class_='col-lg-3 col-sm-6')
         for cell in cells:
-            if len(self.urls) >= self.total_max_articles:
-                break
-            link = cell.find('a')
-            self.urls.append('https://pravdasevera.ru' + link['href'])
+            if is_urls_less_than_max_articles():
+                link = cell.find('a')
+                self.urls.append('https://pravdasevera.ru' + link['href'])
 
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self.seed_urls:
-            if len(self.urls) >= self.total_max_articles:
-                break
-            response = requests.get(seed_url, headers=HEADERS)
-            article_bs = BeautifulSoup(response.text, 'html.parser')
-            self._extract_url(article_bs)
+            if is_urls_less_than_max_articles():
+                response = requests.get(seed_url, headers=HEADERS)
+                article_bs = BeautifulSoup(response.text, 'html.parser')
+                self._extract_url(article_bs)
 
     def get_search_urls(self):
         """
