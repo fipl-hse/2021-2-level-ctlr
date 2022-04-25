@@ -3,9 +3,9 @@ Pipeline for text processing implementation
 """
 import re
 from pathlib import Path
-from pymystem3 import Mystem
+# from pymystem3 import Mystem
 from core_utils.article import Article, ArtifactType
-# checks
+from constants import ASSETS_PATH
 
 
 class EmptyDirectoryError(Exception):
@@ -109,30 +109,33 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
+        text = raw_text.replace('-\n', '')
         clean_text = ''
-        for symbol in raw_text:
-            if symbol.isalpha():
+        pattern = re.compile(r'[а-яА-Яa-zA-Z]')
+
+        for symbol in text:
+            if pattern.match(symbol):
                 clean_text += symbol
             if symbol.isspace() or symbol == '\n':
                 clean_text += ' '
-            if symbol == '-\n':
-                clean_text += ''
-        # clean_list = clean_text.split()
 
-        result = Mystem().analyze(raw_text)
+        clean_list = clean_text.split()
+
         morph_tokens = []
-
-        for element in result:
-            word = element['text']
-            if not word.isalpha():
-                continue
-
+        for word in clean_list:
             token = MorphologicalToken(original_word=word)
             morph_tokens.append(token)
+
         return morph_tokens
 
+        # result = Mystem().analyze(raw_text)
         # morph_tokens = []
-        # for word in clean_list:
+
+        # for element in result:
+        # word = element['text']
+        # if not word.isalpha():
+        # continue
+
         # token = MorphologicalToken(original_word=word)
         # morph_tokens.append(token)
 
@@ -175,7 +178,13 @@ def validate_dataset(path_to_validate):
 
 
 def main():
-    pass
+    print('some preparations')
+    validate_dataset(ASSETS_PATH)
+    print('implementing corpus manager')
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    print('run pipeline...')
+    pipeline.run()
 
 
 if __name__ == "__main__":
