@@ -12,4 +12,3 @@ HEADERS = {'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:99.0) Gec
     # 'Accept-Encoding': "gzip, deflate, br",
     'Accept-Language': "en-US,en;q=0.5"}
 HTTP_MAIN = 'https://esquire.ru'
-

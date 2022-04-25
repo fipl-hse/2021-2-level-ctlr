@@ -127,13 +127,13 @@ def validate_config(crawler_path):
     seed_urls = config['seed_urls']
     total_articles = config["total_articles_to_find_and_parse"]
 
+    if not seed_urls:
+        raise IncorrectURLError
+
     for seed_url in seed_urls:
         pattern = 'https://esquire.ru/'
         if pattern not in seed_url:
             raise IncorrectURLError
-
-    if not seed_urls:
-        raise IncorrectURLError
 
     if not isinstance(seed_urls, list):
         raise IncorrectURLError
@@ -152,15 +152,13 @@ def validate_config(crawler_path):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    given_seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    given_seed_urls, given_max_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
 
-    crawler = Crawler(given_seed_urls, max_articles)
+    crawler = Crawler(given_seed_urls, given_max_articles)
     crawler.find_articles()
 
-    for article_id, url in enumerate(crawler.urls):
-        article_parser = HTMLParser(url, article_id + 1)
+    for id_of_article, url in enumerate(crawler.urls):
+        article_parser = HTMLParser(url, id_of_article + 1)
         article = article_parser.parse()
         article.save_raw()
-
-
