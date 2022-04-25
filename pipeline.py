@@ -3,7 +3,6 @@ Pipeline for text processing implementation
 """
 
 from pathlib import Path
-import re
 
 # import pymorphy2
 # from pymystem3 import Mystem
@@ -69,7 +68,7 @@ class CorpusManager:
         Register each dataset entry
         """
         path_to_raws = Path(self.path_to_raw_txt_data)
-        dataset = [file for file in path_to_raws.rglob('*_raw.txt')]
+        dataset = list(path_to_raws.rglob('*_raw.txt'))
 
         for file in dataset:
             article_id = int(file.parts[-1].split('_')[0])
@@ -133,7 +132,7 @@ def validate_dataset(path_to_validate):
 
 def main():
     validate_dataset(ASSETS_PATH)
-    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    # corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
 
 
 if __name__ == "__main__":

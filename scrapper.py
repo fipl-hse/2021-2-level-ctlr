@@ -128,7 +128,6 @@ class HTMLParser:
         self._fill_article_with_text(article_bs)
         if self.article.text:
             self._fill_article_with_meta_information(article_bs)
-            return self.article
         return self.article
 
 
