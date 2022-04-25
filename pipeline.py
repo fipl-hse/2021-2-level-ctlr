@@ -4,7 +4,7 @@ Pipeline for text processing implementation
 from pathlib import Path
 import re
 
-from pymystem3 import Mystem
+# from pymystem3 import Mystem
 
 from core_utils.article import Article, ArtifactType
 
@@ -111,17 +111,21 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        mystem = Mystem()
-        raw_text_analysis = mystem.analyze(raw_text)
+        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        for symbol in raw_text:
+            if not pattern.match(symbol):
+                raw_text = raw_text.replace(symbol, '')
+        for symbol in '[]_`':
+            raw_text = raw_text.replace(symbol, '')
+        tokens = raw_text.split()
 
-        tokens = []
+        processed_tokens = []
 
-        for single_word_analysis in raw_text_analysis:
-            if single_word_analysis['text'].isalpha():
-                token = MorphologicalToken(single_word_analysis['text'])
-                tokens.append(token)
+        for token in tokens:
+            token = MorphologicalToken(token)
+            processed_tokens.append(token)
 
-        return tokens
+        return processed_tokens
 
 
 def validate_dataset(path_to_validate):
@@ -158,8 +162,8 @@ def validate_dataset(path_to_validate):
         if file.name.endswith('meta.json'):
             counter_meta += 1
 
-    # if counter_txt != counter_meta:
-        # raise InconsistentDatasetError
+    if counter_txt != counter_meta:
+        raise InconsistentDatasetError
 
 
 def main():
