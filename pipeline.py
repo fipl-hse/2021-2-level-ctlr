@@ -4,6 +4,9 @@ Pipeline for text processing implementation
 import re
 from pathlib import Path
 
+#  from constants import ASSETS_PATH
+from core_utils.article import Article
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -53,19 +56,29 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path = Path(path_to_raw_txt_data)
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        dataset = list(self.path.glob('*_raw.txt'))
+        dataset.sort(key=self._extract_file_id)
+        for file in dataset:
+            file_id = self._extract_file_id(file)
+            self._storage[file_id] = Article(url=None, article_id=file_id)
+
+    def _extract_file_id(self, file):
+        pattern = re.compile(r'\d+')
+        return int(pattern.match(file.stem).group())
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -133,13 +146,15 @@ def check_txt_files(dataset_path):
         if file.suffix == '.txt':
             file_content = file.open('r', encoding='utf-8')
             file_text = file_content.read()
+            file_content.close()
             if not file_text:
                 return -1
     return 0
 
 
 def main():
-    # YOUR CODE HERE
+    """validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(ASSETS_PATH)"""
     pass
 
 
