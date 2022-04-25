@@ -70,18 +70,16 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        pathlib_path_to_data = Path(self.path_to_raw_txt_data)
+        article_id = 1
 
-        for file_path in pathlib_path_to_data.iterdir():
-            file_name = file_path.name
+        while True:
+            article = Article(url=None, article_id=article_id)
 
-            if file_name[-8:] == RAW_FILE_PATH_ENDING:
-                match = re.search(r'\d+', file_name)
-                article_id = int(match.group(0))
+            if not article.get_raw_text_path().exists():
+                break
 
-                article = Article(url=None, article_id=article_id)
-
-                self._storage[article_id] = article
+            self._storage[article_id] = article
+            article_id += 1
 
     def get_articles(self):
         """
@@ -140,16 +138,13 @@ class TextProcessingPipeline:
             if not re.match(r'[а-яА-Яa-zA-Z]', original_word):
                 continue
 
+            if not token_info.get('analysis'):
+                continue
+
+            if 'lex' not in token_info['analysis'][0] or 'gr' not in token_info['analysis'][0]:
+                continue
+
             morphological_token = MorphologicalToken(original_word=original_word)
-
-            if 'analysis' not in token_info:
-                continue
-
-            if not token_info['analysis']:
-                continue
-
-            if not {'lex', 'gr'}.issubset(set(token_info['analysis'][0])):
-                continue
 
             morphological_token.normalized_form = token_info['analysis'][0]['lex']
             morphological_token.tags_mystem = token_info['analysis'][0]['gr']
@@ -169,7 +164,7 @@ def validate_dataset(path_to_validate):
 
     pathlib_path_to_validate = Path(path_to_validate)
 
-    if not path_to_validate.exists():
+    if not pathlib_path_to_validate.exists():
         raise FileNotFoundError
 
     if not pathlib_path_to_validate.is_dir():
@@ -178,32 +173,38 @@ def validate_dataset(path_to_validate):
     file_ids = []
 
     for file_path in pathlib_path_to_validate.iterdir():
-        file_name = file_path.name
-
-        match = re.match(r'\d+', file_name)
+        match = re.match(r'\d+', file_path.name)
 
         if not match:
-            raise InconsistentDatasetError
+            raise InconsistentDatasetError("Found a file name that does not correspond to the naming scheme")
+
+        if file_path.stat().st_size == 0:
+            raise InconsistentDatasetError("File is empty")
 
         file_id = int(match.group(0))
 
         if file_id not in file_ids:
             file_ids.append(file_id)
 
+    if not file_ids:
+        raise EmptyDirectoryError("The assets directory is empty")
+
     file_ids = sorted(file_ids)
 
     last_file_id = 0
 
     for file_id in file_ids:
-        if not last_file_id and file_id != 1 or file_id - last_file_id > 1 or \
-                not (pathlib_path_to_validate / f'{file_id}_raw.txt').is_file() or \
+        if not last_file_id and file_id != 1:
+            raise InconsistentDatasetError("Files do not start from 1")
+
+        if file_id - last_file_id > 1:
+            raise InconsistentDatasetError("Files are inconsistent")
+
+        if not (pathlib_path_to_validate / f'{file_id}_raw.txt').is_file() or \
                 not (pathlib_path_to_validate / f'{file_id}_meta.json').is_file():
-            raise InconsistentDatasetError
+            raise InconsistentDatasetError(f"There are no meta or raw files for an article ID: {file_id}")
 
         last_file_id = file_id
-
-    if not last_file_id:
-        raise EmptyDirectoryError
 
 
 def main():
