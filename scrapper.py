@@ -48,7 +48,6 @@ class Crawler:
         for node in article_bs.find_all("a", {"class": "file"}):
             self.urls.append(node["href"])
 
-
     def find_articles(self):
         """
         Finds articles
@@ -72,6 +71,13 @@ class HTMLParser:
         self.article = Article(url=article_url, article_id=article_id)
 
     def parse(self):
+        # do things here
+        response = requests.get(self.article_url)
+        article_bs = BeautifulSoup(response.text, "html.parser")
+        self._fill_article_with_text(article_bs)
+        return self.article
+
+    def _fill_article_with_text(self, article_bs):
         pass
 
 
@@ -108,3 +114,4 @@ if __name__ == '__main__':
 
     for index, url in enumerate(crawler.urls):
         parser = HTMLParser(article_url=url, article_id=index)
+        article = parser.parse()
