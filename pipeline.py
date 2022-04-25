@@ -51,7 +51,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        return f'{self.normalized_form}<{self.tags_pymorphy}>'
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -71,8 +71,8 @@ class CorpusManager:
         path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
 
         for file in path_to_raw_txt_data.glob('*'):
-            if '_raw.txt' in str(file):
-                article_id = int(re.search(r'\d+_raw', str(file))[0][:-4])
+            if '_raw.txt' in file.name:
+                article_id = int(re.search(r'\d+_raw', file.name)[0][:-4])
                 self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
@@ -111,7 +111,6 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-
         mystem = Mystem()
         raw_text_analysis = mystem.analyze(raw_text)
 
@@ -144,16 +143,19 @@ def validate_dataset(path_to_validate):
     counter_txt = 0
     counter_meta = 0
 
-    for file in path_to_validate.glob('*'):
-        if str(file)[-7:] == 'raw.txt':
+    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name[:x.name.find('_')])):
+        if file.name.endswith('raw.txt'):
             counter_txt += 1
+
+            if f'{counter_txt}_raw' not in file.name:
+                raise InconsistentDatasetError
 
             with open(file, 'r', encoding='utf-8') as current_file:
                 text = current_file.read()
             if not text:
                 raise InconsistentDatasetError
 
-        if str(file)[-9:] == 'meta.json':
+        if file.name.endswith('meta.json'):
             counter_meta += 1
 
     if counter_txt != counter_meta:
