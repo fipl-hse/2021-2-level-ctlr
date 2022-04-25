@@ -71,6 +71,9 @@ class HTMLParser:
         self.article_id = article_id
         self.article = Article(url=article_url, article_id=article_id)
 
+    def parse(self):
+        pass
+
 
 def prepare_environment(base_path):
     """
@@ -89,19 +92,19 @@ def validate_config(crawler_path: Path):
     with open(crawler_path) as file:
         config = json.load(file)
 
-    config_seed_urls = config["seed_urls"]
-    config_max_articles = config["total_articles_to_find_and_parse"]
+    seed_urls = config["seed_urls"]
+    max_articles = config["total_articles_to_find_and_parse"]
 
-    return config_seed_urls, config_max_articles
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    seeds, limit = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls=seed_urls,
-                      max_articles=max_articles)
+    crawler = Crawler(seed_urls=seeds,
+                      max_articles=limit)
     crawler.find_articles()
 
-    for index, article_url in enumerate(crawler.urls):
-        parser = HTMLParser(article_url=article_url, article_id=index)
+    for index, url in enumerate(crawler.urls):
+        parser = HTMLParser(article_url=url, article_id=index)
