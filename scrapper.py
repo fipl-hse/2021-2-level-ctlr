@@ -113,7 +113,6 @@ class HTMLParser:
         pdf_text = pdf.get_text()
         if 'Список литературы' in pdf_text:
             pdf_text = pdf_text.split('Список литературы')[0]
-            
         self.article.text = pdf_text
 
     def _fill_article_with_meta_information(self, article_bs):
