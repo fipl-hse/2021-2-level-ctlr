@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 from pymystem3 import Mystem
 from core_utils.article import Article, ArtifactType
+# checks
 
 
 class EmptyDirectoryError(Exception):
