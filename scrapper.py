@@ -5,10 +5,10 @@ Scrapper implementation
 from datetime import datetime as dt
 import json
 from pathlib import Path
-import random
+# import random
 import re
 import shutil
-import time
+# import time
 
 from bs4 import BeautifulSoup
 from fake_headers import Headers
@@ -46,7 +46,7 @@ def _clean_text(text):
 
 def _get_page(link):
     print("attempting to connect to %s", link)
-    time.sleep(random.uniform(2.0, 4.0))
+    #time.sleep(random.uniform(2.0, 4.0))
     headers = Headers().generate()
     print(headers)
     response = requests.get(link,
@@ -122,7 +122,7 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self):
-        time.sleep(random.uniform(0.0, 1.0))
+        #time.sleep(random.uniform(0.0, 1.0))
         pdf_raw = PDFRawFile(self._pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
