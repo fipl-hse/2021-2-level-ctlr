@@ -64,7 +64,7 @@ class Crawler:
         """
         for url in self.seed_urls:
             response = requests.get(url, headers=HEADERS)  # get html code
-            sleep(random.randrange(2, 5))
+            sleep(random.randrange(2, 6))
 
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
             self._extract_url(article_bs)

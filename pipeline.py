@@ -3,10 +3,9 @@ Pipeline for text processing implementation
 """
 import re
 from pathlib import Path
-# from pymystem3 import Mystem
+from pymystem3 import Mystem
 from core_utils.article import Article, ArtifactType
 from constants import ASSETS_PATH
-# check
 
 
 class EmptyDirectoryError(Exception):
@@ -45,7 +44,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
@@ -101,10 +100,13 @@ class TextProcessingPipeline:
             processed_text = self._process(raw_text)
 
             cleaned_tokens = []
+            single_tag = []
             for token in processed_text:
                 cleaned_tokens.append(token.get_cleaned())
+                single_tag.append(token.get_single_tagged())
 
             article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tag), ArtifactType.single_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -120,25 +122,24 @@ class TextProcessingPipeline:
             if symbol.isspace() or symbol == '\n':
                 clean_text += ' '
 
-        clean_list = clean_text.split()
-
+        result = Mystem().analyze(clean_text)
         morph_tokens = []
-        for word in clean_list:
+
+        for element in result:
+            word = element['text']
+            if 'analysis' not in element:
+                continue
+
+            if not element['analysis']:
+                continue
+
             token = MorphologicalToken(original_word=word)
+            token.normalized_form = element['analysis'][0]['lex']
+            token.tags_mystem = element['analysis'][0]['gr']
+
             morph_tokens.append(token)
 
         return morph_tokens
-
-        # result = Mystem().analyze(raw_text)
-        # morph_tokens = []
-
-        # for element in result:
-        # word = element['text']
-        # if not word.isalpha():
-        # continue
-
-        # token = MorphologicalToken(original_word=word)
-        # morph_tokens.append(token)
 
 
 def validate_dataset(path_to_validate):
