@@ -186,7 +186,6 @@ def validate_dataset(path_to_validate):
 
 
 def main():
-    # YOUR CODE HERE
     validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
