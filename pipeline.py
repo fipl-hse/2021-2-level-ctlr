@@ -187,7 +187,7 @@ def validate_dataset(path_to_validate):
                 files.get(file.suffix).append(int(pattern.match(file.stem).group()))
                 continue
 
-        if 'raw' in file.stem and file.suffix == ".txt":
+        if '_raw.txt' in file.name:
             with file.open(encoding='utf=8') as opened_file:
                 file_text = opened_file.read()
                 if not file_text:
