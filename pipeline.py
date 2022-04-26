@@ -8,8 +8,8 @@ from pathlib import Path
 from pymystem3 import Mystem
 import pymorphy2
 
-from constants import ASSETS_PATH
 from core_utils.article import Article
+from constants import ASSETS_PATH
 
 class EmptyDirectoryError(Exception):
     """
