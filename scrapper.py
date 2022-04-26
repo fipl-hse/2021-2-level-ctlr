@@ -63,13 +63,13 @@ class Crawler:
         Finds articles
         """
         for url in self.seed_urls:
-            response = requests.get(url, headers=HEADERS)  # get html code
+            response = requests.get(url, headers=HEADERS, timeout=60)  # get html code
             sleep(random.randrange(2, 6))
 
             if not response.ok:
                 continue
 
-            article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
+            article_bs = BeautifulSoup(response.text, 'lxml')  # creates BS object
             self._extract_url(article_bs)
 
     def get_search_urls(self):
