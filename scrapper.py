@@ -67,7 +67,7 @@ class Crawler:
         for seed in self.seed_urls:
             if len(self.urls) == self.max_articles:
                 break
-            time.sleep(random.random())
+            time.sleep(10)
             response = requests.get(seed, headers=HEADERS)
             article_bs = BeautifulSoup(response.text, features="html.parser")
             self._extract_url(article_bs)
@@ -95,7 +95,7 @@ class HTMLParser:
     def _fill_article_with_text(self):
         pdf_url = self.article_url.replace("view", "download")
         print(pdf_url)
-        time.sleep(random.random())
+        time.sleep(10)
         pdf_raw = PDFRawFile(pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
