@@ -100,7 +100,7 @@ class HTMLParser:
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
 
-    def _fill_text_with_meta_information(self, article_bs):
+    def _fill_article_with_meta_information(self, article_bs):
         pass
 
 def prepare_environment(base_path):
