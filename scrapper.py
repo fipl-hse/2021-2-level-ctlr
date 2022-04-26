@@ -93,7 +93,8 @@ class Crawler:
         for link in soup.find_all('a'):
             path = link.get('href')
             _is_url_by_user = (self._is_string_contains(path, 'community') or self._is_string_contains(path, 'user'))
-            _is_url_not_comment = self._is_string_contains(path, 'content') and not self._is_string_contains(path, 'comment')
+            _is_url_valid_content = self._is_string_contains(path, 'content')
+            _is_url_not_comment = _is_url_valid_content and not self._is_string_contains(path, 'comment')
             if path and path.startswith('/') and _is_url_by_user and _is_url_not_comment:
                 path = urljoin(url, path)
                 self.urls.append(path)
@@ -165,4 +166,5 @@ if __name__ == '__main__':
         article = parser.parse()
         articles_to_save.append(article)
     for article in articles_to_save:
+        article.save_raw()
         article.save_raw()
