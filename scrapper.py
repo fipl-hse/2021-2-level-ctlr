@@ -46,7 +46,7 @@ def _clean_text(text):
 
 
 def _get_page(link):
-    logging.basicConfig(stream=sys.stderr)
+    logging.basicConfig(stream=sys.stdout)
     log = logging.getLogger("user_testing")
     log.setLevel(logging.DEBUG)
     try:
