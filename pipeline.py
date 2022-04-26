@@ -149,7 +149,7 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError
 
     number_txt = 0
-    number_json = 0
+    number_meta = 0
 
     for file in path.glob('*'):
 
