@@ -135,13 +135,8 @@ class TextProcessingPipeline:
         for token_info in result:
             original_word = token_info['text']
 
-            if not re.match(r'[а-яА-Яa-zA-Z]', original_word):
-                continue
-
-            if not token_info.get('analysis'):
-                continue
-
-            if 'lex' not in token_info['analysis'][0] or 'gr' not in token_info['analysis'][0]:
+            if not token_info.get('analysis') or \
+                    'lex' not in token_info['analysis'][0] or 'gr' not in token_info['analysis'][0]:
                 continue
 
             morphological_token = MorphologicalToken(original_word=original_word)
