@@ -76,8 +76,6 @@ class CorpusManager:
                 article_id = file.name.split('_raw.txt')[0]
                 self._storage[article_id] = Article(url=None, article_id=article_id)
 
-
-
     def get_articles(self):
         """
         Returns storage params
@@ -164,7 +162,6 @@ def validate_dataset(path_to_validate):
                 text = current_file.read()
             if not text:
                 raise InconsistentDatasetError
-
         if file.name.endswith('meta.json'):
             number_json += 1
 
@@ -172,11 +169,12 @@ def validate_dataset(path_to_validate):
         raise InconsistentDatasetError
 
 
-
 def main():
     validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
     pipeline.run()
+
+
 if __name__ == "__main__":
     main()
