@@ -48,6 +48,8 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         for node in article_bs.find_all("a", {"class": "file"}):
+            if len(self.urls) == self.max_articles:
+                break
             self.urls.append(node["href"])
 
     def find_articles(self):
