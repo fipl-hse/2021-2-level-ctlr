@@ -163,7 +163,7 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    if not path_to_validate.glob('*'):
+    if not any(path_to_validate.iterdir()):
         raise EmptyDirectoryError
 
     for file in path_to_validate.glob('*'):
