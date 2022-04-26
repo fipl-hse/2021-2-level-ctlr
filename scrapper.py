@@ -54,7 +54,7 @@ def _get_page(link):
                                 headers=headers,
                                 timeout=5)
         return BeautifulSoup(response.text, "html.parser")
-    #except requests.exceptions.ConnectionError:
+    # except requests.exceptions.ConnectionError:
     #    print("failed to connect to %s. trying again", link)
         # return _get_page(link)
     #    raise ServerThrottledError
