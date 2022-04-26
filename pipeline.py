@@ -2,8 +2,8 @@
 Pipeline for text processing implementation
 """
 from pathlib import Path
-from core_utils.article import Article, ArtifactType
 import re
+from core_utils.article import Article, ArtifactType
 
 class EmptyDirectoryError(Exception):
     """
@@ -90,7 +90,7 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        for article in self.corpus_manager.get_articles().values():
+        for article in self.corpus_manager.get_articles(self).values():
             tokenized = ' '.join(self._process(article.get_raw_text()))
             article.save_as(text=tokenized, kind=ArtifactType.cleaned)
 
@@ -151,7 +151,7 @@ def validate_dataset(path_to_validate):
 
 def main():
     # YOUR CODE HERE
-    validate_dataset(AS)
+    pass
 
 
 if __name__ == "__main__":
