@@ -41,15 +41,11 @@ class Crawler:
         self.seed_urls = seed_urls
         self.total_max_articles = max_articles
         self.urls = []
-
-    def is_urls_less_than_max_articles(self):
-        return len(self.urls) < self.total_max_articles
     
-
     def _extract_url(self, article_bs):
         cells = article_bs.find_all("div", class_='col-lg-3 col-sm-6')
         for cell in cells:
-            if is_urls_less_than_max_articles():
+            if len(self.urls) < self.total_max_articles:
                 link = cell.find('a')
                 self.urls.append('https://pravdasevera.ru' + link['href'])
 
@@ -58,7 +54,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            if is_urls_less_than_max_articles():
+            if len(self.urls) < self.total_max_articles:
                 response = requests.get(seed_url, headers=HEADERS)
                 article_bs = BeautifulSoup(response.text, 'html.parser')
                 self._extract_url(article_bs)
@@ -118,7 +114,6 @@ def prepare_environment(base_path):
     if path_to_base_path.exists():
         shutil.rmtree(base_path)
     path_to_base_path.mkdir(parents=True, exist_ok=True)
-
 
 def validate_config(crawler_path):
     """
