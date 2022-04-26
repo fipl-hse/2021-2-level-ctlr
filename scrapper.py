@@ -48,6 +48,11 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         for node in article_bs.find_all("a", {"class": "file"}):
+            # ignore links to issues, only collect articles.
+            # this does not leave out any content, because issues
+            # are comprised of the same articles.
+            if "issue" in node["href"]:
+                continue
             if len(self.urls) == self.max_articles:
                 break
             self.urls.append(node["href"])
@@ -76,13 +81,14 @@ class HTMLParser:
 
     def parse(self):
         # do things here
-        response = requests.get(self.article_url)
-        article_bs = BeautifulSoup(response.text, "html.parser")
-        self._fill_article_with_text(article_bs)
+        # response = requests.get(self.article_url)
+        # article_bs = BeautifulSoup(response.text, "html.parser")
+        # self._fill_article_with_text(article_bs)
+        self._fill_article_with_text()
         return self.article
 
-    def _fill_article_with_text(self, article_bs):
-        pdf_url = article_bs.find("a", {"class": "action pdf"})["href"]
+    def _fill_article_with_text(self):
+        pdf_url = self.article_url.replace("view", "download")
         pdf_raw = PDFRawFile(pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
