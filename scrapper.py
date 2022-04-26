@@ -53,7 +53,7 @@ def _get_page(link):
                             headers=headers,
                             timeout=5)
     if not response.ok:
-        return
+        return None
     return BeautifulSoup(response.text, "html.parser")
     # except requests.exceptions.ConnectionError:
     #    print("failed to connect to %s. trying again", link)
