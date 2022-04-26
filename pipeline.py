@@ -4,8 +4,8 @@ Pipeline for text processing implementation
 from pathlib import Path
 import re
 
-from pymystem3 import Mystem
 import pymorphy2
+from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
@@ -139,12 +139,11 @@ class TextProcessingPipeline:
                 continue
 
             token = MorphologicalToken(single_word['text'])
+            tokens.append(token)
 
             token.normalized_form = single_word['analysis'][0]['lex']
             token.tags_mystem = single_word['analysis'][0]['gr']
             token.tags_pymorphy = analyzer.parse(single_word['text'])[0].tag
-
-            tokens.append(token)
 
         return tokens
 
