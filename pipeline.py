@@ -150,6 +150,9 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
+    if isinstance(path_to_validate, str):
+        path_to_validate = Path(path_to_validate)
+
     stems = [file.stem for file in path_to_validate.glob('*')]
     raw_txt = 0
     meta_json = 0
