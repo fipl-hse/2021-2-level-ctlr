@@ -89,6 +89,7 @@ class HTMLParser:
 
     def _fill_article_with_text(self):
         pdf_url = self.article_url.replace("view", "download")
+        # print(pdf_url)
         pdf_raw = PDFRawFile(pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
