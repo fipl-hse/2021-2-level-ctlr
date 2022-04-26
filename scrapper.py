@@ -98,8 +98,20 @@ def validate_config(crawler_path: Path):
     with open(crawler_path) as file:
         config = json.load(file)
 
+    if "seed_urls" not in config:
+        raise IncorrectURLError
+    if "total_articles_to_find_and_parse" not in config:
+        raise IncorrectNumberOfArticlesError
+
     seed_urls = config["seed_urls"]
     max_articles = config["total_articles_to_find_and_parse"]
+
+    if not isinstance(max_articles, int) or max_articles <= 0:
+        raise IncorrectNumberOfArticlesError
+    if max_articles > 200:
+        raise NumberOfArticlesOutOfRangeError
+    if not isinstance(seed_urls, list):
+        raise IncorrectURLError
 
     return seed_urls, max_articles
 
