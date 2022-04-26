@@ -7,5 +7,3 @@ wget~=3.2
 pymorphy2~=0.9.1
 pathlib~=1.0.1
 pymystem3~=0.2.0
-pytest~=7.1.0
-numpy~=1.22.3
