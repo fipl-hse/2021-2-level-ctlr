@@ -110,7 +110,7 @@ class Crawler:
 
 class HTMLParser:
     def __init__(self, article_url, article_id):
-        self._pdf_url = article_url.replace("view", "download")
+        self._pdf_url = article_url.replace("view", "download") + ".pdf"
         self.article_url = "/".join(article_url.split("/")[:-1])
         self.article_id = article_id
         self.article = Article(url=article_url, article_id=article_id)
