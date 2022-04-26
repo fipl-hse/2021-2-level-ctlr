@@ -1,7 +1,6 @@
 """
 Pipeline for text processing implementation
 """
-import json
 from pathlib import Path
 import re
 
@@ -147,8 +146,8 @@ def validate_dataset(path_to_validate):
 
         # check txt files
         if file.suffix == ".txt":
-            with file.open(encoding='utf=8') as f:
-                file_text = f.read()
+            with file.open(encoding='utf=8') as opened_file:
+                file_text = opened_file.read()
                 if not file_text:
                     raise InconsistentDatasetError
 
@@ -156,7 +155,7 @@ def validate_dataset(path_to_validate):
         files.get(file.suffix).append(int(pattern.match(file.stem).group()))
 
     # check dataset numeration
-    for files_suffix, ids in files.items():
+    for ids in files.values():
         ids.sort()
         for file_number in range(1, len(ids) - 1):
             if ids[file_number - 1] != file_number:
