@@ -80,6 +80,7 @@ class CorpusManager:
                 break
 
             if not article.get_raw_text_path().exists() and article_id == 0:
+                article_id += 1
                 continue
 
             self._storage[article_id] = article
