@@ -72,10 +72,10 @@ class CorpusManager:
         """
         path = Path(self.path_to_raw_txt_data)
 
-        re_pattern = re.compile(r'\d+_raw')
+        pattern = re.compile(r'\d+_raw')
         for file in path.glob('*'):
             if '_raw.txt' in file.name:
-                article_id = int(re_pattern.search(file.name)[0][:-4])
+                article_id = int(pattern.search(file.name)[0][:-4])
                 self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
