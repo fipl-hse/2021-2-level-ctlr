@@ -86,11 +86,10 @@ class HTMLParser:
         self.article = Article(url=article_url, article_id=article_id)
 
     def parse(self):
-        # do things here
-        # response = requests.get(self.article_url)
-        # article_bs = BeautifulSoup(response.text, "html.parser")
-        # self._fill_article_with_text(article_bs)
+        response = requests.get(self.article_url)
+        article_bs = BeautifulSoup(response.text, "html.parser")
         self._fill_article_with_text()
+        self._fill_article_with_meta_information(article_bs)
         return self.article
 
     def _fill_article_with_text(self):
@@ -101,8 +100,8 @@ class HTMLParser:
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
 
-        # self.article.text = "Dummy text, will fix later"
-
+    def _fill_text_with_meta_information(self, article_bs):
+        pass
 
 def prepare_environment(base_path):
     """
