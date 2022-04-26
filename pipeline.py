@@ -62,7 +62,7 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self.path_to_raw_txt_data = Path(path_to_raw_txt_data)
         self._storage = {}
         self._scan_dataset()
 
@@ -70,11 +70,10 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        path = Path(self.path_to_raw_txt_data)
         visited_ids = []
-        for file in path.iterdir():
-            file_name = file.name
-            pattern = re.search(r'\d+', file_name)
+        compiled_expression = re.compile(r'\d+')
+        for file in self.path_to_raw_txt_data.iterdir():
+            pattern = compiled_expression.search(file.name)
             if not pattern:
                 continue
             article_id = int(pattern.group(0))
@@ -128,7 +127,7 @@ class TextProcessingPipeline:
         morph = pymorphy2.MorphAnalyzer()
         tokens = []
         for token in analyzed_cleaned_text:
-            if not token.get('analysis'):
+            if not token.get('analysis') or not token.get('text'):
                 continue
             if 'lex' not in token['analysis'][0] or 'gr' not in token['analysis'][0]:
                 continue
@@ -150,14 +149,16 @@ def validate_dataset(path_to_validate):
     if not path.is_dir():
         raise NotADirectoryError
     all_ids = []
+    compiled_expression = re.compile(r'(\d+)_(?:raw.txt|meta.json|raw.pdf'
+                                     r'|cleaned.txt|single_tagged.txt'
+                                     r'|multiple_tagged.txt|image.png)')
     for file in path.iterdir():
-        full_pattern = re.match(r'\d+_(raw.txt|meta.json|raw.pdf'
-                                r'|cleaned.txt|single_tagged.txt'
-                                r'|multiple_tagged.txt|image.png)', file.name)
+        if file.stat().st_size == 0:
+            raise InconsistentDatasetError("File is empty")
+        full_pattern = compiled_expression.match(file.name)
         if not full_pattern:
             raise InconsistentDatasetError("Incorrect file name")
-        pattern = re.match(r'\d+', file.name)
-        article_id = int(pattern.group(0))
+        article_id = int(full_pattern.group(1))
         if article_id < 1:
             raise InconsistentDatasetError("Article ids do not start from 1")
         all_ids.append(article_id)
@@ -177,10 +178,9 @@ def validate_dataset(path_to_validate):
         raw_path = path / name_for_raw
         meta_path = path / name_for_meta
         if not raw_path.exists() or not meta_path.exists():
-            raise InconsistentDatasetError(f"There are not meta or raw files for an article ID: {number}")
-        with open(raw_path, 'r') as file:
-            if not file.read():
-                raise InconsistentDatasetError(f"There are no meta or raw files for an article ID: {number}")
+            raise InconsistentDatasetError(f"There are no meta or raw files for an article ID: {number}")
+
+
 
 
 def main():
