@@ -4,6 +4,10 @@ Pipeline for text processing implementation
 from pathlib import Path
 import re
 
+from pymystem3 import Mystem
+import pymorphy2
+
+from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
 
 
@@ -49,7 +53,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        return f'{self.normalized_form}<{self.tags_pymorphy}>({self.tags_pymorphy})'
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -97,8 +101,20 @@ class TextProcessingPipeline:
         Runs pipeline process scenario
         """
         for article in self.corpus_manager.get_articles().values():
-            tokenized_text = ' '.join(self._process(article.get_raw_text()))
-            article.save_as(text=tokenized_text, kind=ArtifactType.cleaned)
+            tokenized_text = self._process(article.get_raw_text())
+
+            cleaned = []
+            single_tagged = []
+            multiple_tagged = []
+
+            for token in tokenized_text:
+                cleaned.append(token.get_cleaned())
+                single_tagged.append(token.get_single_tagged())
+                multiple_tagged.append(token.get_multiple_tagged())
+
+            article.save_as(' '.join(cleaned), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -106,12 +122,29 @@ class TextProcessingPipeline:
         """
         pattern = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
 
+        cleaned_text = raw_text
+
         for symbol in raw_text:
             if not pattern.match(symbol):
-                raw_text = raw_text.replace(symbol, '')
+                cleaned_text = raw_text.replace(symbol, '')
 
-        words = raw_text.split()
-        tokens = [MorphologicalToken(word).get_cleaned() for word in words]
+        tokens = []
+
+        result = Mystem().analyze(cleaned_text)
+        analyzer = pymorphy2.MorphAnalyzer()
+
+        for single_word in result:
+
+            if 'analysis' not in single_word or not single_word['analysis']:
+                continue
+
+            token = MorphologicalToken(single_word['text'])
+
+            token.normalized_form = single_word['analysis'][0]['lex']
+            token.tags_mystem = single_word['analysis'][0]['gr']
+            token.tags_pymorphy = analyzer.parse(single_word['text'])[0].tag
+
+            tokens.append(token)
 
         return tokens
 
@@ -154,7 +187,7 @@ def validate_dataset(path_to_validate):
                 files.get(file.suffix).append(int(pattern.match(file.stem).group()))
                 continue
 
-        if file.suffix == ".txt":
+        if 'raw' in file.stem and file.suffix == ".txt":
             with file.open(encoding='utf=8') as opened_file:
                 file_text = opened_file.read()
                 if not file_text:
@@ -167,10 +200,18 @@ def validate_dataset(path_to_validate):
             if ids[file_number - 1] != file_number:
                 raise InconsistentDatasetError
 
+    # check on imbalanced dict
+    files_values = list(files.values())
+    if files_values[0] != files_values[2]:
+        raise InconsistentDatasetError
+
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
