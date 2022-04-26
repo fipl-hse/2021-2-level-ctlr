@@ -2,7 +2,8 @@
 Pipeline for text processing implementation
 """
 from pathlib import Path
-from core_utils.article import Article
+from core_utils.article import Article, ArtifactType
+import re
 
 class EmptyDirectoryError(Exception):
     """
@@ -27,27 +28,26 @@ class MorphologicalToken:
     def __init__(self, original_word):
         self.original_word = original_word
         self.processed_word = ''
-        self.mystem_tags = ''
-        self.pymorphy_tags = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        lowercased = self.original_word.lower()
-        return lowercased
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.processed_word}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.processed_word}<{self.tags_pymorphy}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -90,13 +90,24 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        pass
+        for article in self.corpus_manager.get_articles().values():
+            tokenized = ' '.join(self._process(article.get_raw_text()))
+            article.save_as(text=tokenized, kind=ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        pattern = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
+
+        for letter in raw_text:
+            if not pattern.match(letter):
+                raw_text = raw_text.replace(letter, '')
+
+        words = raw_text.split()
+        tokens = [MorphologicalToken(word).get_cleaned() for word in words]
+
+        return tokens
 
 
 def validate_dataset(path_to_validate):
@@ -140,7 +151,7 @@ def validate_dataset(path_to_validate):
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(AS)
 
 
 if __name__ == "__main__":
