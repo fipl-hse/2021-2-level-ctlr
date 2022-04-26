@@ -41,10 +41,14 @@ class IncorrectNumberOfArticlesError(Exception):
 
 
 def _get_page(link):
-    time.sleep(random.uniform(0.0, 1.0))
-    user_agent = UserAgent().get_random_user_agent()
-    response = requests.get(link, headers={"User-Agent": user_agent})
-    return BeautifulSoup(response.text, "html.parser")
+    try:
+        time.sleep(random.uniform(0.0, 1.0))
+        user_agent = UserAgent().get_random_user_agent()
+        response = requests.get(link, headers={"User-Agent": user_agent})
+        return BeautifulSoup(response.text, "html.parser")
+    except requests.exceptions.ConnectionError:
+        print("failed to connect to", link, "try again")
+        return _get_page(link)
 
 
 class Crawler:
@@ -114,6 +118,9 @@ class HTMLParser:
 
         date = "".join(re.findall(r"(?<=печать )[0-9\.]*", self.article.text))[:-1]
         self.article.date = dt.strptime(date, "%d.%m.%Y")
+
+        topics = "".join(re.findall(r"(?<=Ключевые слова: ).*", self.article.text))
+        self.article.topics = list(filter(None, topics.split(", ")))
 
 
 def prepare_environment(base_path):
