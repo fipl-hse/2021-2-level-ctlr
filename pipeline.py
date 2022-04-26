@@ -2,10 +2,10 @@
 Pipeline for text processing implementation
 """
 import json
-import pathlib
+from pathlib import Path
 import re
 
-from constants import CRAWLER_CONFIG_PATH
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -29,25 +29,28 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_pymorphy}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -56,19 +59,30 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path = Path(path_to_raw_txt_data)
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        dataset = list(self.path.glob("*_raw.txt"))
+        dataset.sort(key=self._get_file_id)
+
+        for file in dataset:
+            file_id = self._get_file_id(file)
+            self._storage[file_id] = Article(url=None, article_id=file_id)
+
+    def _get_file_id(self, file):
+        pattern = re.compile(r'\d+')
+        return int(pattern.match(file.stem).group())
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -77,60 +91,76 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        pass
+        for article in self.corpus_manager.get_articles().values():
+            tokenized_text = ' '.join(self._process(article.get_raw_text()))
+            article.save_as(text=tokenized_text, kind=ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+
+        for symbol in raw_text:
+            if not pattern.match(symbol):
+                raw_text = raw_text.replace(symbol, '')
+
+        words = raw_text.split()
+        tokens = [MorphologicalToken(word).get_cleaned() for word in words]
+
+        return tokens
 
 
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    path = pathlib.Path(path_to_validate)
+    path = path_to_validate
 
-    if not path_to_validate.exists():
+    if isinstance(path_to_validate, str):
+        path = Path(path_to_validate)
+
+    if not path.exists():
         raise FileNotFoundError
 
     if not path.is_dir():
         raise NotADirectoryError
 
-    if not path.glob('*'):
+    if not list(path.glob('**/*')):
         raise EmptyDirectoryError
 
     files = {
-        "json": 0,
-        "pdf": 0,
-        "txt": 0
+        ".json": [],
+        ".pdf": [],
+        ".txt": []
     }
-    for file in path.iterdir():
-        file_name = file.name
-        if not re.match(r'\d+_(raw\.(txt|pdf)|meta\.json)', file_name):
-            raise InconsistentDatasetError
 
-        file_number = int(re.findall(r'\d+', file_name)[0])
-        current_file_number = files.get(file.suffix)
-        if file_number - current_file_number != 1:
-            raise InconsistentDatasetError
-        files[file.suffix] = file_number
+    pattern = re.compile(r'\d+')
 
-    with open(CRAWLER_CONFIG_PATH) as file:
-        config = json.load(file)
+    for file in list(path.glob('*')):
 
-    # нужна проверка на порядок, чтобы нумерация начиналась с единицы
+        # check txt files
+        if file.suffix == ".txt":
+            with file.open(encoding='utf=8') as f:
+                file_text = f.read()
+                if not file_text:
+                    raise InconsistentDatasetError
 
-    for number_of_files in files.values():
-        if number_of_files != config['total_articles_to_find_and_parse']:
-            raise InconsistentDatasetError
+        # add in dict file id with relevant filename extension
+        files.get(file.suffix).append(int(pattern.match(file.stem).group()))
+
+    # check dataset numeration
+    for files_suffix, ids in files.items():
+        ids.sort()
+        for file_number in range(1, len(ids) - 1):
+            if ids[file_number - 1] != file_number:
+                raise InconsistentDatasetError
 
 
 def main():
