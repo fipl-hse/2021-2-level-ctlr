@@ -78,6 +78,8 @@ class CorpusManager:
             # article_id > 0 is meant to solve CI where files may start from 0 during CorpusManager init
             if not article.get_raw_text_path().exists() and article_id > 0:
                 break
+            elif not article.get_raw_text_path().exists() and article_id == 0:
+                continue
 
             self._storage[article_id] = article
             article_id += 1
