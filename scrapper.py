@@ -15,6 +15,7 @@ from constants import (
     CRAWLER_CONFIG_PATH,
 )
 from core_utils.article import Article
+from core_utils.pdf_utils import PDFRawFile
 
 
 class IncorrectURLError(Exception):
@@ -79,7 +80,12 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        self.article.text = "Dummy text, will fix later"
+        pdf_url = article_bs.find("a", {"class": "action pdf"})["href"]
+        pdf_raw = PDFRawFile(pdf_url, self.article_id)
+        pdf_raw.download()
+        self.article.text = pdf_raw.get_text()
+
+        # self.article.text = "Dummy text, will fix later"
 
 
 def prepare_environment(base_path):
