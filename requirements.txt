@@ -1,4 +1,5 @@
 beautifulsoup4==4.10.0
+pymorphy2==0.9.1
 pymupdf==1.19.6
 pymystem3==0.1.10
 pytest==7.1.0
