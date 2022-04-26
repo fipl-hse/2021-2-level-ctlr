@@ -23,6 +23,9 @@ from constants import (
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
+logging.basicConfig(stream=sys.stderr)
+log = logging.getLogger("user_testing")
+log.setLevel(logging.DEBUG)
 
 class IncorrectURLError(Exception):
     """
@@ -46,7 +49,6 @@ def _clean_text(text):
 
 
 def _get_page(link):
-    log = logging.getLogger("user_testing")
     log.debug("attempting to connect to %s", link)
     try:
         time.sleep(random.uniform(2.0, 4.0))
@@ -176,8 +178,8 @@ def _is_valid_url(url_to_validate):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    logging.basicConfig(stream=sys.stderr)
-    logging.getLogger("user_testing").setLevel(logging.DEBUG)
+    # logging.basicConfig(stream=sys.stderr)
+    # logging.getLogger("user_testing").setLevel(logging.DEBUG)
 
     seeds, limit = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
