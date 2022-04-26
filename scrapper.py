@@ -39,10 +39,6 @@ class IncorrectNumberOfArticlesError(Exception):
     Total number of articles to parse in not integer
     """
 
-class ServerThrottledError(Exception):
-    """
-    Server disconnects any attempt to access this page. Please move on to another.
-    """
 
 def _clean_text(text):
     return re.sub(r"[\n\t ]+", " ", text).strip()
@@ -57,10 +53,10 @@ def _get_page(link):
                                 headers={"User-Agent": user_agent},
                                 timeout=5)
         return BeautifulSoup(response.text, "html.parser")
-    except requests.exceptions.ConnectionError:
-        print("failed to connect to %s. trying again", link)
+    #except requests.exceptions.ConnectionError:
+    #    print("failed to connect to %s. trying again", link)
         # return _get_page(link)
-        raise ServerThrottledError
+    #    raise ServerThrottledError
     except requests.exceptions.ReadTimeout:
         print("timed out connecting to %s. trying again", link)
         return _get_page(link)
@@ -96,7 +92,7 @@ class Crawler:
                 break
             try:
                 self._extract_url(_get_page(seed))
-            except ServerThrottledError:
+            except requests.exceptions.ConnectionError:
                 continue
 
 
@@ -135,7 +131,7 @@ class HTMLParser:
         topics = [_clean_text(topic.text) for topic in topics]
         self.article.topics = [topic for topic in topics if topic and "," not in topic]
 
-        date = "".join(re.findall(r"(?<=печать )[0-9\.]*", self.article.text))[:-1]
+        date = "".join(re.findall(r"(?<=печат[ьи] )[0-9\.]*", self.article.text))[:-1]
         self.article.date = dt.strptime(date, "%d.%m.%Y")
 
 
