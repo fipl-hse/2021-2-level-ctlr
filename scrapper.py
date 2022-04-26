@@ -110,7 +110,7 @@ def validate_config(crawler_path: Path):
         raise IncorrectNumberOfArticlesError
     if max_articles > 200:
         raise NumberOfArticlesOutOfRangeError
-    if not isinstance(seed_urls, list):
+    if not isinstance(seed_urls, list) or not seed_urls:
         raise IncorrectURLError
 
     return seed_urls, max_articles
