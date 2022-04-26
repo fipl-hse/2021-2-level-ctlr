@@ -64,7 +64,7 @@ class Crawler:
         """
         for url in self.seed_urls:
             response = requests.get(url, headers=HEADERS)  # get html code
-            sleep(random.randrange(2, 6))
+            sleep(random.randrange(2, 5))
 
             if not response.ok:
                 continue
@@ -108,7 +108,7 @@ class HTMLParser:
         page_link = fulltext.find('a')['href']  # link to a page with pdf
 
         download_link = page_link.replace('view', 'download')
-
+        sleep(random.randrange(2, 5))
         pdf = PDFRawFile(download_link, self.article_id)
 
         pdf.download()
