@@ -78,7 +78,7 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self, article_bs):
-        pass
+        self.article.text = "Dummy text, will fix later"
 
 
 def prepare_environment(base_path):
@@ -115,3 +115,4 @@ if __name__ == '__main__':
     for index, url in enumerate(crawler.urls):
         parser = HTMLParser(article_url=url, article_id=index)
         article = parser.parse()
+        article.save_raw()
