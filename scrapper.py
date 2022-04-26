@@ -42,7 +42,7 @@ class IncorrectNumberOfArticlesError(Exception):
 def _get_page(link):
     time.sleep(random.uniform(0.0, 1.0))
     user_agent = UserAgent().get_random_user_agent()
-    response = requests.get(link, headers={"user-agent": user_agent})
+    response = requests.get(link, headers={"User-Agent": user_agent})
     return BeautifulSoup(response.text, "html.parser")
 
 
