@@ -163,9 +163,9 @@ def validate_dataset(path_to_validate):
             if not text:
                 raise InconsistentDatasetError
         if file.name.endswith('meta.json'):
-            number_json += 1
+            number_meta += 1
 
-    if number_txt != number_json:
+    if number_txt != number_meta:
         raise InconsistentDatasetError
 
 
