@@ -72,7 +72,7 @@ class CorpusManager:
         Register each dataset entry
         """
         path = Path(self.path_to_raw_txt_data)
-        digit = re.compile(r'\d')
+        digit = re.compile(r'\d+')
         for file in path.glob('*'):
             digit_in_title = digit.match(file.name)
             if not digit_in_title:
@@ -119,7 +119,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁa-zA-Z]+', raw_text))
+        cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁ]+', raw_text))
         analyzed_cleaned_text = Mystem().analyze(cleaned_text)
         tokens = []
         morph = pymorphy2.MorphAnalyzer()
@@ -147,7 +147,7 @@ def validate_dataset(path_to_validate):
     if not dataset_path.is_dir():
         raise NotADirectoryError
     indices = []
-    digit_pattern = re.compile(r'\d')
+    digit_pattern = re.compile(r'\d+')
     for files in dataset_path.glob('*'):
         digit = digit_pattern.match(files.stem)
         if not digit:
