@@ -150,14 +150,14 @@ def validate_dataset(path_to_validate):
     if not list(path.iterdir()):
         raise EmptyDirectoryError
 
-    number_txt = 0
+    number_raw_txt = 0
     number_meta = 0
 
     for file in path.glob('*'):
 
         if file.name.endswith('raw.txt'):
-            number_txt += 1
-            if f'{number_txt}_raw' not in file.name:
+            number_raw_txt += 1
+            if f'{number_raw_txt}_raw' not in file.name:
                 raise InconsistentDatasetError
 
             with open(file, 'r', encoding='utf-8') as current_file:
@@ -167,7 +167,7 @@ def validate_dataset(path_to_validate):
         if file.name.endswith('meta.json'):
             number_meta += 1
 
-    if number_txt != number_meta:
+    if number_raw_txt != number_meta:
         raise InconsistentDatasetError
 
 
