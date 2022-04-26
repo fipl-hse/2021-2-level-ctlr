@@ -47,10 +47,15 @@ def _get_page(link):
     try:
         time.sleep(random.uniform(0.0, 1.0))
         user_agent = UserAgent().get_random_user_agent()
-        response = requests.get(link, headers={"User-Agent": user_agent})
+        response = requests.get(link,
+                                headers={"User-Agent": user_agent},
+                                timeout=5)
         return BeautifulSoup(response.text, "html.parser")
     except requests.exceptions.ConnectionError:
-        print("failed to connect to", link, "try again")
+        print(f"failed to connect to {link}. trying again")
+        return _get_page(link)
+    except requests.exceptions.ReadTimeout:
+        print(f"timed out connecting to {link}. trying again")
         return _get_page(link)
 
 
