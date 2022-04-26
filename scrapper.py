@@ -47,6 +47,7 @@ def _clean_text(text):
 
 def _get_page(link):
     log = logging.getLogger("user_testing")
+    log.debug("attempting to connect to %s", link)
     try:
         time.sleep(random.uniform(2.0, 4.0))
         user_agent = UserAgent().get_random_user_agent()
