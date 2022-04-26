@@ -4,8 +4,10 @@ Pipeline for text processing implementation
 from pathlib import Path
 import re
 
-# from pymystem3 import Mystem
+from pymystem3 import Mystem
+import pymorphy2
 
+from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
 
 
@@ -101,11 +103,17 @@ class TextProcessingPipeline:
             tokens = self._process(raw_text)
 
             cleaned_tokens = []
+            single_tagged_tokens = []
+            multiple_tagged_tokens = []
 
             for token in tokens:
                 cleaned_tokens.append(token.get_cleaned())
+                single_tagged_tokens.append(token.get_single_tagged())
+                multiple_tagged_tokens.append(token.get_multiple_tagged())
 
             article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -115,14 +123,25 @@ class TextProcessingPipeline:
         for symbol in raw_text:
             if not pattern.match(symbol):
                 raw_text = raw_text.replace(symbol, '')
-        for symbol in '[]_`':
-            raw_text = raw_text.replace(symbol, '')
-        tokens = raw_text.split()
+
+        text_analysis = Mystem().analyze(raw_text)
+        morph = pymorphy2.MorphAnalyzer()
 
         processed_tokens = []
 
-        for token in tokens:
-            token = MorphologicalToken(token)
+        for single_word_analysis in text_analysis:
+
+            if 'analysis' not in single_word_analysis:
+                continue
+
+            if not single_word_analysis['analysis']:
+                continue
+
+            token = MorphologicalToken(single_word_analysis['text'])
+            token.normalized_form = single_word_analysis['analysis'][0]['lex']
+            token.tags_mystem = single_word_analysis['analysis'][0]['gr']
+            token.tags_pymorphy = morph.parse(single_word_analysis['text'])[0].tag
+
             processed_tokens.append(token)
 
         return processed_tokens
@@ -168,7 +187,10 @@ def validate_dataset(path_to_validate):
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
