@@ -16,7 +16,6 @@ from core_utils.pdf_utils import PDFRawFile
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
 from constants import HEADERS
-# check
 
 
 class IncorrectURLError(Exception):
@@ -66,6 +65,9 @@ class Crawler:
         for url in self.seed_urls:
             response = requests.get(url, headers=HEADERS)  # get html code
             sleep(random.randrange(2, 6))
+
+            if not response.ok:
+                continue
 
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
             self._extract_url(article_bs)
