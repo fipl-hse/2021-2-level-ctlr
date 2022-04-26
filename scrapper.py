@@ -39,6 +39,9 @@ class IncorrectNumberOfArticlesError(Exception):
     Total number of articles to parse in not integer
     """
 
+def _clean_text(text):
+    return re.sub(r"[\n\t ]+", " ", text).strip()
+
 
 def _get_page(link):
     try:
@@ -95,32 +98,29 @@ class HTMLParser:
         self.article = Article(url=article_url, article_id=article_id)
 
     def parse(self):
-        article_bs = _get_page(self.article_url)
         self._fill_article_with_text()
+        article_bs = _get_page("/".join(self.article_url.split("/")[:-1]))
         self._fill_article_with_meta_information(article_bs)
         return self.article
 
     def _fill_article_with_text(self):
         pdf_url = self.article_url.replace("view", "download")
-        print(pdf_url)
         time.sleep(random.uniform(0.0, 1.0))
         pdf_raw = PDFRawFile(pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
-        citation = article_bs.find("p", {"id": "citRus"}).text
-        metadata = list(filter(None, citation.split("  ")))
-
         self.article.article_id = self.article_id
-        self.article.author = metadata[1]
-        self.article.title = metadata[-4]
+        self.article.title = article_bs.find("h1").text
+        self.article.author = _clean_text(article_bs.find("div", {"id": "authorString"}).text)
+
+        topics = article_bs.find("div", {"id": "articleSubject"}).find("div").children
+        topics = [_clean_text(topic.text) for topic in topics]
+        self.article.topics = [topic for topic in topics if topic and "," not in topic]
 
         date = "".join(re.findall(r"(?<=печать )[0-9\.]*", self.article.text))[:-1]
         self.article.date = dt.strptime(date, "%d.%m.%Y")
-
-        topics = "".join(re.findall(r"(?<=Ключевые слова: ).*", self.article.text))
-        self.article.topics = list(filter(None, topics.split(", ")))
 
 
 def prepare_environment(base_path):
