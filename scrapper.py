@@ -100,7 +100,6 @@ class Crawler:
                 print("failed to connect to", seed)
                 continue
 
-
     def get_search_urls(self):
         """
         Returns seed_urls param
