@@ -41,7 +41,6 @@ class Crawler:
         self.seed_urls = seed_urls
         self.total_max_articles = max_articles
         self.urls = []
-    
     def _extract_url(self, article_bs):
         cells = article_bs.find_all("div", class_='col-lg-3 col-sm-6')
         for cell in cells:
