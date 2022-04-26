@@ -9,13 +9,14 @@ import datetime
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
+from random_user_agent.user_agent import UserAgent
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
-from constants import HEADERS
+# from constants import HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -55,22 +56,24 @@ class Crawler:
                 link = article.find('a')
                 href = link['href']
                 self.urls.append(href)
-            else:
-                break
 
     def find_articles(self):
         """
         Finds articles
         """
         for url in self.seed_urls:
-
-            response = requests.get(url, headers=HEADERS)  # get html code
+            user_agent = UserAgent().get_random_user_agent()
+            headers = {'user-agent': user_agent,
+                       'accept': '*/*',
+                       'accept-encoding': 'gzip, deflate, br',
+                       'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
+            response = requests.get(url, headers=headers)  # get html code
             sleep(random.randrange(2, 5))
 
             if not response.ok:
                 continue
 
-            article_bs = BeautifulSoup(response.text, 'html.parse')  # creates BS object
+            article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
             self._extract_url(article_bs)
 
     def get_search_urls(self):
@@ -93,7 +96,12 @@ class HTMLParser:
         """
         Extracts all necessary data from the article web page
         """
-        response = requests.get(self.article_url, HEADERS)
+        user_agent = UserAgent().get_random_user_agent()
+        headers = {'user-agent': user_agent,
+                   'accept': '*/*',
+                   'accept-encoding': 'gzip, deflate, br',
+                   'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
+        response = requests.get(self.article_url, headers)
         sleep(random.randrange(2, 5))
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
