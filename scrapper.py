@@ -1,17 +1,15 @@
 """
 Scrapper implementation
 """
-import requests
-from bs4 import BeautifulSoup
-import re
-#import time
-#from datetime import datetime
-#import random
 import json
+import re
 import shutil
 from pathlib import Path
-from core_utils.article import Article
+import requests
+from bs4 import BeautifulSoup
 from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from core_utils.article import Article
+
 
 
 class IncorrectURLError(Exception):
