@@ -11,7 +11,7 @@ import shutil
 import time
 
 from bs4 import BeautifulSoup
-from random_user_agent.user_agent import UserAgent
+from fake_headers import Headers
 import requests
 
 from constants import (
@@ -48,9 +48,10 @@ def _get_page(link):
     print("attempting to connect to %s", link)
     try:
         time.sleep(random.uniform(2.0, 4.0))
-        user_agent = UserAgent().get_random_user_agent()
+        headers = Headers().generate()
+        print(headers)
         response = requests.get(link,
-                                headers={"User-Agent": user_agent},
+                                headers=headers,
                                 timeout=5)
         return BeautifulSoup(response.text, "html.parser")
     #except requests.exceptions.ConnectionError:
