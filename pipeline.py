@@ -70,21 +70,16 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        article_id = 0
+        article_ids = []
 
-        while True:
+        for file_path in Path(self.path_to_raw_txt_data).iterdir():
+            match = re.match(r'\d+', file_path.name)
+
+            article_ids.append(int(match.group(0)))
+
+        for article_id in set(article_ids):
             article = Article(url=None, article_id=article_id)
-
-            # article_id > 0 is meant to solve CI where files may start from 0 during CorpusManager init
-            if not article.get_raw_text_path().exists() and article_id > 0:
-                break
-
-            if not article.get_raw_text_path().exists() and article_id == 0:
-                article_id += 1
-                continue
-
             self._storage[article_id] = article
-            article_id += 1
 
     def get_articles(self):
         """
