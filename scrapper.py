@@ -4,10 +4,12 @@ Scrapper implementation
 
 from datetime import datetime as dt
 import json
+import logging
 from pathlib import Path
 import random
 import re
 import shutil
+import sys
 import time
 
 from bs4 import BeautifulSoup
@@ -44,6 +46,7 @@ def _clean_text(text):
 
 
 def _get_page(link):
+    log = logging.getLogger("user_testing")
     try:
         time.sleep(random.uniform(0.0, 1.0))
         user_agent = UserAgent().get_random_user_agent()
@@ -52,10 +55,10 @@ def _get_page(link):
                                 timeout=5)
         return BeautifulSoup(response.text, "html.parser")
     except requests.exceptions.ConnectionError:
-        print(f"failed to connect to {link}. trying again")
+        log.debug(f"failed to connect to {link}. trying again")
         return _get_page(link)
     except requests.exceptions.ReadTimeout:
-        print(f"timed out connecting to {link}. trying again")
+        log.debug(f"timed out connecting to {link}. trying again")
         return _get_page(link)
 
 
@@ -172,6 +175,9 @@ def _is_valid_url(url_to_validate):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
+    logging.basicConfig(stream=sys.stderr)
+    logging.getLogger("user_testing").setLevel(logging.DEBUG)
+
     seeds, limit = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(seed_urls=seeds,
