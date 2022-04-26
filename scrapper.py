@@ -4,12 +4,10 @@ Scrapper implementation
 
 from datetime import datetime as dt
 import json
-import logging
 from pathlib import Path
 import random
 import re
 import shutil
-import sys
 import time
 
 from bs4 import BeautifulSoup
@@ -23,10 +21,6 @@ from constants import (
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
-logging.basicConfig(stream=sys.stderr)
-log = logging.getLogger("user_testing")
-log.setLevel(logging.DEBUG)
-log.debug("started")
 
 class IncorrectURLError(Exception):
     """
@@ -45,12 +39,17 @@ class IncorrectNumberOfArticlesError(Exception):
     Total number of articles to parse in not integer
     """
 
+class ServerThrottledError(Exception):
+    """
+    Server disconnects any attempt to access this page. Please move on to another.
+    """
+
 def _clean_text(text):
     return re.sub(r"[\n\t ]+", " ", text).strip()
 
 
 def _get_page(link):
-    log.debug("attempting to connect to %s", link)
+    print("attempting to connect to %s", link)
     try:
         time.sleep(random.uniform(2.0, 4.0))
         user_agent = UserAgent().get_random_user_agent()
@@ -59,10 +58,11 @@ def _get_page(link):
                                 timeout=5)
         return BeautifulSoup(response.text, "html.parser")
     except requests.exceptions.ConnectionError:
-        log.debug("failed to connect to %s. trying again", link)
-        return _get_page(link)
+        print("failed to connect to %s. trying again", link)
+        # return _get_page(link)
+        raise ServerThrottledError
     except requests.exceptions.ReadTimeout:
-        log.debug("timed out connecting to %s. trying again", link)
+        print("timed out connecting to %s. trying again", link)
         return _get_page(link)
 
 
@@ -94,7 +94,11 @@ class Crawler:
         for seed in self.seed_urls:
             if len(self.urls) == self.max_articles:
                 break
-            self._extract_url(_get_page(seed))
+            try:
+                self._extract_url(_get_page(seed))
+            except ServerThrottledError:
+                continue
+
 
     def get_search_urls(self):
         """
