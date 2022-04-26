@@ -4,6 +4,10 @@ Pipeline for text processing implementation
 from pathlib import Path
 import re
 
+import pymorphy2
+from pymystem3 import Mystem
+
+from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
 
 
@@ -29,9 +33,9 @@ class MorphologicalToken:
 
     def __init__(self, original_word):
         self.original_word = original_word
-        self.normalized_form = ""
-        self.mystem_tags = ""
-        self.pymorphy_tags = ""
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
@@ -43,13 +47,13 @@ class MorphologicalToken:
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -91,27 +95,42 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        articles = self.corpus_manager.get_articles().values()
-        tokens = []
-        for article in articles:
+        cleaned_tokens = []
+        single_tagged_tokens = []
+        multiple_tagged_tokens = []
+        for article in self.corpus_manager.get_articles().values():
             article_raw_text = article.get_raw_text()
 
             for token in self._process(article_raw_text):
-                tokens.append(token.get_cleaned())
+                cleaned_tokens.append(token.get_cleaned())
+                single_tagged_tokens.append(token.get_single_tagged())
+                multiple_tagged_tokens.append(token.get_multiple_tagged())
 
-            article.save_as(' '.join(tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
+        text = raw_text.replace('\n', '')
+        analyzed_text = Mystem().analyze(text)
+        morph = pymorphy2.MorphAnalyzer()
+        tokens = []
+        for token in analyzed_text:
 
-        text = re.sub(r"[^а-я\s]", "", raw_text)
-        tokens = text.split()
+            if 'analysis' not in token:
+                continue
+            if not token['analysis']:
+                continue
 
-        morphological_tokens = [MorphologicalToken(original_word=word) for word in tokens]
-
-        return morphological_tokens
+            morph_token = MorphologicalToken(original_word=token['text'])
+            morph_token.normalized_form = token['analysis'][0]['lex']
+            morph_token.tags_mystem = token['analysis'][0]['gr']
+            morph_token.tags_pymorphy = morph.parse(token['text'])[0].tag
+            tokens.append(morph_token)
+        return tokens
 
 
 def validate_dataset(path_to_validate):
@@ -129,22 +148,33 @@ def validate_dataset(path_to_validate):
     if not list(path.iterdir()):
         raise EmptyDirectoryError
 
-    meta = []
-    raw = []
-    for file in path.rglob('*.json'):
-        meta.append(file.parts[-1].split('_')[0])
-    for file in path.rglob('*_raw.txt'):
-        raw.append(file.parts[-1].split('_')[0])
-    if meta != raw:
+    number_txt = 0
+    number_json = 0
+
+    for file in path.glob('*'):
+
+        if file.name.endswith('raw.txt'):
+            number_txt += 1
+            if f'{number_txt}_raw' not in file.name:
+                raise InconsistentDatasetError
+
+            with open(file, 'r', encoding='utf-8') as current_file:
+                text = current_file.read()
+            if not text:
+                raise InconsistentDatasetError
+
+        if file.name.endswith('meta.json'):
+            number_json += 1
+
+    if number_txt != number_json:
         raise InconsistentDatasetError
 
 
 
-
 def main():
-    # YOUR CODE HERE
-    pass
-
-
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager)
+    pipeline.run()
 if __name__ == "__main__":
     main()
