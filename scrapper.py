@@ -48,7 +48,7 @@ def _clean_text(text):
 def _get_page(link):
     log = logging.getLogger("user_testing")
     try:
-        time.sleep(random.uniform(0.0, 1.0))
+        time.sleep(random.uniform(2.0, 4.0))
         user_agent = UserAgent().get_random_user_agent()
         response = requests.get(link,
                                 headers={"User-Agent": user_agent},
