@@ -2,6 +2,7 @@
 Pipeline for text processing implementation
 """
 from pathlib import Path
+import re
 
 import pymorphy2
 from pymystem3 import Mystem
@@ -71,9 +72,10 @@ class CorpusManager:
         """
         path = Path(self.path_to_raw_txt_data)
 
-        for file in path.iterdir():
-            if file.name.endswith('_raw.txt'):
-                article_id = file.name.split('_raw.txt')[0]
+        re_pattern = re.compile(r'\d+_raw')
+        for file in path.glob('*'):
+            if '_raw.txt' in file.name:
+                article_id = int(re_pattern.search(file.name)[0][:-4])
                 self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
