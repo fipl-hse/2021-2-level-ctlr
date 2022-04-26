@@ -15,6 +15,7 @@ import requests
 from constants import (
     ASSETS_PATH,
     CRAWLER_CONFIG_PATH,
+    HEADERS
 )
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
@@ -67,7 +68,7 @@ class Crawler:
             if len(self.urls) == self.max_articles:
                 break
             time.sleep(random.random())
-            response = requests.get(seed)
+            response = requests.get(seed, headers=HEADERS)
             article_bs = BeautifulSoup(response.text, features="html.parser")
             self._extract_url(article_bs)
 
