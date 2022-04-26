@@ -2,6 +2,7 @@
 Scrapper implementation
 """
 
+from datetime import datetime as dt
 import json
 from pathlib import Path
 import random
@@ -98,7 +99,7 @@ class HTMLParser:
     def _fill_article_with_text(self):
         pdf_url = self.article_url.replace("view", "download")
         print(pdf_url)
-        time.sleep(4)
+        time.sleep(random.uniform(0.0, 1.0))
         pdf_raw = PDFRawFile(pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
@@ -110,6 +111,7 @@ class HTMLParser:
         self.article.article_id = self.article_id
         self.article.author = metadata[1]
         self.article.title = metadata[-4]
+        self.article.date = dt.now() # placeholder
 
 
 def prepare_environment(base_path):
