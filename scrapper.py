@@ -26,6 +26,7 @@ from core_utils.pdf_utils import PDFRawFile
 logging.basicConfig(stream=sys.stderr)
 log = logging.getLogger("user_testing")
 log.setLevel(logging.DEBUG)
+log.debug("started")
 
 class IncorrectURLError(Exception):
     """
