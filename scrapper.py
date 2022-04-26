@@ -93,6 +93,7 @@ class Crawler:
             try:
                 self._extract_url(_get_page(seed))
             except requests.exceptions.ConnectionError:
+                print("failed to connect to", seed)
                 continue
 
 
