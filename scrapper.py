@@ -46,21 +46,22 @@ def _clean_text(text):
 
 def _get_page(link):
     print("attempting to connect to %s", link)
-    try:
-        time.sleep(random.uniform(2.0, 4.0))
-        headers = Headers().generate()
-        print(headers)
-        response = requests.get(link,
-                                headers=headers,
-                                timeout=5)
-        return BeautifulSoup(response.text, "html.parser")
+    time.sleep(random.uniform(2.0, 4.0))
+    headers = Headers().generate()
+    print(headers)
+    response = requests.get(link,
+                            headers=headers,
+                            timeout=5)
+    if not response.ok:
+        return
+    return BeautifulSoup(response.text, "html.parser")
     # except requests.exceptions.ConnectionError:
     #    print("failed to connect to %s. trying again", link)
         # return _get_page(link)
     #    raise ServerThrottledError
-    except requests.exceptions.ReadTimeout:
-        print("timed out connecting to %s. trying again", link)
-        return _get_page(link)
+    #except requests.exceptions.ReadTimeout:
+        #print("timed out connecting to %s. trying again", link)
+        #return _get_page(link)
 
 
 class Crawler:
@@ -74,6 +75,8 @@ class Crawler:
         self.urls = []
 
     def _extract_url(self, article_bs):
+        if not article_bs:
+            return
         for node in article_bs.find_all("a", {"class": "file"}):
             # ignore links to issues, only collect articles.
             # this does not leave out any content, because issues
