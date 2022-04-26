@@ -72,9 +72,7 @@ class CorpusManager:
         """
         path_raw = Path(self.path_to_raw_txt_data)
 
-        files = [file for file in path_raw.glob('*_raw.txt')]
-
-        for file in files:
+        for file in path_raw.glob('*_raw.txt'):
             article_id = int(file.stem.split('_')[0])
             self._storage[article_id] = Article(url=None, article_id=article_id)
 
@@ -152,11 +150,7 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    if isinstance(path_to_validate, str):
-        path_to_validate = Path(path_to_validate)
-
-    files = [file for file in path_to_validate.glob('*')]
-    stems = [file.stem for file in files]
+    stems = [file.stem for file in path_to_validate.glob('*')]
     raw_txt = 0
     meta_json = 0
 
@@ -166,10 +160,10 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    if not files:
+    if not path_to_validate.glob('*'):
         raise EmptyDirectoryError
 
-    for file in files:
+    for file in path_to_validate.glob('*'):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError
 
