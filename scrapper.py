@@ -38,6 +38,12 @@ class IncorrectNumberOfArticlesError(Exception):
     """
 
 
+def _get_page(link):
+    user_agent = UserAgent().get_random_user_agent()
+    response = requests.get(link, headers={"user-agent": user_agent})
+    return BeautifulSoup(response.text, "html.parser")
+
+
 class Crawler:
     """
     Crawler implementation
@@ -66,11 +72,7 @@ class Crawler:
         for seed in self.seed_urls:
             if len(self.urls) == self.max_articles:
                 break
-            time.sleep(4)
-            user_agent = UserAgent().get_random_user_agent()
-            response = requests.get(seed, headers={"user-agent": user_agent})
-            article_bs = BeautifulSoup(response.text, features="html.parser")
-            self._extract_url(article_bs)
+            self._extract_url(_get_page(seed))
 
     def get_search_urls(self):
         """
@@ -86,8 +88,7 @@ class HTMLParser:
         self.article = Article(url=article_url, article_id=article_id)
 
     def parse(self):
-        response = requests.get(self.article_url)
-        article_bs = BeautifulSoup(response.text, "html.parser")
+        article_bs = _get_page(self.article_url)
         self._fill_article_with_text()
         self._fill_article_with_meta_information(article_bs)
         return self.article
