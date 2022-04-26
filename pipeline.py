@@ -29,7 +29,7 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        self.normalized_form = None
+        self.normalized_form = original_word
         self.mystem_tags = None
         self.pymorphy_tags = None
 
@@ -95,13 +95,22 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        pass
+        for article_id, article in self.corpus_manager.get_articles():
+            self._process(article.get_raw_text())
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        tokens = []
+        punctuation = """'!@#$%^&*()-_=+/|"№;:?><,.`~’…—[]{}1234567890\\"""
+        for character in raw_text:
+            if character in punctuation:
+                raw_text = raw_text.replace(character, '')
+        words = raw_text.split()
+        for word in words:
+            tokens.append(MorphologicalToken(word).get_cleaned())
+        return tokens
 
 
 def validate_dataset(path_to_validate):
