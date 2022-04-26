@@ -111,7 +111,9 @@ class HTMLParser:
         self.article.article_id = self.article_id
         self.article.author = metadata[1]
         self.article.title = metadata[-4]
-        self.article.date = dt.now() # placeholder
+
+        date = "".join(re.findall(r"(?<=печать )[0-9\.]*", self.article.text))[:-1]
+        self.article.date = dt.strptime(date, "%d.%m.%Y")
 
 
 def prepare_environment(base_path):
