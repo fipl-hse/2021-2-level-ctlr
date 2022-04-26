@@ -105,20 +105,20 @@ class Crawler:
 
 class HTMLParser:
     def __init__(self, article_url, article_id):
-        self.article_url = article_url
+        self._pdf_url = article_url.replace("view", "download")
+        self.article_url = "/".join(article_url.split("/")[:-1])
         self.article_id = article_id
         self.article = Article(url=article_url, article_id=article_id)
 
     def parse(self):
         self._fill_article_with_text()
-        article_bs = _get_page("/".join(self.article_url.split("/")[:-1]))
+        article_bs = _get_page(self.article_url)
         self._fill_article_with_meta_information(article_bs)
         return self.article
 
     def _fill_article_with_text(self):
-        pdf_url = self.article_url.replace("view", "download")
         time.sleep(random.uniform(0.0, 1.0))
-        pdf_raw = PDFRawFile(pdf_url, self.article_id)
+        pdf_raw = PDFRawFile(self._pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
 
