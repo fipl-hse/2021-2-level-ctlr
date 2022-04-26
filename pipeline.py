@@ -2,6 +2,7 @@
 Pipeline for text processing implementation
 """
 import re
+import pymorphy2
 from pathlib import Path
 from pymystem3 import Mystem
 from core_utils.article import Article, ArtifactType
@@ -50,7 +51,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -101,12 +102,16 @@ class TextProcessingPipeline:
 
             cleaned_tokens = []
             single_tag = []
+            multiple_tag = []
+
             for token in processed_text:
                 cleaned_tokens.append(token.get_cleaned())
                 single_tag.append(token.get_single_tagged())
+                multiple_tag.append(token.get_multiple_tagged())
 
             article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
             article.save_as(' '.join(single_tag), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tag), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -125,6 +130,8 @@ class TextProcessingPipeline:
         result = Mystem().analyze(clean_text)
         morph_tokens = []
 
+        analyzer = pymorphy2.MorphAnalyzer()
+
         for element in result:
             word = element['text']
             if 'analysis' not in element:
@@ -136,6 +143,9 @@ class TextProcessingPipeline:
             token = MorphologicalToken(original_word=word)
             token.normalized_form = element['analysis'][0]['lex']
             token.tags_mystem = element['analysis'][0]['gr']
+
+            parsed_word = analyzer.parse(word)[0]
+            token.tags_pymorphy = parsed_word.tag
 
             morph_tokens.append(token)
 
