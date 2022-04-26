@@ -70,12 +70,13 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        article_id = 1
+        article_id = 0
 
         while True:
             article = Article(url=None, article_id=article_id)
 
-            if not article.get_raw_text_path().exists():
+            # article_id > 0 is meant to solve CI where files may start from 0 during CorpusManager init
+            if not article.get_raw_text_path().exists() and article_id > 0:
                 break
 
             self._storage[article_id] = article
