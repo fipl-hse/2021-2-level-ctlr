@@ -46,9 +46,7 @@ def _clean_text(text):
 
 
 def _get_page(link):
-    logging.basicConfig(stream=sys.stdout)
     log = logging.getLogger("user_testing")
-    log.setLevel(logging.DEBUG)
     try:
         time.sleep(random.uniform(2.0, 4.0))
         user_agent = UserAgent().get_random_user_agent()
@@ -177,6 +175,8 @@ def _is_valid_url(url_to_validate):
 
 if __name__ == '__main__':
     # YOUR CODE HERE
+    logging.basicConfig(stream=sys.stderr)
+    logging.getLogger("user_testing").setLevel(logging.DEBUG)
 
     seeds, limit = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
