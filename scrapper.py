@@ -104,7 +104,13 @@ class HTMLParser:
         self.article.text = pdf_raw.get_text()
 
     def _fill_article_with_meta_information(self, article_bs):
-        pass
+        citation = article_bs.find("p", {"id": "citRus"}).text
+        metadata = list(filter(None, citation.split("  ")))
+
+        self.article.article_id = self.article_id
+        self.article.author = metadata[1]
+        self.article.title = metadata[-4]
+
 
 def prepare_environment(base_path):
     """
