@@ -153,7 +153,6 @@ def validate_dataset(path_to_validate):
     if isinstance(path_to_validate, str):
         path_to_validate = Path(path_to_validate)
 
-    stems = [file.stem for file in path_to_validate.glob('*')]
     raw_txt = 0
     meta_json = 0
 
@@ -166,22 +165,22 @@ def validate_dataset(path_to_validate):
     if not any(path_to_validate.iterdir()):
         raise EmptyDirectoryError
 
-    for file in path_to_validate.glob('*'):
+    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name.split('_')[0])):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError
 
-        if file.suffix == '.json':
+        if file.name.endswith('meta.json'):
 
             meta_json += 1
 
-            if f'{meta_json}_meta' not in stems:
+            if f'{meta_json}_meta' != file.stem:
                 raise InconsistentDatasetError
 
-        if file.suffix == '.txt':
+        if file.name.endswith('raw.txt'):
 
             raw_txt += 1
 
-            if f'{raw_txt}_raw' not in stems:
+            if f'{raw_txt}_raw' != file.stem:
                 raise InconsistentDatasetError
 
     if raw_txt != meta_json:
