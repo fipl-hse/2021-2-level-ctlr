@@ -2,17 +2,16 @@
 Scrapper implementation
 """
 
-from sqlite3 import Date
 from urllib.parse import urlparse
 from urllib.parse import urljoin
-from constants import CRAWLER_CONFIG_PATH
-from constants import ASSETS_PATH
 import json
 import os
-import requests
-from bs4 import BeautifulSoup
 import datetime
 import shutil
+import requests
+from bs4 import BeautifulSoup
+from constants import CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH
 
 from core_utils.article import Article
 
@@ -82,9 +81,9 @@ class Crawler:
         Finds articles
         """
         for url in self.seed_urls:
-            if self.seed_urls.index(url) < max_articles:
-             html = requests.get(url).text
-             self.exctract_aticle_urls(url, html)
+            if self.seed_urls.index(url) < self.max_articles:
+                html = requests.get(url).text
+                self.exctract_aticle_urls(url, html)
             else:
                 break
 
@@ -93,12 +92,14 @@ class Crawler:
         soup = BeautifulSoup(html, 'html.parser')
         for link in soup.find_all('a'):
             path = link.get('href')
-            if path and path.startswith('/') and (self._is_string_contains(path, 'community') or self._is_string_contains(path, 'user')) and self._is_string_contains(path, 'content') and not self._is_string_contains(path, 'comment'):
+            _is_url_by_user = (self._is_string_contains(path, 'community') or self._is_string_contains(path, 'user'))
+            _is_url_not_comment = self._is_string_contains(path, 'content') and not self._is_string_contains(path, 'comment')
+            if path and path.startswith('/') and _is_url_by_user and _is_url_not_comment:
                 path = urljoin(url, path)
                 self.urls.append(path)
 
-    def _is_string_contains(self, sourceString, substring):
-        return sourceString.find(substring) != -1
+    def _is_string_contains(self, source_string, substring):
+        return source_string.find(substring) != -1
 
     def get_search_urls(self):
         """
@@ -138,11 +139,11 @@ def validate_url(url):
     else:
         raise IncorrectURLError()
 
-def is_number_of_articles_in_range(number, rangeNumber):
-    if number <= rangeNumber:
+def is_number_of_articles_in_range(number, range_number):
+    if number <= range_number:
         pass
     else:
-         raise NumberOfArticlesOutOfRangeError()
+        raise NumberOfArticlesOutOfRangeError()
 
 def is_number_of_articles_valid(number):
     if isinstance(number, int):
@@ -152,16 +153,16 @@ def is_number_of_articles_valid(number):
 
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    _seed_urls, _max_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls=seed_urls, max_articles=max_articles)
+    crawler = Crawler(seed_urls=_seed_urls, max_articles=_max_articles)
     crawler.find_articles()
     print(len(crawler.urls))
     articles_to_save = []
-    for i in range(max_articles):
-        url = crawler.urls[i]
-        parser = HTMLParser(article_url=url, article_id=crawler.urls.index(url))
+    for i in range(_max_articles):
+        _url = crawler.urls[i]
+        parser = HTMLParser(article_url=_url, article_id=crawler.urls.index(_url))
         article = parser.parse()
         articles_to_save.append(article)
     for article in articles_to_save:
-         article.save_raw()
+        article.save_raw()
