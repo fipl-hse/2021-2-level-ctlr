@@ -4,6 +4,7 @@ Scrapper implementation
 
 import json
 from pathlib import Path
+import re
 import shutil
 
 from bs4 import BeautifulSoup
@@ -112,8 +113,15 @@ def validate_config(crawler_path: Path):
         raise NumberOfArticlesOutOfRangeError
     if not isinstance(seed_urls, list) or not seed_urls:
         raise IncorrectURLError
+    for seed_url in seed_urls:
+        if not _is_valid_url(seed_url):
+            raise IncorrectURLError
 
     return seed_urls, max_articles
+
+
+def _is_valid_url(url_to_validate):
+    return re.match(r"https?://", url_to_validate)
 
 
 if __name__ == '__main__':
