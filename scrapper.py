@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from core_utils.article import Article
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PATTERN
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, PATTERN, HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -59,7 +59,7 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             sleep(random.randint(2, 4))
-            response = requests.get(url=seed_url)
+            response = requests.get(url=seed_url, headers=HEADERS)
             if not response.ok:
                 continue
             article_bs = BeautifulSoup(response.text, 'lxml')
@@ -115,7 +115,7 @@ class HTMLParser:
             self.article.text += add_text
 
     def parse(self):
-        response = requests.get(url=self.article_url, timeout=20)
+        response = requests.get(url=self.article_url, timeout=20, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
