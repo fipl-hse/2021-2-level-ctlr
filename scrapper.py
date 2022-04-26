@@ -63,13 +63,14 @@ class Crawler:
         Finds articles
         """
         for url in self.seed_urls:
+
             response = requests.get(url, headers=HEADERS)  # get html code
             sleep(random.randrange(2, 5))
 
             if not response.ok:
                 continue
 
-            article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
+            article_bs = BeautifulSoup(response.text, 'html.parse')  # creates BS object
             self._extract_url(article_bs)
 
     def get_search_urls(self):
@@ -93,6 +94,7 @@ class HTMLParser:
         Extracts all necessary data from the article web page
         """
         response = requests.get(self.article_url, HEADERS)
+        sleep(random.randrange(2, 5))
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)

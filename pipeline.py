@@ -1,9 +1,9 @@
 """
 Pipeline for text processing implementation
 """
+from pathlib import Path
 import re
 import pymorphy2
-from pathlib import Path
 from pymystem3 import Mystem
 from core_utils.article import Article, ArtifactType
 from constants import ASSETS_PATH
