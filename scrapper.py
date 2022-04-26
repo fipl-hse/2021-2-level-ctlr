@@ -55,10 +55,10 @@ def _get_page(link):
                                 timeout=5)
         return BeautifulSoup(response.text, "html.parser")
     except requests.exceptions.ConnectionError:
-        log.debug("failed to connect to %s. trying again" % link)
+        log.debug("failed to connect to %s. trying again", link)
         return _get_page(link)
     except requests.exceptions.ReadTimeout:
-        log.debug("timed out connecting to %s. trying again" % link)
+        log.debug("timed out connecting to %s. trying again", link)
         return _get_page(link)
 
 
