@@ -104,7 +104,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        pattern = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
 
         for symbol in raw_text:
             if not pattern.match(symbol):
@@ -134,6 +134,8 @@ def validate_dataset(path_to_validate):
     if not list(path.glob('**/*')):
         raise EmptyDirectoryError
 
+    needed_file_names = ['_raw', '_meta']
+
     files = {
         ".json": [],
         ".pdf": [],
@@ -145,14 +147,18 @@ def validate_dataset(path_to_validate):
     for file in list(path.glob('*')):
 
         # check txt files
+
+        # add in dict file id with relevant filename extension
+        for file_name_type in needed_file_names:
+            if file_name_type in file.stem:
+                files.get(file.suffix).append(int(pattern.match(file.stem).group()))
+                continue
+
         if file.suffix == ".txt":
             with file.open(encoding='utf=8') as opened_file:
                 file_text = opened_file.read()
                 if not file_text:
                     raise InconsistentDatasetError
-
-        # add in dict file id with relevant filename extension
-        files.get(file.suffix).append(int(pattern.match(file.stem).group()))
 
     # check dataset numeration
     for ids in files.values():
