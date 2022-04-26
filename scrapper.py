@@ -168,7 +168,3 @@ if __name__ == '__main__':
     for article in articles_to_save:
         article.save_raw()
         article.save_raw()
-
-
-
-
