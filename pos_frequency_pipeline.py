@@ -2,17 +2,14 @@
 Implementation of POSFrequencyPipeline for score ten only.
 """
 
-<<<<<<< HEAD
 import json
 import re
 
 from constants import ASSETS_PATH
+from core_utils.article import ArtifactType
 from core_utils.visualizer import visualize
 from pipeline import CorpusManager, validate_dataset
-=======
-from pipeline import CorpusManager
 
->>>>>>> origin/main
 
 class EmptyFileError(Exception):
     """
@@ -21,17 +18,15 @@ class EmptyFileError(Exception):
 
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
-<<<<<<< HEAD
-        self.corpus_manager = corpus_manager
-=======
         pass
->>>>>>> origin/main
+        self.corpus_manager = corpus_manager
 
     def run(self):
+        pass
         for article in self.corpus_manager.get_articles().values():
             frequencies = {}
             pattern = re.compile(r'<([A-Z]+)')
-            with open(article.get_file_path('single_tagged'), 'r') as file:
+            with open(article.get_file_path(ArtifactType.single_tagged), 'r') as file:
                 text = file.read()
                 if not text:
                     raise EmptyFileError
@@ -60,6 +55,7 @@ class POSFrequencyPipeline:
 
 def main():
     # YOUR CODE HERE
+    pass
     validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = POSFrequencyPipeline(corpus_manager=corpus_manager)
