@@ -115,11 +115,17 @@ class TextProcessingPipeline:
         mystem_tokens = []
         cleaned_text = raw_text
         letters = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
+        transferences_and_footers = re.compile(r'(-\n)|(\d+\s+[^\n]([А-Я]\.)+\s[А-Яа-я]+\s\n)'
+                                               r'|(([А-ЯёЁ]{1}([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)')
         for character in raw_text:
             if letters.match(character) is None:
                 cleaned_text = cleaned_text.replace(character, '')
 
-        result = Mystem().analyze(raw_text)
+        preprocessed_text = transferences_and_footers.sub('', raw_text)
+        """for thing_to_delete in things_to_delete:
+            preprocessed_text.replace(thing_to_delete, '')"""
+
+        result = Mystem().analyze(preprocessed_text)
         for processed_word in result:
             if processed_word.get('analysis') is not None and processed_word.get('analysis'):
                 mystem_token = MorphologicalToken(processed_word['text'])
