@@ -6,6 +6,7 @@ import json
 import re
 
 from constants import ASSETS_PATH
+from core_utils.article import ArtifactType
 from core_utils.visualizer import visualize
 from pipeline import CorpusManager, validate_dataset
 
@@ -24,7 +25,7 @@ class POSFrequencyPipeline:
         for article in self.corpus_manager.get_articles().values():
             frequencies = {}
             pattern = re.compile(r'<([A-Z]+)')
-            with open(article.get_file_path('single_tagged'), 'r') as file:
+            with open(article.get_file_path(ArtifactType.single_tagged), 'r') as file:
                 text = file.read()
                 if not text:
                     raise EmptyFileError
