@@ -1,8 +1,13 @@
 """
 Implementation of POSFrequencyPipeline for score ten only.
 """
+import json
+import re
 
-from pipeline import CorpusManager
+from constants import ASSETS_PATH
+from core_utils.article import ArtifactType
+from core_utils.visualizer import visualize
+from pipeline import CorpusManager, validate_dataset
 
 
 class EmptyFileError(Exception):
@@ -13,15 +18,44 @@ class EmptyFileError(Exception):
 
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
-        pass
+        articles = self.corpus_manager.get_articles().values()
+
+        for article in articles:
+
+            article_path = article.get_file_path(ArtifactType.single_tagged)
+
+            with open(article_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+
+                if not text:
+                    raise EmptyFileError
+
+            pos_freq_dict = {}
+            pos_pattern = re.compile(r'<([A-Z]+)')
+
+            for pos_match in pos_pattern.findall(text):
+                pos_freq_dict[pos_match] = pos_freq_dict.get(pos_match, 0) + 1
+
+            with open(ASSETS_PATH / article.get_meta_file_path(), 'r', encoding='utf-8') as meta:
+                meta_file = json.load(meta)
+
+            meta_file.update({'pos_frequencies': pos_freq_dict})
+
+            with open(ASSETS_PATH / article.get_meta_file_path(), 'w', encoding='utf-8') as meta:
+                json.dump(meta_file, meta, ensure_ascii=False, indent=4, separators=(',', ':'))
+
+            visualize(statistics=pos_freq_dict, path_to_save=ASSETS_PATH / f'{article.article_id}_image.png')
 
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = POSFrequencyPipeline(corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
