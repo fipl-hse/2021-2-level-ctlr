@@ -62,7 +62,7 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        self.path_to_raw_txt_data = Path(path_to_raw_txt_data)
+        self.path_to_raw_txt_data = path_to_raw_txt_data
         self._storage = {}
         self._scan_dataset()
 
@@ -70,14 +70,12 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        compiled_expression = re.compile(r'\d+_raw.txt')
-        for file in self.path_to_raw_txt_data.iterdir():
-            pattern = compiled_expression.match(file.name)
-            if not pattern:
-                continue
-            article_id = compiled_expression.match(file.name)[0][0]
-            article = Article(url=None, article_id=article_id)
-            self._storage[article_id] = article
+        path = Path(self.path_to_raw_txt_data)
+
+        for file in path.glob('*'):
+            if '_raw.txt' in file.name:
+                article_id = int(re.search(r'\d+_raw', file.name)[0][:-4])
+                self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -98,19 +96,18 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        articles = self.corpus_manager.get_articles().values()
-        for article in articles:
-            raw_text = article.get_raw_text()
-            processed_tokens = self._process(raw_text)
+
+        for article in self.corpus_manager.get_articles().values():
+            article_raw_text = article.get_raw_text()
 
             cleaned_tokens = []
             single_tagged_tokens = []
             multiple_tagged_tokens = []
 
-            for processed_token in processed_tokens:
-                cleaned_tokens.append(processed_token.get_cleaned())
-                single_tagged_tokens.append(processed_token.get_single_tagged())
-                multiple_tagged_tokens.append(processed_token.get_multiple_tagged())
+            for token in self._process(article_raw_text):
+                cleaned_tokens.append(token.get_cleaned())
+                single_tagged_tokens.append(token.get_single_tagged())
+                multiple_tagged_tokens.append(token.get_multiple_tagged())
 
             article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
             article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
@@ -120,19 +117,25 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        cleaned_text = raw_text.replace('-\n', '')
-        plain_text_analysis = Mystem().analyze(cleaned_text)
-        morph_analyzer = pymorphy2.MorphAnalyzer()
+        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        for symbol in raw_text:
+            if not pattern.match(symbol):
+                text = raw_text.replace(symbol, '')
 
+        analyzed_text = Mystem().analyze(text)
+        morph = pymorphy2.MorphAnalyzer()
         tokens = []
-        for single_word_analysis in plain_text_analysis:
-            if not single_word_analysis.get('analysis') or not single_word_analysis.get('text'):
+        for token in analyzed_text:
+            if 'analysis' not in token:
                 continue
-            morphological_token = MorphologicalToken(original_word=single_word_analysis['text'])
-            morphological_token.normalized_form = single_word_analysis['analysis'][0]['lex']
-            morphological_token.tags_mystem = single_word_analysis['analysis'][0]['gr']
-            morphological_token.tags_pymorphy = morph_analyzer.parse(single_word_analysis['text'])[0].tag
-            tokens.append(morphological_token)
+            if not token['analysis']:
+                continue
+
+            morph_token = MorphologicalToken(original_word=token['text'])
+            morph_token.normalized_form = token['analysis'][0]['lex']
+            morph_token.tags_mystem = token['analysis'][0]['gr']
+            morph_token.tags_pymorphy = morph.parse(token['text'])[0].tag
+            tokens.append(morph_token)
         return tokens
 
 
@@ -174,8 +177,8 @@ def validate_dataset(path_to_validate):
 
 def main():
     validate_dataset(ASSETS_PATH)
-    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
-    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager)
     pipeline.run()
 
 
