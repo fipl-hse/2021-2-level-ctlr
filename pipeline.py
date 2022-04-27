@@ -52,7 +52,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        return f'{self.normalized_form}<{self.tags_pymorphy}>({self.tags_pymorphy})'
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
