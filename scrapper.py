@@ -1,19 +1,19 @@
 """
 Scrapper implementation
 """
-import json
-import re
-import shutil
-import requests
-from bs4 import BeautifulSoup
-from pathlib import Path
-from random import randint
-from time import sleep
 from datetime import datetime
+import json
+from pathlib import Path
+import re
+from random import randint
+import shutil
+from time import sleep
+from bs4 import BeautifulSoup
+import requests
 from constants import ASSETS_PATH
+from constants import DOMAIN_NAME
 from constants import CRAWLER_CONFIG_PATH
 from constants import HEADERS
-from constants import DOMAIN_NAME
 from core_utils.article import Article
 
 
@@ -55,7 +55,8 @@ class Crawler:
             if len(self.urls) < self.max_articles:
                 link = article.find('a')
                 href = link['href']
-                self.urls.append(href)
+                if href not in self.urls:
+                    self.urls.append(href)
 
     def find_articles(self):
         """
@@ -126,49 +127,51 @@ class HTMLParser:
             author_bs = 'NOT FOUND'
         self.article.author = author_bs
 
-    def prepare_environment(base_path):
-        """
-        Creates ASSETS_PATH folder if not created and removes existing folder
-        """
-        path = Path(base_path)
-        if path.exists():
-            shutil.rmtree(base_path)
-        base_path.mkdir(exist_ok=True, parents=True)
 
-    def validate_config(crawler_path):
-        """
-        Validates given config
-        """
-        with open(crawler_path) as file:
-            config = json.load(file)  # load is for decoding
+def prepare_environment(base_path):
+    """
+    Creates ASSETS_PATH folder if not created and removes existing folder
+    """
+    path = Path(base_path)
+    if path.exists():
+        shutil.rmtree(base_path)
+    base_path.mkdir(exist_ok=True, parents=True)
 
-        seed_urls = config['seed_urls']
-        max_articles = config['total_articles_to_find_and_parse']
 
-        if not seed_urls:
+def validate_config(crawler_path):
+    """
+    Validates given config
+    """
+    with open(crawler_path) as file:
+        config = json.load(file)  # load is for decoding
+
+    seed_urls = config['seed_urls']
+    max_articles = config['total_articles_to_find_and_parse']
+
+    if not isinstance(seed_urls, list) or not seed_urls:
+        raise IncorrectURLError
+
+    for url in seed_urls:
+        if not re.match(r'https:?//', url):
             raise IncorrectURLError
 
-        for url in seed_urls:
-            if not re.match(r'https?://', url):
-                raise IncorrectURLError
+    if not isinstance(max_articles, int) or max_articles <= 0:
+        raise IncorrectNumberOfArticlesError
 
-        if not isinstance(max_articles, int) or max_articles <= 0:
-            raise IncorrectNumberOfArticlesError
+    if max_articles > 110:
+        raise NumberOfArticlesOutOfRangeError
 
-        if max_articles > 100:
-            raise NumberOfArticlesOutOfRangeError
+    return seed_urls, max_articles
 
-        crawler_path.prepare_environment(ASSETS_PATH)
-        return seed_urls, max_articles
 
-    if __name__ == '__main__':
-        # YOUR CODE HERE
-        my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
-        prepare_environment(ASSETS_PATH)
-        crawler = Crawler(my_seed_urls, my_max_articles)
-        crawler.find_articles()
+if __name__ == '__main__':
+    # YOUR CODE HERE
+    my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(my_seed_urls, my_max_articles)
+    crawler.find_articles()
 
-        for i, my_url in enumerate(crawler.urls):
-            parser = HTMLParser(my_url, i + 1)
-            my_article = parser.parse()
-            my_article.save_raw()
+    for i, my_url in enumerate(crawler.urls):
+        parser = HTMLParser(my_url, i + 1)
+        my_article = parser.parse()
+        my_article.save_raw()
