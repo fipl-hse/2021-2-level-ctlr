@@ -186,4 +186,3 @@ if __name__ == '__main__':
         article = article_parser.parse()
         article.save_raw()
         print(id_of_article,'done')
-        id_of_article += 1
