@@ -24,8 +24,8 @@ class POSFrequencyPipeline:
         for article in self.corpus_manager.get_articles().values():
             frequencies = {}
             pattern = re.compile(r'<([A-Z]+)')
-            with open(article.get_file_path('single_tagged'), 'r') as f:
-                text = f.read()
+            with open(article.get_file_path('single_tagged'), 'r') as file:
+                text = file.read()
                 if not text:
                     raise EmptyFileError
 
@@ -43,8 +43,8 @@ class POSFrequencyPipeline:
 
             json_f['pos_frequencies'] = frequencies
 
-            with open(article.get_meta_file_path(), 'w', encoding='utf-8') as f:
-                json.dump(json_f, f, sort_keys=False,
+            with open(article.get_meta_file_path(), 'w', encoding='utf-8') as file:
+                json.dump(json_f, file, sort_keys=False,
                           indent=4, ensure_ascii=False, separators=(',', ': '))
 
             visualize(statistics=frequencies,
