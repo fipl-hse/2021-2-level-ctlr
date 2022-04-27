@@ -37,7 +37,7 @@ class StudentTextBasicPreprocessTest(unittest.TestCase):
     @pytest.mark.stage_3_5_student_dataset_validation
     def test_clean_tokens(self):
         """
-        Ensure there is no punctuation of uppercase in cleaned text
+        Ensure there is no punctuation or uppercase in cleaned text
         """
         for article_id, article_text in self.articles.items():
             for token in article_text.split():

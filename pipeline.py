@@ -4,8 +4,8 @@ Pipeline for text processing implementation
 import re
 from pathlib import Path
 
-#  from constants import ASSETS_PATH
-from core_utils.article import Article
+from constants import ASSETS_PATH
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -29,15 +29,16 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        self.normalized_form = original_word
-        self.mystem_tags = None
-        self.pymorphy_tags = None
+        self.original_word = original_word
+        self.normalized_form = None
+        self.tags_mystem = None
+        self.tags_pymorphy = None
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
@@ -95,17 +96,18 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        for article_id, article in self.corpus_manager.get_articles():
-            self._process(article.get_raw_text())
+        for article in self.corpus_manager.get_articles().values():
+            tokenized_text = ' '.join(self._process(article.get_raw_text()))
+            article.save_as(text=tokenized_text, kind=ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
         tokens = []
-        punctuation = """'!@#$%^&*()-_=+/|"№;:?><,.`~’…—[]{}1234567890\\"""
+        letters = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
         for character in raw_text:
-            if character in punctuation:
+            if letters.match(character) is None:
                 raw_text = raw_text.replace(character, '')
         words = raw_text.split()
         for word in words:
@@ -135,6 +137,7 @@ def check_dataset_numeration(dataset_path):
     """
     Checks that the dataset is valid
     """
+    files_to_check = ['_raw', '_meta']
     files = {
         '.json': [],
         '.txt': [],
@@ -142,7 +145,10 @@ def check_dataset_numeration(dataset_path):
     }
     pattern = re.compile(r'\d+')
     for file in list(dataset_path.glob('*')):
-        files.get(file.suffix).append(int(pattern.match(file.stem).group()))
+        for file_name_type in files_to_check:
+            if file_name_type in file.stem:
+                files.get(file.suffix).append(int(pattern.match(file.stem).group()))
+                continue
     for files_suffix, ids_list in files.items():
         ids_list.sort()
         for file_number in range(1, len(ids_list) - 1):
@@ -164,9 +170,15 @@ def check_txt_files(dataset_path):
 
 
 def main():
-    """validate_dataset(ASSETS_PATH)
-    corpus_manager = CorpusManager(ASSETS_PATH)"""
-    pass
+    print('STARTING PROGRAM...\nVALIDATING DATASET...')
+    validate_dataset(ASSETS_PATH)
+    print('DATASET IS CORRECT.\nCREATING CORPUS MANAGER ABSTRACTION...')
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    print('DONE.\nCREATING PIPELINE INSTANCE...')
+    pipe = TextProcessingPipeline(corpus_manager)
+    print('DONE.\nRUNNING TEXT PROCESSING ON COLLECTED FILES...')
+    pipe.run()
+    print('DONE.')
 
 
 if __name__ == "__main__":

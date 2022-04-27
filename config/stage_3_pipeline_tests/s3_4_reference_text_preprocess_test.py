@@ -67,7 +67,7 @@ Check how you tokenize""")
     @pytest.mark.stage_3_4_admin_data_processing
     def test_overall_format(self):
         """
-        Ensure that there is no punctuation of uppercase in clean text
+        Ensure that there is no punctuation or uppercase in clean text
         """
         self.assertTrue(self.processed.islower(),
                         'Cleaned text must be lowercase')
