@@ -144,17 +144,22 @@ def check_dataset_numeration(dataset_path):
         '.pdf': []
     }
     pattern = re.compile(r'\d+')
+
     for file in list(dataset_path.glob('*')):
         for file_name_type in files_to_check:
             if file_name_type in file.stem:
                 files.get(file.suffix).append(int(pattern.match(file.stem).group()))
                 continue
+
     for files_suffix, ids_list in files.items():
         ids_list.sort()
         for file_number in range(1, len(ids_list) - 1):
             if ids_list[file_number - 1] != file_number:
                 print(f'Missing file № {file_number} with {files_suffix} suffix')
                 return -1
+
+    if files.get('.json') != files.get('.txt'):
+        return -1
     return 0
 
 
