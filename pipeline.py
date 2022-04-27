@@ -78,6 +78,9 @@ class CorpusManager:
             self._storage[file_id] = Article(url=None, article_id=file_id)
 
     def _get_file_id(self, file):
+        """
+        Gets file id
+        """
         pattern = re.compile(r'\d+')
         return int(pattern.match(file.stem).group())
 
