@@ -20,13 +20,13 @@ class IncorrectURLError(Exception):
     """
     Seed URL does not match standard pattern
     """
-
+    
 
 class NumberOfArticlesOutOfRangeError(Exception):
     """
     Total number of articles to parse is too big
     """
-
+   
 
 class IncorrectNumberOfArticlesError(Exception):
     """
