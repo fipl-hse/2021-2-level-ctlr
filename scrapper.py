@@ -73,7 +73,7 @@ class Crawler:
                 break
             sleep(random.uniform(0.0, 1.0))
             # user_agent = UserAgent().get_random_user_agent()
-            response = requests.get(url, headers=HEADERS, timeout=60)  # get html code
+            response = requests.get(url, headers=HEADERS, timeout=40)  # get html code
 
             if not response.ok:
                 continue
@@ -103,7 +103,7 @@ class HTMLParser:
         """
         # user_agent = UserAgent().get_random_user_agent()
         sleep(random.uniform(0.0, 1.0))
-        response = requests.get(self.article_url, HEADERS, timeout=60)
+        response = requests.get(self.article_url, headers=HEADERS, timeout=40)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
