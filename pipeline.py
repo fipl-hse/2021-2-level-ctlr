@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from constants import ASSETS_PATH
 
+
 class EmptyDirectoryError(Exception):
     """
     No data to process
@@ -118,8 +119,8 @@ def validate_dataset(path_to_validate):
             raise InconsistentDatasetError
         if index - constant_index > 1:
             raise InconsistentDatasetError
-        if not Path(str(tmp_path) + '\\'+str(index)+'_raw.txt').is_file() or \
-                not Path(str(tmp_path) + '\\'+str(index)+'_meta.json').is_file():
+        if not Path(str(tmp_path) + '\\' + str(index) + '_raw.txt').is_file() or \
+                not Path(str(tmp_path) + '\\' + str(index) + '_meta.json').is_file():
             raise InconsistentDatasetError
         constant_index = index
 
