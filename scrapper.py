@@ -56,8 +56,17 @@ class HTMLParser:
 
     def _fill_article_with_text(self, article_bs):
         self.article.title = article_bs.find('h1').text
-        self.article.text = ' '.join(data.text for data in article_bs.find_all('div', {'class': 'post post2'}))
-        self.article.author = article_bs.find('a', {'rel': 'nofollow'}).text
+        _text_class = 'post post2'
+        _poll_class = 'opros-txt'
+        _poll_comps = article_bs.find_all('div', {'class': _poll_class})
+        _is_article_poll = len(_poll_comps) != 0
+        if _is_article_poll:
+            _text_class = _poll_class
+        self.article.text = ' '.join(data.text for data in article_bs.find_all('div', {'class': _text_class}))
+        if _is_article_poll:
+            self.article.author = article_bs.find('span', {'class': 'user-name'}).text
+        else:
+            self.article.author = article_bs.find('a', {'rel': 'nofollow'}).text
         self.article.date = datetime.datetime.today()
 
 
@@ -81,12 +90,9 @@ class Crawler:
         Finds articles
         """
         for url in self.seed_urls:
-            if self.seed_urls.index(url) < self.max_articles:
-                html = requests.get(url).text
-                self.exctract_aticle_urls(url, html)
-            else:
-                break
-
+            html = requests.get(url).text
+            self.exctract_aticle_urls(url, html)
+            self.urls = list(set(self.urls))
 
     def exctract_aticle_urls(self, url, html):
         soup = BeautifulSoup(html, 'html.parser')
@@ -106,7 +112,7 @@ class Crawler:
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
 
 
 def prepare_environment(base_path):
@@ -120,17 +126,22 @@ def prepare_environment(base_path):
 def validate_config(crawler_path):
     file = open(crawler_path)
     dict_data = json.load(file)
+    if not isinstance(dict_data["seed_urls"], list):
+        raise IncorrectURLError("incorrect url", 1)
     seed_urls = dict_data["seed_urls"]
+    for url in dict_data["seed_urls"]:
+        if 'https://newsland.com' not in url:
+            raise IncorrectURLError("incorrect url", 1)
     total_articles_to_find_and_parse = dict_data["total_articles_to_find_and_parse"]
 
     if seed_urls:
         for url in seed_urls:
             validate_url(url)
     else:
-        raise ValueError("No urls")
+        raise ValueError("No urls", 1)
 
     is_number_of_articles_valid(total_articles_to_find_and_parse)
-    is_number_of_articles_in_range(3, total_articles_to_find_and_parse)
+    is_number_of_articles_in_range(total_articles_to_find_and_parse, 150)
     return seed_urls, total_articles_to_find_and_parse
 
 def validate_url(url):
@@ -138,19 +149,19 @@ def validate_url(url):
     if (isinstance(url,str) and url != "" and all([result.scheme, result.netloc])):
         pass
     else:
-        raise IncorrectURLError()
+        raise IncorrectURLError("url is incorrect", 1)
 
 def is_number_of_articles_in_range(number, range_number):
     if number <= range_number:
         pass
     else:
-        raise NumberOfArticlesOutOfRangeError()
+        raise NumberOfArticlesOutOfRangeError("number is out of range", 1)
 
 def is_number_of_articles_valid(number):
     if isinstance(number, int):
         pass
     else:
-        raise IncorrectNumberOfArticlesError()
+        raise IncorrectNumberOfArticlesError("number is not an integer", 1)
 
 
 if __name__ == '__main__':
@@ -158,13 +169,10 @@ if __name__ == '__main__':
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(seed_urls=_seed_urls, max_articles=_max_articles)
     crawler.find_articles()
-    print(len(crawler.urls))
-    articles_to_save = []
-    for i in range(_max_articles):
-        _url = crawler.urls[i]
-        parser = HTMLParser(article_url=_url, article_id=crawler.urls.index(_url))
-        article = parser.parse()
-        articles_to_save.append(article)
-    for article in articles_to_save:
-        article.save_raw()
-        article.save_raw()
+    for i, crawler_url in enumerate(crawler.urls):
+        if i < _max_articles:
+         article_parser = HTMLParser(article_url=crawler_url, article_id=i + 1)
+         article = article_parser.parse()
+         article.save_raw()
+        else:
+            break
