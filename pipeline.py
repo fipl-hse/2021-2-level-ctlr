@@ -160,6 +160,8 @@ def validate_dataset(path_to_validate):
         raise InconsistentDatasetError
     raw_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), raws)))
     meta_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), metas)))
+    if raw_indices[0] != 1 or meta_indices[0] != 1:
+        raise InconsistentDatasetError
     if not raw_indices == meta_indices:
         raise InconsistentDatasetError
 
