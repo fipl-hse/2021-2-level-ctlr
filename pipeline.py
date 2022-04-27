@@ -149,6 +149,13 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError
     raws = list(path.glob('*_raw.txt'))
     metas = list(path.glob('*_meta.json'))
+    all_files = list(path.iterdir())
+    for file in all_files:
+        if '_raw.txt' in file.name:
+            with open(file, 'r', encoding='utf-8') as text_file:
+                text = text_file.read()
+                if not text:
+                    raise InconsistentDatasetError
     if not len(metas) == len(raws):
         raise InconsistentDatasetError
     raw_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), raws)))
