@@ -10,6 +10,7 @@ import requests
 from constants import ASSETS_PATH
 
 
+
 class RawBasicDataValidator(unittest.TestCase):
     """
     Ensure collected data includes basic information

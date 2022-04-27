@@ -12,9 +12,8 @@ from bs4 import BeautifulSoup
 import requests
 
 from core_utils.article import Article
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN
 
-HTTP_PATTERN = 'https://snob.ru'
 
 
 class IncorrectURLError(Exception):
@@ -182,6 +181,7 @@ if __name__ == '__main__':
 
     print('pars')
     for id_of_article, article_url_test in enumerate(crawler.urls):
+        id_of_article = id_of_article + 1
         article_parser = HTMLParser(article_url=article_url_test, article_id=id_of_article)
         article = article_parser.parse()
         article.save_raw()
