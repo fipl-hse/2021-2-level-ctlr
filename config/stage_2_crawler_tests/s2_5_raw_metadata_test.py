@@ -5,9 +5,8 @@ import random
 import re
 import json
 import unittest
-
-import pytest
 from time import sleep
+import pytest
 import requests
 from constants import ASSETS_PATH, HEADERS
 
