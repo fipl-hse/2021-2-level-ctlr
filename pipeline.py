@@ -155,7 +155,7 @@ def validate_dataset(path_to_validate):
                     raise InconsistentDatasetError
 
     pattern = re.compile(r'[0-9]+')
-    sorted_dataset = sorted(dataset, key=lambda x: int(pattern.search(x.name).group(0)))
+    sorted_dataset = sorted(list(path.iterdir()), key=lambda x: int(pattern.search(x.name).group(0)))
 
     true_id = 0
     for file in sorted_dataset:
