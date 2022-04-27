@@ -40,7 +40,7 @@ class Crawler:
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
-    
+
     def _extract_url(self, article_bs):
         """
         Extracts articles
@@ -56,7 +56,7 @@ class Crawler:
                         journal_url = f"https:{raw_journal_url}"
                         if journal_url not in self.urls:
                             self.urls.append(journal_url)
-    
+ 
     def find_articles(self):
         """
         Finds articles
@@ -66,7 +66,7 @@ class Crawler:
             sleep(random.randint(1, 5))
             article_bs = BeautifulSoup(response.text, 'lxml')
             self._extract_url(article_bs)
-    
+
     def get_search_urls(self):
         """
         Returns seed_urls param
@@ -82,7 +82,7 @@ class HTMLParser:
         self.article_url = article_url
         self.article_id = article_id
         self.article = Article(self.article_url, self.article_id)
-    
+
     def parse(self):
         """
         Extracts all necessary data from the article web page
@@ -92,7 +92,7 @@ class HTMLParser:
         self._fill_article_with_text(article_bs)
         self._fill_article_with_meta_information(article_bs)
         return self.article
-    
+
     def _fill_article_with_text(self, article_bs):
         """
         Fills the Article instance with text
@@ -103,7 +103,7 @@ class HTMLParser:
         pdf = PDFRawFile(download_page, self.article_id)
         pdf.download()
         self.article.text = pdf.get_text()
-    
+
     def _fill_article_with_meta_information(self, article_bs):
         """
         Fills the Article instance with meta information
@@ -171,4 +171,3 @@ if __name__ == '__main__':
         parser = HTMLParser(my_url, i + 1)
         my_article = parser.parse()
         my_article.save_raw()
-        
