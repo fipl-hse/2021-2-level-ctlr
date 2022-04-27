@@ -157,9 +157,6 @@ def check_dataset_numeration(dataset_path):
             if ids_list[file_number - 1] != file_number:
                 print(f'Missing file № {file_number} with {files_suffix} suffix')
                 return -1
-
-    """if files.get('.json') != files.get('.txt'):
-        return -1"""
     return 0
 
 
