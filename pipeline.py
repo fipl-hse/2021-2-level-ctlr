@@ -153,15 +153,15 @@ def validate_dataset(path_to_validate):
     number_raw_txt = 0
     number_meta = 0
 
-    for file in path.glob('*'):
+    for file in sorted(path.glob('*'), key=lambda x: int(x.name.split('_')[0])):
 
         if file.name.endswith('raw.txt'):
             number_raw_txt += 1
             if f'{number_raw_txt}_raw' not in file.name:
                 raise InconsistentDatasetError
 
-            with open(file, 'r', encoding='utf-8') as current_file:
-                text = current_file.read()
+            with open(file, 'r', encoding='utf-8') as the_file:
+                text = the_file.read()
             if not text:
                 raise InconsistentDatasetError
         if file.name.endswith('meta.json'):
