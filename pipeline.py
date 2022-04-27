@@ -119,7 +119,7 @@ class TextProcessingPipeline:
             if letters.match(character) is None:
                 cleaned_text = cleaned_text.replace(character, '')
 
-        result = Mystem().analyze(cleaned_text)
+        result = Mystem().analyze(raw_text)
         for processed_word in result:
             if processed_word.get('analysis') is not None and processed_word.get('analysis'):
                 mystem_token = MorphologicalToken(processed_word['text'])
@@ -204,7 +204,7 @@ def main():
     pipe = TextProcessingPipeline(corpus_manager)
     print('DONE.\nRUNNING TEXT PROCESSING ON COLLECTED FILES...')
     pipe.run()
-    print('DONE.')
+    print('DONE.\nPROGRAM FINISHED.')
 
 
 if __name__ == "__main__":
