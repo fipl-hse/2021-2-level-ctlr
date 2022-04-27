@@ -40,7 +40,7 @@ class MorphologicalToken:
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
@@ -100,9 +100,16 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        for token in Mystem().analyze(raw_text):
-            print("done")
-            break
+        # Linebreaks make Mystem slow and unresponsive.
+        tokens = []
+        for analysis in Mystem().analyze(raw_text.replace("\n", " ")):
+            if "analysis" not in analysis:
+                continue
+            if not analysis["analysis"]:
+                continue
+            token = MorphologicalToken(original_word=analysis["text"])
+            tokens.append(token)
+        return tokens
 
 
 def validate_dataset(path_to_validate):
