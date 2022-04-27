@@ -8,6 +8,7 @@ import unittest
 import pytest
 import requests
 from constants import ASSETS_PATH
+from scrapper import get_random_headers
 
 
 class RawBasicDataValidator(unittest.TestCase):
@@ -110,10 +111,10 @@ class RawMediumDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
             msg = "Can not open URL: %s. Check how you collect URLs"
-            self.assertTrue(requests.get(metadata[1]['url']),
+            self.assertTrue(requests.get(metadata[1]['url'], headers=get_random_headers),
                             msg=msg % metadata[1]['url'])
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=get_random_headers).text
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
             self.assertTrue(check_title_in_html(metadata[1]['title'],
@@ -178,7 +179,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], headers=get_random_headers).text
 
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
