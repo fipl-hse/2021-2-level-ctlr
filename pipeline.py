@@ -118,14 +118,14 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        pattern = re.compile(r'[а-яА-Яa-zA-z ёЁ]')
+        cleaned_text = raw_text
         for letter in raw_text:
             if not pattern.match(letter):
-                raw_text = raw_text.replace(letter, ' ')
+                cleaned_text = raw_text.replace(letter, ' ')
 
-        mystem = Mystem()
         morph_analyzer = pymorphy2.MorphAnalyzer()
-        analyzed_text = mystem.analyze(raw_text)
+        analyzed_text = Mystem().analyze(cleaned_text)
         tokens = []
 
         for single_word_analysis in analyzed_text:
@@ -135,11 +135,11 @@ class TextProcessingPipeline:
                 continue
 
             token = MorphologicalToken(single_word_analysis['text'])
+            tokens.append(token)
             token.normalized_form = single_word_analysis['analysis'][0]['lex']
             token.tags_mystem = single_word_analysis['analysis'][0]['gr']
             token.tags_pymorphy = morph_analyzer.parse(single_word_analysis['text'])[0].tag
 
-            tokens.append(token)
 
         return tokens
 
