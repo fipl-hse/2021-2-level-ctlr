@@ -2,6 +2,11 @@
 Pipeline for text processing implementation
 """
 
+import json
+from pathlib import Path
+import re
+import os
+from constants import ASSETS_PATH
 
 class EmptyDirectoryError(Exception):
     """
@@ -88,12 +93,39 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    if not os.path.isdir(path_to_validate):
+        raise IsADirectoryError
+
+    list_of_files = os.listdir(path_to_validate)
+    #print(list_of_files)
+    list_of_indexes = []
+    for name in list_of_files:
+        match = re.match(r'\d+', name)
+        if not match:
+            raise InconsistentDatasetError("Found a file name that does not correspond to the naming scheme")
+        name_path = str(path_to_validate)+'\\'+name
+        if not os.path.isfile(name_path):
+            raise InconsistentDatasetError("File is empty")
+        index = name.index('_')
+        if 'raw' in name:
+            list_of_indexes.append(int(name[:index]))
+
+    list_of_indexes = sorted(list_of_indexes)
+    for index in list_of_indexes[1:]:
+        #print(index)
+        if index != list_of_indexes[list_of_indexes.index(index)-1]+1:
+            raise InconsistentDatasetError
+
+    if len(list_of_files) == 0:
+        raise EmptyDirectoryError
+
+    if len(list_of_files) != len(list_of_indexes)*2:
+        raise FileNotFoundError
 
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
 
 
 if __name__ == "__main__":
