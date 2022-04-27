@@ -165,7 +165,7 @@ def check_dataset_numeration(dataset_path):
 
 def check_txt_files(dataset_path):
     for file in list(dataset_path.glob('*')):
-        if file.suffix == '.txt':
+        if '_raw.txt' in file.name:
             file_content = file.open('r', encoding='utf-8')
             file_text = file_content.read()
             file_content.close()
