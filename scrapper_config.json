@@ -1,10 +1,8 @@
-{
-    "seed_urls": ["https://lingngu.elpub.ru/jour/issue/view/3/showToc",
+{"seed_urls": ["https://lingngu.elpub.ru/jour/issue/view/3/showToc",
         "https://lingngu.elpub.ru/jour/issue/view/2/showToc",
         "https://lingngu.elpub.ru/jour/issue/view/4/showToc",
         "https://lingngu.elpub.ru/jour/issue/view/5/showToc",
         "https://lingngu.elpub.ru/jour/issue/view/6/showToc",
         "https://lingngu.elpub.ru/jour/issue/view/7/showToc",
         "https://lingngu.elpub.ru/jour/issue/view/8/showToc"],
-    "total_articles_to_find_and_parse": 100
-}
+    "total_articles_to_find_and_parse": 100}
