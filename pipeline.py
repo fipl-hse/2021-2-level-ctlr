@@ -4,6 +4,8 @@ Pipeline for text processing implementation
 import re
 from pathlib import Path
 
+from pymystem3 import Mystem
+
 from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
 
@@ -44,7 +46,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
@@ -97,21 +99,40 @@ class TextProcessingPipeline:
         Runs pipeline process scenario
         """
         for article in self.corpus_manager.get_articles().values():
-            tokenized_text = ' '.join(self._process(article.get_raw_text()))
+            tokens = self._process(article.get_raw_text())
+            tokenized_text = ' '.join(tokens[0])
+            tokenized_mystem_text = ' '.join(tokens[1])
+
             article.save_as(text=tokenized_text, kind=ArtifactType.cleaned)
+            article.save_as(text=tokenized_mystem_text, kind=ArtifactType.single_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
         tokens = []
+        cleaned_tokens = []
+        mystem_tokens = []
+        cleaned_text = raw_text
         letters = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
         for character in raw_text:
             if letters.match(character) is None:
-                raw_text = raw_text.replace(character, '')
-        words = raw_text.split()
+                cleaned_text = cleaned_text.replace(character, '')
+
+        result = Mystem().analyze(cleaned_text)
+        for processed_word in result:
+            if processed_word.get('analysis') is not None and processed_word.get('analysis'):
+                mystem_token = MorphologicalToken(processed_word['text'])
+                mystem_token.normalized_form = processed_word['analysis'][0]['lex']
+                mystem_token.tags_mystem = processed_word['analysis'][0]['gr']
+                mystem_tokens.append(mystem_token.get_single_tagged())
+
+        words = cleaned_text.split()
         for word in words:
-            tokens.append(MorphologicalToken(word).get_cleaned())
+            cleaned_tokens.append(MorphologicalToken(word).get_cleaned())
+
+        tokens.append(cleaned_tokens)
+        tokens.append(mystem_tokens)
         return tokens
 
 
