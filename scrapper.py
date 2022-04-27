@@ -55,7 +55,7 @@ class Crawler:
         if len(articles_links_raw) == max_num_per_seed or len(articles_links_raw) == max_num_articles:
             return True
         
-     def find_articles(self): 
+     def find_articles (self): 
         """
         Finds articles
 
