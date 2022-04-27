@@ -119,60 +119,54 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    if isinstance(path_to_validate, str):
-        path_to_validate = Path(path_to_validate)
-    if not path_to_validate.exists():
+    path = Path(path_to_validate)
+
+    if not path.exists():
         raise FileNotFoundError
-    if not path_to_validate.is_dir():
+
+    if not path.is_dir():
         raise NotADirectoryError
-    if not list(path_to_validate.glob('**/*')):
+
+    if not list(path.glob('**/*')):
         raise EmptyDirectoryError
-    if check_dataset_numeration(path_to_validate) == -1:
-        raise InconsistentDatasetError
-    if check_txt_files(path_to_validate) == -1:
-        raise InconsistentDatasetError
 
+    needed_file_names = ['_raw', '_meta']
 
-def check_dataset_numeration(dataset_path):
-    """
-    Checks that the dataset is valid
-    """
-    files_to_check = ['_raw', '_meta']
     files = {
-        '.json': [],
-        '.txt': [],
-        '.pdf': []
+        ".json": [],
+        ".pdf": [],
+        ".txt": []
     }
+
     pattern = re.compile(r'\d+')
 
-    for file in list(dataset_path.glob('*')):
-        for file_name_type in files_to_check:
+    for file in list(path.glob('*')):
+
+        # check txt files
+
+        # add in dict file id with relevant filename extension
+        for file_name_type in needed_file_names:
             if file_name_type in file.stem:
                 files.get(file.suffix).append(int(pattern.match(file.stem).group()))
                 continue
 
-    for files_suffix, ids_list in files.items():
-        ids_list.sort()
-        for file_number in range(1, len(ids_list) - 1):
-            if ids_list[file_number - 1] != file_number:
-                print(f'Missing file № {file_number} with {files_suffix} suffix')
-                return -1
-
-    files_ids = list(files.values())
-    if files_ids[0] != files_ids[1]:
-        return -1
-    return 0
-
-
-def check_txt_files(dataset_path):
-    for file in list(dataset_path.glob('*')):
         if '_raw.txt' in file.name:
-            file_content = file.open('r', encoding='utf-8')
-            file_text = file_content.read()
-            file_content.close()
-            if not file_text:
-                return -1
-    return 0
+            with file.open(encoding='utf=8') as opened_file:
+                file_text = opened_file.read()
+                if not file_text:
+                    raise InconsistentDatasetError
+
+    # check dataset numeration
+    for ids in files.values():
+        ids.sort()
+        for file_number in range(1, len(ids) - 1):
+            if ids[file_number - 1] != file_number:
+                raise InconsistentDatasetError
+
+    # check on imbalanced dict
+    files_values = list(files.values())
+    if files_values[0] != files_values[2]:
+        raise InconsistentDatasetError
 
 
 def main():
