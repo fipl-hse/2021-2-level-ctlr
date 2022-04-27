@@ -160,9 +160,7 @@ def validate_dataset(path_to_validate):
     true_id = 0
     for file in sorted_dataset:
         file_id = int(pattern.search(file.name).group(0))
-        if file_id == 0 or file_id - true_id > 1 or \
-                not (path_to_validate / f'{file_id}_raw.txt').is_file() or \
-                not (path_to_validate / f'{file_id}_meta.json').is_file():
+        if file_id == 0 or file_id - true_id > 1:
             raise InconsistentDatasetError
         true_id = file_id
 
