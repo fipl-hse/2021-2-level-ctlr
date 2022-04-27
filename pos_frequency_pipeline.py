@@ -23,7 +23,7 @@ class POSFrequencyPipeline:
         self.frequencies = {}
 
     def run(self):
-        for id, article in self.corpus_manager.get_articles().items():
+        for idx, article in self.corpus_manager.get_articles().items():
             processed_text_path = article.get_file_path(kind="single_tagged")
             with open(processed_text_path, encoding="utf-8") as file:
                 text = file.read()
@@ -32,11 +32,11 @@ class POSFrequencyPipeline:
                 raise EmptyFileError
 
             self.frequencies = self._calculate_frequencies(text)
-            self._update_meta(id)
+            self._update_meta(idx)
 
             visualize(
                 statistics=self.frequencies,
-                path_to_save=Path(ASSETS_PATH) / f"{id}_image.png"
+                path_to_save=Path(ASSETS_PATH) / f"{idx}_image.png"
             )
 
     def _calculate_frequencies(self, processed_text):
