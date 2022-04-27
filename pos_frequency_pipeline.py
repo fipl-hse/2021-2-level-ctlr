@@ -46,13 +46,12 @@ class POSFrequencyPipeline:
 
             # write frequencies to the meta file
             with open(ASSETS_PATH / article.get_meta_file_path(), encoding='utf-8') as meta_f:
-                meta_data = json.load(meta_f)
+                meta_inf = json.load(meta_f)
 
-            meta_data.update({'pos_frequencies': freq_dict})
+            meta_inf.update({'pos_frequencies': freq_dict})
 
             with open(ASSETS_PATH / article.get_meta_file_path(), 'w', encoding='utf-8') as meta_f:
-                json.dump(meta_data, meta_f, sort_keys=False, indent=4,
-                          ensure_ascii=False, separators=(',', ':'))
+                json.dump(meta_inf, meta_f, ensure_ascii=False, indent=4, separators=(',', ':'))
 
             # visualize frequencies in a form of images with names N_image.png.
             visualize(statistics=freq_dict,
