@@ -112,7 +112,7 @@ class HTMLParser:
         self._pdf_url = article_url.replace("view", "download") + ".pdf"
         self.article_url = "/".join(article_url.split("/")[:-1])
         self.article_id = article_id
-        self.article = Article(url=article_url, article_id=article_id)
+        self.article = Article(url=self.article_url, article_id=article_id)
 
     def parse(self):
         self._fill_article_with_text()
