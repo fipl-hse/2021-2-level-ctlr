@@ -99,6 +99,11 @@ class HTMLParser:
         if title is not None:
             self.article.title = title.text
 
+        topics = article_bs.find('div', {'class': 'tags article-detail__tags'})
+        if topics is not None:
+            topic_list = topics.find('a', {'class': 'tags__link'})
+            self.article.topics = topic_list.text.strip().capitalize()
+
     def parse(self):
         response = requests.get(url=self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
