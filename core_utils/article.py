@@ -4,7 +4,6 @@ Article implementation
 import json
 import os
 import datetime
-
 from constants import ASSETS_PATH
 
 

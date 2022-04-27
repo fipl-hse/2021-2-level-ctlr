@@ -1,7 +1,8 @@
 {
-    "seed_urls": ["https://daily-nn.ru/policy/",
-    "https://daily-nn.ru/economics/",
-    "https://daily-nn.ru/society/",
-    "https://daily-nn.ru/business/"],
+    "seed_urls":
+    ["https://daily-nn.ru/society/",
+    "https://daily-nn.ru/society/?PAGEN_1=2",
+    "https://daily-nn.ru/society/?PAGEN_1=3",
+    "https://daily-nn.ru/society/?PAGEN_1=4"],
     "total_articles_to_find_and_parse": 100
 }
