@@ -36,14 +36,14 @@ class POSFrequencyPipeline:
                 else:
                     frequencies[pos] += 1
 
-            with open(article.get_meta_file_path(), "r", encoding='utf-8') as meta_f:
+            with open(article.get_meta_file_path(), 'r') as meta_f:
                 json_f = json.load(meta_f)
                 if not json_f:
                     raise EmptyFileError
 
             json_f['pos_frequencies'] = frequencies
 
-            with open(article.get_meta_file_path(), 'w', encoding='utf-8') as file:
+            with open(article.get_meta_file_path(), 'w') as file:
                 json.dump(json_f, file, sort_keys=False,
                           indent=4, ensure_ascii=False, separators=(',', ': '))
 
