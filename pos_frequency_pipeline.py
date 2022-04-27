@@ -27,6 +27,8 @@ class POSFrequencyPipeline:
             path_to_article = article.get_file_path(ArtifactType.single_tagged)
             with open(path_to_article, encoding='utf-8') as file:
                 text = file.read()
+                if not text:
+                    raise EmptyFileError
 
             pattern = re.compile(r'<([A-Z]+)')
             freq_dict = {}
@@ -36,13 +38,13 @@ class POSFrequencyPipeline:
                 if element not in freq_dict:
                     freq_dict[element] = parts_of_speech.count(element)
 
-            with open(article.get_meta_file_path(), encoding='utf-8') as meta_file:
+            with open(ASSETS_PATH / article.get_meta_file_path(), encoding='utf-8') as meta_file:
                 meta_data = json.load(meta_file)
 
-            with open(article.get_meta_file_path(), 'w', encoding='utf-8') as meta_file:
-                json.dump(meta_data, meta_file, ensure_ascii=False, indent=4, separators=(',', ':'))
+            meta_data.update({'pos_frequencies': freq_dict})
 
-            meta_data['pos_frequencies'] = freq_dict
+            with open(ASSETS_PATH / article.get_meta_file_path(), 'w', encoding='utf-8') as meta_file:
+                json.dump(meta_data, meta_file, ensure_ascii=False, indent=4, separators=(',', ':'))
 
             visualize(statistics=freq_dict, path_to_save=ASSETS_PATH / f'{article.article_id}_image.png')
 
