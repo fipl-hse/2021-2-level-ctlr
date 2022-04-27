@@ -147,23 +147,24 @@ def validate_dataset(path_to_validate):
         raise NotADirectoryError
     if not list(path.iterdir()):
         raise EmptyDirectoryError
-    raws = list(path.glob('*_raw.txt'))
-    metas = list(path.glob('*_meta.json'))
-    all_files = list(path.iterdir())
-    for file in all_files:
-        if '_raw.txt' in file.name:
+    for file in dataset:
+        if 'raw.txt' in file.name:
             with open(file, 'r', encoding='utf-8') as text_file:
                 text = text_file.read()
                 if not text:
                     raise InconsistentDatasetError
-    if not len(metas) == len(raws):
-        raise InconsistentDatasetError
-    raw_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), raws)))
-    meta_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), metas)))
-    if raw_indices[0] != 1 or meta_indices[0] != 1:
-        raise InconsistentDatasetError
-    if not raw_indices == meta_indices:
-        raise InconsistentDatasetError
+
+    pattern = re.compile(r'[0-9]+')
+    sorted_dataset = sorted(dataset, key=lambda x: int(pattern.search(x.name).group(0)))
+
+    true_id = 0
+    for file in sorted_dataset:
+        file_id = int(pattern.search(file.name).group(0))
+        if file_id == 0 or file_id - true_id > 1 or \
+                not (path_to_validate / f'{file_id}_raw.txt').is_file() or \
+                not (path_to_validate / f'{file_id}_meta.json').is_file():
+            raise InconsistentDatasetError
+        true_id = file_id
 
 
 def main():
