@@ -111,11 +111,11 @@ class RawMediumDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
             msg = "Can not open URL: %s. Check how you collect URLs"
-            self.assertTrue(requests.get(metadata[1]['url'], HEADERS),
+            self.assertTrue(requests.get(metadata[1]['url'], HEADERS, timeout=60),
                             msg=msg % metadata[1]['url'])
             sleep(random.randrange(1, 5))
 
-            html_source = requests.get(metadata[1]['url'], HEADERS).text
+            html_source = requests.get(metadata[1]['url'], HEADERS, timeout=60).text
             sleep(random.randrange(1, 5))
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
@@ -181,7 +181,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
 
-            html_source = requests.get(metadata[1]['url'], HEADERS).text
+            html_source = requests.get(metadata[1]['url'], HEADERS, timeout=60).text
             sleep(random.randrange(1, 5))
 
             message = f"Date <{metadata[1]['date']}> do not match given " \

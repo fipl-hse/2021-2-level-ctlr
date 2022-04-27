@@ -62,9 +62,11 @@ class Crawler:
         Finds articles
         """
         for url in self.seed_urls:
+            if len(self.urls) >= self.max_articles:
+                break
             # user_agent = UserAgent().get_random_user_agent()
-            response = requests.get(url, headers=HEADERS)  # get html code
-            sleep(random.randrange(1, 5))
+            response = requests.get(url, headers=HEADERS, timeout=60)  # get html code
+            sleep(random.random())
 
             if not response.ok:
                 continue
@@ -93,8 +95,8 @@ class HTMLParser:
         Extracts all necessary data from the article web page
         """
         # user_agent = UserAgent().get_random_user_agent()
-        response = requests.get(self.article_url, HEADERS)
-        sleep(random.randrange(1, 5))
+        response = requests.get(self.article_url, HEADERS, timeout=60)
+        sleep(random.random())
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
