@@ -171,8 +171,8 @@ if __name__ == '__main__':
     crawler.find_articles()
     for i, crawler_url in enumerate(crawler.urls):
         if i < _max_articles:
-         article_parser = HTMLParser(article_url=crawler_url, article_id=i + 1)
-         article = article_parser.parse()
-         article.save_raw()
+            article_parser = HTMLParser(article_url=crawler_url, article_id=i + 1)
+            article = article_parser.parse()
+            article.save_raw()
         else:
             break
