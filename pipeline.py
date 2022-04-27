@@ -170,9 +170,6 @@ def validate_dataset(path_to_validate):
 
         pattern = re.match(r'\d+', file.name)
         article_id = int(pattern.group(0))
-
-        #if article_id < 1:
-        #    raise InconsistentDatasetError
         all_article_ids.append(article_id)
 
     if not all_article_ids:
@@ -180,7 +177,6 @@ def validate_dataset(path_to_validate):
 
     previous_article_id = 0
     sorted_all_ids = sorted(all_article_ids)
-    print(sorted_all_ids)
     for article_id in sorted_all_ids:
         if article_id - previous_article_id > 1:
             raise InconsistentDatasetError
