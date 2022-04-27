@@ -156,7 +156,6 @@ class PipelinePathCheck(ExtendedTestCase):
                                      validate_dataset,
                                      self.broken_id)
 
-    @pytest.mark.mark4
     @pytest.mark.mark6
     @pytest.mark.mark8
     @pytest.mark.mark10
