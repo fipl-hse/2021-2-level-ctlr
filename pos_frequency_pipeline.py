@@ -27,8 +27,8 @@ class POSFrequencyPipeline:
 
             article_path = article.get_file_path(ArtifactType.single_tagged)
 
-            with open(article_path, 'r', encoding='utf-8') as f:
-                text = f.read()
+            with open(article_path, 'r', encoding='utf-8') as file:
+                text = file.read()
 
                 if not text:
                     raise EmptyFileError
