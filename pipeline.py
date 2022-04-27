@@ -52,7 +52,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f"{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy}"
 
 
 class CorpusManager:
@@ -99,21 +99,28 @@ class TextProcessingPipeline:
                             ArtifactType.cleaned)
             article.save_as(" ".join(map(lambda x: x.get_single_tagged(), tokens)),
                             ArtifactType.single_tagged)
+            article.save_as(" ".join(map(lambda x: x.get_multiple_tagged(), tokens)),
+                            ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
+        mystem = Mystem()
+        morph_analyzer = MorphAnalyzer()
         # Linebreaks make Mystem slow and unresponsive.
         tokens = []
-        for analysis in Mystem().analyze(raw_text.replace("\n", " ")):
+        for analysis in mystem.analyze(raw_text.replace("\n", " ")):
             if "analysis" not in analysis:
                 continue
             if not analysis["analysis"]:
                 continue
             token = MorphologicalToken(original_word=analysis["text"])
+
             token.normalized_form = analysis["analysis"][0]["lex"]
             token.tags_mystem = analysis["analysis"][0]["gr"]
+            token.tags_pymorphy = morph_analyzer.parse(analysis["text"])[0].tag
+
             tokens.append(token)
         return tokens
 
