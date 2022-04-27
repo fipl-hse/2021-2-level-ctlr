@@ -2,7 +2,6 @@
 Article implementation
 """
 import json
-import os
 import datetime
 from constants import ASSETS_PATH
 
@@ -37,7 +36,7 @@ class Article:
         self.text = ''
 
         meta_file = self.get_meta_file_path()
-        if os.path.exists(meta_file):
+        if meta_file.exists():
             self.from_meta_json(meta_file)
 
     def save_raw(self):
@@ -49,13 +48,10 @@ class Article:
         with open(self.get_raw_text_path(), 'w', encoding='utf-8') as file:
             file.write(self.text)
 
-        with open(os.path.join(ASSETS_PATH, article_meta_name), "w", encoding='utf-8') as file:
-            json.dump(self._get_meta(),
-                      file,
-                      sort_keys=False,
-                      indent=4,
-                      ensure_ascii=False,
-                      separators=(',', ': '))
+        if self.author:
+            with (ASSETS_PATH / article_meta_name).open("w", encoding='utf-8') as file:
+                json.dump(self._get_meta(), file, sort_keys=False,
+                          indent=4, ensure_ascii=False, separators=(',', ': '))
 
     def from_meta_json(self, json_path: str):
         """
@@ -113,14 +109,14 @@ class Article:
         Returns path for requested raw article
         """
         article_txt_name = "{}_raw.txt".format(self.article_id)
-        return os.path.join(ASSETS_PATH, article_txt_name)
+        return ASSETS_PATH / article_txt_name
 
     def get_meta_file_path(self):
         """
         Returns path for requested raw article
         """
         meta_file_name = "{}_meta.json".format(self.article_id)
-        return os.path.join(ASSETS_PATH, meta_file_name)
+        return ASSETS_PATH / meta_file_name
 
     def get_file_path(self, kind: str) -> str:
         """
@@ -141,4 +137,4 @@ class Article:
 
         article_txt_name = "{}_{}.txt".format(self.article_id, kind)
 
-        return os.path.join(ASSETS_PATH, article_txt_name)
+        return ASSETS_PATH / article_txt_name
