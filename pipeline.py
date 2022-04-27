@@ -70,7 +70,7 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        paths_to_files = list(Path(self.path_to_raw_txt_data).glob('*_raw.txt'))
+        paths_to_files = Path(self.path_to_raw_txt_data).glob('*_raw.txt')
         id_template = re.compile(r'\d+')
         for file_path in paths_to_files:
             file_id = int(id_template.search(file_path.name).group())
@@ -92,7 +92,6 @@ class TextProcessingPipeline:
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
 
-
     def run(self):
         """
         Runs pipeline process scenario
@@ -109,7 +108,6 @@ class TextProcessingPipeline:
             article_item.save_as(' '.join(tokens_for_article), kind='cleaned')
             article_item.save_as(' '.join(single_tagged_tokens), kind='single_tagged')
             article_item.save_as(' '.join(multiple_tagged_tokens), kind='multiple_tagged')
-
 
     def _process(self, raw_text: str):
         """
