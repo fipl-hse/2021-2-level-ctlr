@@ -7,7 +7,7 @@ from pymorphy3 import MorphAnalyzer
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from core_utils.article import Article
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -95,6 +95,8 @@ class TextProcessingPipeline:
         for article in self.corpus_manager.get_articles().values():
             text = article.get_raw_text()
             tokens = self._process(text)
+            article.save_as(" ".join(map(lambda x: x.get_cleaned(), tokens)),
+                            ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
