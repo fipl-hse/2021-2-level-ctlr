@@ -9,14 +9,14 @@ import datetime
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
-from random_user_agent.user_agent import UserAgent
+# from random_user_agent.user_agent import UserAgent
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
-# from constants import HEADERS
+from constants import HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -62,13 +62,9 @@ class Crawler:
         Finds articles
         """
         for url in self.seed_urls:
-            user_agent = UserAgent().get_random_user_agent()
-            headers = {'user-agent': user_agent,
-                       'accept': '*/*',
-                       'accept-encoding': 'gzip, deflate, br',
-                       'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
-            response = requests.get(url, headers=headers)  # get html code
-            sleep(random.randrange(2, 5))
+            # user_agent = UserAgent().get_random_user_agent()
+            response = requests.get(url, headers=HEADERS)  # get html code
+            sleep(random.randrange(1, 5))
 
             if not response.ok:
                 continue
@@ -96,13 +92,9 @@ class HTMLParser:
         """
         Extracts all necessary data from the article web page
         """
-        user_agent = UserAgent().get_random_user_agent()
-        headers = {'user-agent': user_agent,
-                   'accept': '*/*',
-                   'accept-encoding': 'gzip, deflate, br',
-                   'accept-language': 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'}
-        response = requests.get(self.article_url, headers)
-        sleep(random.randrange(2, 5))
+        # user_agent = UserAgent().get_random_user_agent()
+        response = requests.get(self.article_url, HEADERS)
+        sleep(random.randrange(1, 5))
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
@@ -118,7 +110,7 @@ class HTMLParser:
         page_link = fulltext.find('a')['href']  # link to a page with pdf
 
         download_link = page_link.replace('view', 'download')
-        sleep(random.randrange(2, 5))
+        sleep(random.randrange(1, 5))
         pdf = PDFRawFile(download_link, self.article_id)
 
         pdf.download()

@@ -1,13 +1,15 @@
 """
 Dataset validation
 """
+import random
 import re
 import json
 import unittest
 
 import pytest
+from time import sleep
 import requests
-from constants import ASSETS_PATH
+from constants import ASSETS_PATH, HEADERS
 
 
 class RawBasicDataValidator(unittest.TestCase):
@@ -110,10 +112,12 @@ class RawMediumDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
             msg = "Can not open URL: %s. Check how you collect URLs"
-            self.assertTrue(requests.get(metadata[1]['url']),
+            self.assertTrue(requests.get(metadata[1]['url'], HEADERS),
                             msg=msg % metadata[1]['url'])
+            sleep(random.randrange(1, 5))
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], HEADERS).text
+            sleep(random.randrange(1, 5))
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
             self.assertTrue(check_title_in_html(metadata[1]['title'],
@@ -178,7 +182,8 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'], HEADERS).text
+            sleep(random.randrange(1, 5))
 
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
