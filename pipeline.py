@@ -72,10 +72,9 @@ class CorpusManager:
         """
         path = Path(self.path_to_raw_txt_data)
 
-        pattern = re.compile(r'\d+_raw')
         for file in path.glob('*'):
             if '_raw.txt' in file.name:
-                article_id = int(pattern.search(file.name)[0][:-4])
+                article_id = int(re.search(r'\d+_raw', file.name)[0][:-4])
                 self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
@@ -97,11 +96,13 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        cleaned_tokens = []
-        single_tagged_tokens = []
-        multiple_tagged_tokens = []
+
         for article in self.corpus_manager.get_articles().values():
             article_raw_text = article.get_raw_text()
+
+            cleaned_tokens = []
+            single_tagged_tokens = []
+            multiple_tagged_tokens = []
 
             for token in self._process(article_raw_text):
                 cleaned_tokens.append(token.get_cleaned())
@@ -116,12 +117,15 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        text = raw_text.replace('\n', '')
+        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        for symbol in raw_text:
+            if not pattern.match(symbol):
+                text = raw_text.replace(symbol, '')
+
         analyzed_text = Mystem().analyze(text)
         morph = pymorphy2.MorphAnalyzer()
         tokens = []
         for token in analyzed_text:
-
             if 'analysis' not in token:
                 continue
             if not token['analysis']:
@@ -153,7 +157,7 @@ def validate_dataset(path_to_validate):
     number_raw_txt = 0
     number_meta = 0
 
-    for file in sorted(path.glob('*'), key=lambda x: int(x.name.split('_')[0])):
+    for file in sorted(path.glob('*'), key=lambda x: int(x.name[:x.name.find('_')])):
 
         if file.name.endswith('raw.txt'):
             number_raw_txt += 1
