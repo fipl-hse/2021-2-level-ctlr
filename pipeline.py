@@ -1,12 +1,12 @@
 """
 Pipeline for text processing implementation
 """
+from pathlib import Path
+import re
+from pymystem3 import Mystem
+import pymorphy2
 from core_utils.article import Article
 from constants import ASSETS_PATH
-from pymystem3 import Mystem
-from pathlib import Path
-import pymorphy2
-import re
 
 
 class EmptyDirectoryError(Exception):
