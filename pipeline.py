@@ -2,8 +2,6 @@
 Pipeline for text processing implementation
 """
 
-import json
-from pathlib import Path
 import re
 import os
 from constants import ASSETS_PATH
