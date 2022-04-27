@@ -18,8 +18,8 @@ HEADERS = {'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/5
            'sec-fetch-dest': 'empty',
            'sec-fetch-mode': 'cors',
            'sec-fetch-site': 'cross-site',
-           'content-length': '300',
-           'content-type': 'text/plain',
+           'content-length': '24',
+           'content-type': 'application/x-www-form-urlencoded',
            'cookie': 'yandexuid=5687879911644746701; yuidss=5687879911644746701; '
                      'ymex=1960108130.yrts.1644748130#1960108129.yrtsi.1644748129; '
                      'is_gdpr=0; _ym_uid=1645129214159782619; '
