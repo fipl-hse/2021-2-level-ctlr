@@ -2,12 +2,17 @@
 Implementation of POSFrequencyPipeline for score ten only.
 """
 
+<<<<<<< HEAD
 import json
 import re
 
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
 from pipeline import CorpusManager, validate_dataset
+=======
+from pipeline import CorpusManager
+
+>>>>>>> origin/main
 
 class EmptyFileError(Exception):
     """
@@ -16,7 +21,11 @@ class EmptyFileError(Exception):
 
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
+<<<<<<< HEAD
         self.corpus_manager = corpus_manager
+=======
+        pass
+>>>>>>> origin/main
 
     def run(self):
         for article in self.corpus_manager.get_articles().values():
