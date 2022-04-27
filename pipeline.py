@@ -2,6 +2,10 @@
 Pipeline for text processing implementation
 """
 
+
+from pymorphy3 import MorphAnalyzer
+from pymystem3 import Mystem
+
 from constants import ASSETS_PATH
 from core_utils.article import Article
 
@@ -88,13 +92,17 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        pass
+        for article in self.corpus_manager.get_articles().values():
+            text = article.get_raw_text()
+            tokens = self._process(text)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        for token in Mystem().analyze(raw_text):
+            print("done")
+            break
 
 
 def validate_dataset(path_to_validate):
