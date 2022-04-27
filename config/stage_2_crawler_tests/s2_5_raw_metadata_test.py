@@ -113,7 +113,7 @@ class RawMediumDataValidator(unittest.TestCase):
             msg = "Can not open URL: %s. Check how you collect URLs"
 
             self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
-                            msg=msg % metadata[1]['url']
+                            msg=msg % metadata[1]['url'])
                             
             html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
             msg = "Title is not found by specified in metadata " \
