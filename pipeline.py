@@ -27,7 +27,10 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self._normalized_form = ""
+        self.tags_mystem = ""
+        self.tags_pymorphy = ""
 
     def get_cleaned(self):
         """
@@ -79,7 +82,7 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
@@ -106,6 +109,8 @@ def main():
     # YOUR CODE HERE
     validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
