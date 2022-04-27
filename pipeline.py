@@ -2,6 +2,9 @@
 Pipeline for text processing implementation
 """
 
+from constants import ASSETS_PATH
+from core_utils.article import Article
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -51,7 +54,9 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_text_data = path_to_raw_txt_data
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
@@ -91,12 +96,14 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    # Dummy validation
+    return None
 
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
 
 
 if __name__ == "__main__":
