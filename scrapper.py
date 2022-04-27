@@ -98,49 +98,8 @@ class HTMLParser:
 
         self.article.topics = article_bs.find('span', class_='tags').text.strip().split(' /  ')
 
-        raw_date = article_bs.find('time').text
-        if 'часов' in raw_date or 'часа' in raw_date or 'час' in raw_date:
-            hours = int(raw_date.split()[0])
-            full_date = datetime.today() - timedelta(hours=hours)
-            raw_date = datetime.strftime(full_date, '%d %m, %H:%M %Y')
-            self.article.date = datetime.strptime(raw_date, '%d %m, %H:%M %Y')
-        elif 'Час' in raw_date:
-            full_date = datetime.today() - timedelta(hours=1)
-            raw_date = datetime.strftime(full_date, '%d %m, %H:%M %Y')
-            self.article.date = datetime.strptime(raw_date, '%d %m, %H:%M %Y')
-        elif 'минут' in raw_date or 'минуты' in raw_date or 'минута' in raw_date:
-            minutes = int(raw_date.split()[0])
-            full_date = datetime.today() - timedelta(minutes=minutes)
-            raw_date = datetime.strftime(full_date, '%d %m, %H:%M %Y')
-            self.article.date = datetime.strptime(raw_date, '%d %m, %H:%M %Y')
-        elif 'День' in raw_date:
-            full_date = datetime.today() - timedelta(days=1)
-            raw_date = datetime.strftime(full_date, '%d %m, %H:%M %Y')
-            self.article.date = datetime.strptime(raw_date, '%d %m, %H:%M %Y')
-        else:
-            months_dict = {'января': '01',
-                           'февраля': '02',
-                           'марта': '03',
-                           'апреля': '04',
-                           'мая': '05',
-                           'июня': '06',
-                           'июля': '07',
-                           'августа': '08',
-                           'сентября': '09',
-                           'октября': '10',
-                           'ноября': '11',
-                           'декабря': '12',
-                           }
-            for month in months_dict:
-                if month in raw_date:
-                    raw_date = raw_date.replace(month, months_dict[month])
-            pattern_of_date = r'\d{4}'
-            is_date = re.findall(pattern_of_date, raw_date)
-            if is_date:
-                self.article.date = datetime.strptime(raw_date, '%d %m %Y, %H:%M /')
-            else:
-                raw_date = raw_date.replace('/', '2022')
-                self.article.date = datetime.strptime(raw_date, '%d %m, %H:%M %Y')
+        raw_date = article_bs.find('time')['datetime'][:-10]
+        self.article.date = datetime.strptime(raw_date, '%Y-%m-%dT%H:%M:%S')
 
         self.article.title = article_bs.find('h1', class_='article-headline__title').text.strip()
 
