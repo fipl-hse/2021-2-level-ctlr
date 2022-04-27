@@ -4,6 +4,7 @@ Pipeline for text processing implementation
 import re
 from pathlib import Path
 
+import pymorphy2
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
@@ -52,7 +53,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -102,9 +103,11 @@ class TextProcessingPipeline:
             tokens = self._process(article.get_raw_text())
             tokenized_text = ' '.join(tokens[0])
             tokenized_mystem_text = ' '.join(tokens[1])
+            tokenized_double_tagged_text = ' '.join(tokens[2])
 
             article.save_as(text=tokenized_text, kind=ArtifactType.cleaned)
             article.save_as(text=tokenized_mystem_text, kind=ArtifactType.single_tagged)
+            article.save_as(text=tokenized_double_tagged_text, kind=ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -113,10 +116,13 @@ class TextProcessingPipeline:
         tokens = []
         cleaned_tokens = []
         mystem_tokens = []
+        multiple_tagged_tokens = []
+
         cleaned_text = raw_text
+
         letters = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
         transferences_and_footers = re.compile(r'(-\n)|(\d+\s+[^\n]([А-Я]\.)+\s[А-Яа-я]+\s\n)'
-                                               r'|(([А-ЯёЁ]{1}([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)')
+                                               r'|(([А-ЯёЁ]([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)')
         for character in raw_text:
             if letters.match(character) is None:
                 cleaned_text = cleaned_text.replace(character, '')
@@ -124,12 +130,18 @@ class TextProcessingPipeline:
         preprocessed_text = transferences_and_footers.sub('', raw_text)
 
         result = Mystem().analyze(preprocessed_text)
+        morph = pymorphy2.MorphAnalyzer()
+
         for processed_word in result:
             if processed_word.get('analysis') is not None and processed_word.get('analysis'):
                 mystem_token = MorphologicalToken(processed_word['text'])
                 mystem_token.normalized_form = processed_word['analysis'][0]['lex']
                 mystem_token.tags_mystem = processed_word['analysis'][0]['gr']
+
+                mystem_token.tags_pymorphy = morph.parse(mystem_token.original_word)[0].tag
+
                 mystem_tokens.append(mystem_token.get_single_tagged())
+                multiple_tagged_tokens.append(mystem_token.get_multiple_tagged())
 
         words = cleaned_text.split()
         for word in words:
@@ -137,6 +149,7 @@ class TextProcessingPipeline:
 
         tokens.append(cleaned_tokens)
         tokens.append(mystem_tokens)
+        tokens.append(multiple_tagged_tokens)
         return tokens
 
 
