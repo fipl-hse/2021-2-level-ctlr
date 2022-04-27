@@ -62,13 +62,15 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        pass
+        for file in self.path_to_raw_text_data.glob("*_raw.txt"):
+            index = int(file.name[:-8])
+            self._storage[index] = Article(None, index)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
