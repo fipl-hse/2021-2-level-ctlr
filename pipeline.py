@@ -145,24 +145,37 @@ def validate_dataset(path_to_validate):
         raise FileNotFoundError
     if not path.is_dir():
         raise NotADirectoryError
-    if not list(path.iterdir()):
-        raise EmptyDirectoryError
-    for file in list(path.iterdir()):
-        if 'raw.txt' in file.name:
-            with open(file, 'r', encoding='utf-8') as text_file:
-                text = text_file.read()
-                if not text:
-                    raise InconsistentDatasetError
-
-    pattern = re.compile(r'[0-9]+')
-    sorted_dataset = sorted(list(path.iterdir()), key=lambda x: int(pattern.search(x.name).group(0)))
-
-    true_id = 0
-    for file in sorted_dataset:
-        file_id = int(pattern.search(file.name).group(0))
-        if file_id == 0 or file_id - true_id > 1:
+    all_ids = []
+    compiled_expression = re.compile(r'(\d+)_(?:raw.txt|meta.json|raw.pdf'
+                                     r'|cleaned.txt|single_tagged.txt'
+                                     r'|multiple_tagged.txt|image.png)')
+    for file in path.iterdir():
+        if file.stat().st_size == 0:
             raise InconsistentDatasetError
-        true_id = file_id
+        full_pattern = compiled_expression.match(file.name)
+        if not full_pattern:
+            raise InconsistentDatasetError
+        article_id = int(full_pattern.group(1))
+        if article_id < 1:
+            raise InconsistentDatasetError
+        all_ids.append(article_id)
+    if not all_ids:
+        raise EmptyDirectoryError
+    previous_article_id = 0
+    sorted_all_ids = sorted(all_ids)
+    for article_id in sorted_all_ids:
+        if article_id - previous_article_id > 1:
+            raise InconsistentDatasetError
+        previous_article_id = article_id
+    if sorted_all_ids[0] != 1:
+        raise InconsistentDatasetError
+    for number in set(sorted_all_ids):
+        name_for_raw = f'{number}_raw.txt'
+        name_for_meta = f'{number}_meta.json'
+        raw_path = path / name_for_raw
+        meta_path = path / name_for_meta
+        if not raw_path.exists() or not meta_path.exists():
+            raise InconsistentDatasetError
 
 
 def main():
