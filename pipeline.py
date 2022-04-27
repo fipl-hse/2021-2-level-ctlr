@@ -149,24 +149,26 @@ def validate_dataset(path_to_validate):
     path = Path(path_to_validate)
     Validation = namedtuple('Validation', ['success', 'error'])
 
-    is_exists = path.exists()
-    is_dir = path.is_dir()
-    txt_files = list(path.rglob('*_raw.txt'))
-    json_files = list(path.rglob('*_meta.json'))
+    paths = tuple(path.glob("*_raw.txt")), tuple(path.glob("*_meta.json"))
+    sorted_paths = [
+        sorted(arr, key=lambda x: int(re.match(r"^\d+", x.name).group()))
+        for arr in paths
+    ]
+    valid_order = [str(x) for x in range(1, max(len(paths[0]), len(paths[1])) + 1)]
 
-    txt_ids = list(map(lambda file: int(file.parts[-1].split('_')[0]), txt_files))
-    json_ids = list(map(lambda file: int(file.parts[-1].split('_')[0]), json_files))
-    is_consistent_txt = len(txt_ids) == len(txt_files) and set(txt_ids) == set(range(min(txt_ids), max(txt_ids) + 1))
-    is_consistent_json = (
-            len(json_ids) == len(json_files) and
-            set(json_ids) == set(range(min(json_ids), max(json_ids) + 1))
+    is_num_raw_meta_equal = len(paths[0]) == len(paths[1])
+    are_nums_consequent = list(
+        all(x.name.startswith(n) for x in p)
+        for *p, n in zip(*sorted_paths, valid_order)
     )
 
+    is_empty_files = all(tuple(map(lambda file_path: file_path.stat().st_size != 0, paths[0])))
+
     validations = (
-        Validation(is_exists, FileNotFoundError),
-        Validation(is_dir, NotADirectoryError),
-        Validation(txt_files and json_files, EmptyDirectoryError),
-        Validation(is_consistent_txt and is_consistent_json, InconsistentDatasetError),
+        Validation(path.is_dir(), NotADirectoryError),
+        Validation(path.exists(), FileNotFoundError),
+        Validation(any(path.iterdir()), EmptyDirectoryError),
+        Validation(is_num_raw_meta_equal and all(are_nums_consequent) and is_empty_files, InconsistentDatasetError),
     )
 
     for test in validations:
