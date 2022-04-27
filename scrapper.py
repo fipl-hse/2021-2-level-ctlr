@@ -74,7 +74,7 @@ class Crawler:
             sleep(random.uniform(0.0, 1.0))
             user_agent = UserAgent().get_random_user_agent()
             headers = {'User-Agent': user_agent}
-            response = requests.get(url, headers=headers, timeout=30)  # get html code
+            response = requests.get(url, headers=headers)  # get html code
 
             if not response.ok:
                 continue
