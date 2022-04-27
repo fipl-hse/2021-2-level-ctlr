@@ -32,9 +32,9 @@ class MorphologicalToken:
 
     def __init__(self, original_word):
         self.original_word = original_word
-        self.normalized_form = None
-        self.tags_mystem = None
-        self.tags_pymorphy = None
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
@@ -122,8 +122,6 @@ class TextProcessingPipeline:
                 cleaned_text = cleaned_text.replace(character, '')
 
         preprocessed_text = transferences_and_footers.sub('', raw_text)
-        """for thing_to_delete in things_to_delete:
-            preprocessed_text.replace(thing_to_delete, '')"""
 
         result = Mystem().analyze(preprocessed_text)
         for processed_word in result:
