@@ -51,28 +51,35 @@ class Crawler:
         Extracts urls of articles
         """
         content = article_bs.find_all('div', {'class': 'issueArticle flex'})
+        urls = []
+        urls_count = len(self.urls)
         for article in content:
-            if len(self.urls) < self.max_articles:
-                link = article.find('a')
-                href = link['href']
-                self.urls.append(href)
+            if urls_count + 1 > self.max_articles:
+                break
+            link = article.find('a')
+            href = link['href']
+            if href not in self.urls and href not in urls:
+                urls.append(href)
+                urls_count += 1
+
+        return urls
 
     def find_articles(self):
         """
         Finds articles
         """
         for url in self.seed_urls:
-            if len(self.urls) >= self.max_articles:
+            if len(self.urls) + 1 > self.max_articles:
                 break
+            sleep(random.uniform(0.0, 1.0))
             # user_agent = UserAgent().get_random_user_agent()
             response = requests.get(url, headers=HEADERS, timeout=60)  # get html code
-            sleep(random.random())
 
             if not response.ok:
                 continue
 
             article_bs = BeautifulSoup(response.text, 'html.parser')  # creates BS object
-            self._extract_url(article_bs)
+            self.urls.extend(self._extract_url(article_bs))
 
     def get_search_urls(self):
         """
@@ -95,8 +102,8 @@ class HTMLParser:
         Extracts all necessary data from the article web page
         """
         # user_agent = UserAgent().get_random_user_agent()
+        sleep(random.uniform(0.0, 1.0))
         response = requests.get(self.article_url, HEADERS, timeout=60)
-        sleep(random.random())
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
@@ -112,7 +119,6 @@ class HTMLParser:
         page_link = fulltext.find('a')['href']  # link to a page with pdf
 
         download_link = page_link.replace('view', 'download')
-        sleep(random.randrange(1, 5))
         pdf = PDFRawFile(download_link, self.article_id)
 
         pdf.download()
