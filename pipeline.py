@@ -187,11 +187,11 @@ def validate_dataset(path_to_validate):
         if article_id - previous_article_id > 1:
             raise InconsistentDatasetError
 
-        with open(path / f'{article_id}_raw.txt', 'r') as f:
-            if not f.read(1):
+        with open(path / f'{article_id}_raw.txt', 'r') as file:
+            if not file.read(1):
                 raise InconsistentDatasetError
-        with open(path / f'{article_id}_meta.json', 'r') as f:
-            if not f.read(1):
+        with open(path / f'{article_id}_meta.json', 'r') as file:
+            if not file.read(1):
                 raise InconsistentDatasetError
 
         previous_article_id = article_id
