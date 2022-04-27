@@ -147,7 +147,7 @@ def validate_dataset(path_to_validate):
         raise NotADirectoryError
     if not list(path.iterdir()):
         raise EmptyDirectoryError
-    for file in dataset:
+    for file in list(path.iterdir()):
         if 'raw.txt' in file.name:
             with open(file, 'r', encoding='utf-8') as text_file:
                 text = text_file.read()
