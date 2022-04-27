@@ -3,7 +3,7 @@ Pipeline for text processing implementation
 """
 
 import re
-import os
+from pathlib import Path
 from constants import ASSETS_PATH
 
 class EmptyDirectoryError(Exception):
@@ -94,34 +94,34 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    if not os.path.isdir(path_to_validate):
-        raise IsADirectoryError
-
-    list_of_files = os.listdir(path_to_validate)
-    #print(list_of_files)
-    list_of_indexes = []
-    for name in list_of_files:
-        match = re.match(r'\d+', name)
-        if not match:
-            raise InconsistentDatasetError("Found a file name that does not correspond to the naming scheme")
-        name_path = str(path_to_validate)+'\\'+name
-        if not os.path.isfile(name_path):
-            raise InconsistentDatasetError("File is empty")
-        index = name.index('_')
-        if 'raw' in name:
-            list_of_indexes.append(int(name[:index]))
-
-    list_of_indexes = sorted(list_of_indexes)
-    for index in list_of_indexes[1:]:
-        #print(index)
-        if index != list_of_indexes[list_of_indexes.index(index)-1]+1:
-            raise InconsistentDatasetError
-
-    if len(list_of_files) == 0:
-        raise EmptyDirectoryError
-
-    if len(list_of_files) != len(list_of_indexes)*2:
+    tmp_path = Path(path_to_validate)
+    if not tmp_path.exists():
         raise FileNotFoundError
+    if not tmp_path.is_dir():
+        raise NotADirectoryError
+    list_of_indexes = []
+    for file in tmp_path.iterdir():
+        match = re.match(r'\d+', file.name)
+        if not match:
+            raise InconsistentDatasetError
+        if file.stat().st_size == 0:
+            raise InconsistentDatasetError
+        index = int(match.group(0))
+        if index not in list_of_indexes:
+            list_of_indexes.append(index)
+    if not list_of_indexes:
+        raise EmptyDirectoryError
+    list_of_indexes_sorted = sorted(list_of_indexes)
+    constant_index = 0
+    for index in list_of_indexes_sorted:
+        if not constant_index and index != 1:
+            raise InconsistentDatasetError
+        if index - constant_index > 1:
+            raise InconsistentDatasetError
+        if not Path(str(tmp_path) + '\\'+str(index)+'_raw.txt').is_file() or \
+                not Path(str(tmp_path) + '\\'+str(index)+'_meta.json').is_file():
+            raise InconsistentDatasetError
+        constant_index = index
 
 
 def main():
