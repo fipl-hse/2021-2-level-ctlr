@@ -8,7 +8,7 @@ import pymorphy2
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from core_utils.article import Article
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -114,9 +114,9 @@ class TextProcessingPipeline:
                 tokens_single_tagged.append(processed_token.get_single_tagged())
                 tokens_multi_tagged.append(processed_token.get_multiple_tagged())
 
-            article.save_as(' '.join(tokens_cleaned), 'cleaned')
-            article.save_as(' '.join(tokens_single_tagged), 'single_tagged')
-            article.save_as(' '.join(tokens_multi_tagged), 'multiple_tagged')
+            article.save_as(' '.join(tokens_cleaned), ArtifactType.cleaned)
+            article.save_as(' '.join(tokens_single_tagged), ArtifactType.single_tagged)
+            article.save_as(' '.join(tokens_multi_tagged), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
