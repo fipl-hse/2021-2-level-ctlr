@@ -1,9 +1,8 @@
 """
 Scrapper implementation
 """
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
-import re
 from pathlib import Path
 import random
 import shutil
