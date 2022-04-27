@@ -164,12 +164,12 @@ def validate_dataset(path_to_validate):
 def main():
     validate_dataset(ASSETS_PATH)
     print('Validating dataset is done!')
-    # corpus_manager = CorpusManager(ASSETS_PATH)
-    # print('Corpus manager is created!')
-    # pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
-    # print('Pipeline is created!')
-    # pipeline.run()
-    # print('Done!')
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    print('Corpus manager is created!')
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    print('Pipeline is created!')
+    pipeline.run()
+    print('Done!')
 
 
 if __name__ == "__main__":
