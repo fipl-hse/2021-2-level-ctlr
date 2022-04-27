@@ -32,7 +32,7 @@ class MorphologicalToken:
 
     def __init__(self, original_word):
         self.original_word = original_word
-        self._normalized_form = ""
+        self.normalized_form = ""
         self.tags_mystem = ""
         self.tags_pymorphy = ""
 
@@ -46,7 +46,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f"{self.normalized_form}<{self.tags_mystem}>"
 
     def get_multiple_tagged(self):
         """
@@ -97,6 +97,8 @@ class TextProcessingPipeline:
             tokens = self._process(text)
             article.save_as(" ".join(map(lambda x: x.get_cleaned(), tokens)),
                             ArtifactType.cleaned)
+            article.save_as(" ".join(map(lambda x: x.get_single_tagged(), tokens)),
+                            ArtifactType.single_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -110,6 +112,8 @@ class TextProcessingPipeline:
             if not analysis["analysis"]:
                 continue
             token = MorphologicalToken(original_word=analysis["text"])
+            token.normalized_form = analysis["analysis"][0]["lex"]
+            token.tags_mystem = analysis["analysis"][0]["gr"]
             tokens.append(token)
         return tokens
 
