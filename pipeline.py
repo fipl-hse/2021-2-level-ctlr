@@ -118,14 +118,8 @@ class TextProcessingPipeline:
         mystem_tokens = []
         multiple_tagged_tokens = []
 
-        cleaned_text = raw_text
-
-        letters = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
         transferences_and_footers = re.compile(r'(-\n)|(\d+\s+[^\n]([А-Я]\.)+\s[А-Яа-я]+\s\n)'
                                                r'|(([А-ЯёЁ]([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)')
-        for character in raw_text:
-            if letters.match(character) is None:
-                cleaned_text = cleaned_text.replace(character, '')
 
         preprocessed_text = transferences_and_footers.sub('', raw_text)
 
@@ -140,12 +134,9 @@ class TextProcessingPipeline:
 
                 mystem_token.tags_pymorphy = morph.parse(mystem_token.original_word)[0].tag
 
+                cleaned_tokens.append(MorphologicalToken(mystem_token.original_word).get_cleaned())
                 mystem_tokens.append(mystem_token.get_single_tagged())
                 multiple_tagged_tokens.append(mystem_token.get_multiple_tagged())
-
-        words = cleaned_text.split()
-        for word in words:
-            cleaned_tokens.append(MorphologicalToken(word).get_cleaned())
 
         tokens.append(cleaned_tokens)
         tokens.append(mystem_tokens)
