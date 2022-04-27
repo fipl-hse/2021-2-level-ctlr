@@ -56,7 +56,7 @@ class Crawler:
                         journal_url = f"https:{raw_journal_url}"
                         if journal_url not in self.urls:
                             self.urls.append(journal_url)
- 
+
     def find_articles(self):
         """
         Finds articles
