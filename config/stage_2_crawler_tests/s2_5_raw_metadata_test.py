@@ -114,7 +114,6 @@ class RawMediumDataValidator(unittest.TestCase):
 
             self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
                             msg=msg % metadata[1]['url'])
-                            
             html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
@@ -181,7 +180,6 @@ class RawAdvancedDataValidator(unittest.TestCase):
                 continue
 
             html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
-                            
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
                       f"(url <{metadata[1]['url']}>). " \
