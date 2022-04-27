@@ -163,7 +163,6 @@ def validate_dataset(path_to_validate):
     files = list(path_to_validate.glob('*'))
     if not files:
         raise EmptyDirectoryError
-    roots = [file.stem for file in files]
 
     json_counter = 0
     raw_counter = 0
