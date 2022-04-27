@@ -1,6 +1,12 @@
 """
 Pipeline for text processing implementation
 """
+from pathlib import Path
+from pymystem3 import Mystem
+import re
+
+from constants import ASSETS_PATH
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -24,19 +30,22 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
@@ -51,19 +60,26 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
+        for file in path_to_raw_txt_data.glob("*.txt"):
+            file_match = re.search(r'\d+', file.name)
+            if file_match:
+                article_id = int(file_match.group(0))
+                self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -72,31 +88,88 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        pass
+        articles = self.corpus_manager.get_articles().values()
+        for article in articles:
+            raw_text = article.get_raw_text()
+            tokens = self._process(raw_text)
+            cleaned_tokens = []
+            single_tagged_tokens = []
+            for token in tokens:
+                cleaned_tokens.append(token.get_cleaned())
+                single_tagged_tokens.append(token.get_single_tagged())
+            article.save_as(" ".join(cleaned_tokens), kind=ArtifactType.cleaned)
+            article.save_as(" ".join(single_tagged_tokens), kind=ArtifactType.single_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        text = Mystem().analyze(raw_text)
+        tokens = []
+        for word in text:
+            if 'analysis' not in word:
+                continue
+            if not word['analysis']:
+                continue
+            morph_token = MorphologicalToken(original_word=word['text'])
+            morph_token.normalized_form = word['analysis'][0]['lex']
+            morph_token.tags_mystem = word['analysis'][0]['gr']
+
+            tokens.append(morph_token)
+
+        return tokens
 
 
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    if not isinstance(path_to_validate, Path):
+        path_to_validate = Path(path_to_validate)
+
+    if not path_to_validate.exists():
+        raise FileNotFoundError
+
+    if not path_to_validate.is_dir():
+        raise NotADirectoryError
+
+    if len(list(path_to_validate.glob('*'))) == 0:
+        raise EmptyDirectoryError
+
+    counter_txt, counter_meta = 0, 0
+
+    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name.split('_')[0])):
+        if file.name.endswith('raw.txt'):
+            counter_txt += 1
+
+            if f'{counter_txt}_raw' not in file.name:
+                raise InconsistentDatasetError
+            with open(file, encoding='utf-8') as f:
+                if not f.read():
+                    raise InconsistentDatasetError
+
+        if file.name.endswith('.json'):
+            counter_meta += 1
+
+    if counter_txt != counter_meta:
+        raise InconsistentDatasetError
 
 
 def main():
-    # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    print('Validating dataset is done!')
+    # corpus_manager = CorpusManager(ASSETS_PATH)
+    # print('Corpus manager is created!')
+    # pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    # print('Pipeline is created!')
+    # pipeline.run()
+    # print('Done!')
 
 
 if __name__ == "__main__":
