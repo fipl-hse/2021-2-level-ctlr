@@ -6,12 +6,11 @@ import re
 import json
 import unittest
 from time import sleep
-from random_user_agent.user_agent import UserAgent
 
 import pytest
 import requests
 from constants import ASSETS_PATH
-# from constants import HEADERS
+from constants import HEADERS
 
 
 class RawBasicDataValidator(unittest.TestCase):
@@ -114,12 +113,11 @@ class RawMediumDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
             msg = "Can not open URL: %s. Check how you collect URLs"
-            user_agent = UserAgent().get_random_user_agent()
-            headers = {'User-Agent': user_agent}
-            self.assertTrue(requests.get(metadata[1]['url'], headers=headers),
+
+            self.assertTrue(requests.get(metadata[1]['url'], headers=HEADERS),
                             msg=msg % metadata[1]['url'])
-            sleep(random.uniform(0.0, 1.0))
-            html_source = requests.get(metadata[1]['url'], headers=headers).text
+            
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
             self.assertTrue(check_title_in_html(metadata[1]['title'],
@@ -183,9 +181,8 @@ class RawAdvancedDataValidator(unittest.TestCase):
         for metadata in self.metadata:
             if metadata[1]['url'].endswith(".pdf"):
                 continue
-            user_agent = UserAgent().get_random_user_agent()
-            headers = {'User-Agent': user_agent}
-            html_source = requests.get(metadata[1]['url'], headers=headers).text
+
+            html_source = requests.get(metadata[1]['url'], headers=HEADERS).text
 
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
