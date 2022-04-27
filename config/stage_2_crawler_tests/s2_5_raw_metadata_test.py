@@ -111,9 +111,9 @@ class RawMediumDataValidator(unittest.TestCase):
                 continue
             msg = "Can not open URL: %s. Check how you collect URLs"
             self.assertTrue(requests.get(metadata[1]['url'], headers={
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
-                              '(KHTML, like Gecko) Chrome/98.0.4758.109 Safari/537.36'},
-                msg=msg % metadata[1]['url']))
+                            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+                                          '(KHTML, like Gecko) Chrome/98.0.4758.109 Safari/537.36'}),
+                            msg=msg % metadata[1]['url'])
 
             html_source = requests.get(metadata[1]['url'], headers={
                 'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
