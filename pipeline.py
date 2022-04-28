@@ -72,14 +72,23 @@ class CorpusManager:
         """
         article_ids = []
 
+        digit_pattern = re.compile(r'\d+')
+
         for file_path in Path(self.path_to_raw_txt_data).iterdir():
-            match = re.match(r'\d+', file_path.name)
+            match = digit_pattern.match(file_path.name)
 
-            article_ids.append(int(match.group(0)))
+            if not match:
+                continue
 
-        for article_id in set(article_ids):
+            article_id = int(match.group(0))
+
+            if article_id in article_ids:
+                continue
+
             article = Article(url=None, article_id=article_id)
             self._storage[article_id] = article
+
+            article_ids.append(article_id)
 
     def get_articles(self):
         """
@@ -144,8 +153,10 @@ class TextProcessingPipeline:
             morphological_token.normalized_form = token_info['analysis'][0]['lex']
             morphological_token.tags_mystem = token_info['analysis'][0]['gr']
 
-            parsed_word = morph.parse(original_word)[0]
-            morphological_token.tags_pymorphy = parsed_word.tag
+            parsed_word = morph.parse(original_word)
+
+            if not parsed_word:
+                morphological_token.tags_pymorphy = parsed_word[0].tag
 
             morphological_tokens.append(morphological_token)
 
@@ -167,8 +178,10 @@ def validate_dataset(path_to_validate):
 
     file_ids = []
 
+    digit_pattern = re.compile(r'\d+')
+
     for file_path in pathlib_path_to_validate.iterdir():
-        match = re.match(r'\d+', file_path.name)
+        match = digit_pattern.match(file_path.name)
 
         if not match:
             raise InconsistentDatasetError("Found a file name that does not correspond to the naming scheme")
@@ -186,20 +199,16 @@ def validate_dataset(path_to_validate):
 
     file_ids = sorted(file_ids)
 
-    last_file_id = 0
+    if file_ids[0] != 1:
+        raise InconsistentDatasetError("Files do not start from 1")
 
-    for file_id in file_ids:
-        if not last_file_id and file_id != 1:
-            raise InconsistentDatasetError("Files do not start from 1")
-
-        if file_id - last_file_id > 1:
+    for i, file_id in enumerate(file_ids):
+        if i != file_id:
             raise InconsistentDatasetError("Files are inconsistent")
 
         if not (pathlib_path_to_validate / f'{file_id}_raw.txt').is_file() or \
                 not (pathlib_path_to_validate / f'{file_id}_meta.json').is_file():
             raise InconsistentDatasetError(f"There are no meta or raw files for an article ID: {file_id}")
-
-        last_file_id = file_id
 
 
 def main():

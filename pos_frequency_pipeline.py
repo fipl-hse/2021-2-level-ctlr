@@ -24,12 +24,12 @@ class POSFrequencyPipeline:
         articles = self.corpus_manager.get_articles().values()
 
         for article in articles:
-            pos_frequencies = self.calculate_pos_frequencies(article)
+            pos_frequencies = self._calculate_pos_frequencies(article)
 
-            self.save_pos_frequencies(article, pos_frequencies)
+            self._save_pos_frequencies(article, pos_frequencies)
             visualize(statistics=pos_frequencies, path_to_save=ASSETS_PATH / f'{article.article_id}_image.png')
 
-    def calculate_pos_frequencies(self, article):
+    def _calculate_pos_frequencies(self, article):
         """
         Calculates POS frequencies for one article
         """
@@ -51,7 +51,7 @@ class POSFrequencyPipeline:
 
         return pos_frequencies
 
-    def save_pos_frequencies(self, article, pos_frequencies):
+    def _save_pos_frequencies(self, article, pos_frequencies):
         with open(ASSETS_PATH / article.get_meta_file_path(), 'r', encoding='utf-8') as meta_file:
             meta_data = json.load(meta_file)
 
