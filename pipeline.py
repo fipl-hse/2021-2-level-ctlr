@@ -8,7 +8,7 @@ from pathlib import Path
 from pymystem3 import Mystem
 import pymorphy2
 
-from core_utils.article import Article
+from core_utils.article import Article, ArtifactType
 from constants import ASSETS_PATH
 
 class EmptyDirectoryError(Exception):
@@ -106,9 +106,9 @@ class TextProcessingPipeline:
                 tokens_for_article.append(token.get_cleaned())
                 single_tagged_tokens.append(token.get_single_tagged())
                 multiple_tagged_tokens.append(token.get_multiple_tagged())
-            article.save_as(' '.join(tokens_for_article), kind='cleaned')
-            article.save_as(' '.join(single_tagged_tokens), kind='single_tagged')
-            article.save_as(' '.join(multiple_tagged_tokens), kind='multiple_tagged')
+            article.save_as(' '.join(tokens_for_article), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -146,14 +146,14 @@ def validate_dataset(path_to_validate):
         raise FileNotFoundError
     if not path.is_dir():
         raise NotADirectoryError
+    raws = list(path.glob('*_raw.txt'))
+    metas = list(path.glob('*_meta.json'))
+    if not len(metas) == len(raws):
+        raise InconsistentDatasetError
     all_article_ids = []
     for file in path.glob("*.txt"):
         with open(file, 'r', encoding='utf-8') as text_file:
             text = text_file.read()
-        raws = list(path.glob('*_raw.txt'))
-        metas = list(path.glob('*_meta.json'))
-        if not len(metas) == len(raws):
-            raise InconsistentDatasetError
         if not text:
             raise InconsistentDatasetError
         name_pattern = re.match(r'\d+', file.name)
