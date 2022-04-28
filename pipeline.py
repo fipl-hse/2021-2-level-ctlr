@@ -162,8 +162,7 @@ def validate_dataset(path_to_validate):
     for file in path.glob('*'):
 
         number = int(pattern.search(file.name)[0])
-        if number not in numeration:
-            numeration.append(number)
+        numeration.append(number)
 
         if file.name.endswith('raw.txt'):
             number_raw_txt += 1
@@ -174,7 +173,7 @@ def validate_dataset(path_to_validate):
             if file.stat().st_size == 0:
                 raise InconsistentDatasetError
 
-    sorted_numeration = sorted(numeration)
+    sorted_numeration = sorted(set(numeration))
     if sorted_numeration[0] != 1:
         raise InconsistentDatasetError
     previous = 0
