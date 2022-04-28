@@ -4,6 +4,7 @@ Pipeline for text processing implementation
 
 from pathlib import Path
 import re
+import os
 
 from pymorphy3 import MorphAnalyzer
 from pymystem3 import Mystem
@@ -33,7 +34,7 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        self.original_form = original_word
+        self.original_word = original_word
         self.normalized_form = ''
         self.tags_mystem = ''
         self.tags_pymorphy = ''
@@ -42,7 +43,7 @@ class MorphologicalToken:
         """
         Returns lowercased original form of a token
         """
-        return self.original_form.lower()
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
@@ -163,6 +164,9 @@ def validate_dataset(path_to_validate):
     # creating a dictionary of file indexes
     # and checking the formats
     for file in Path(path_to_validate).iterdir():
+
+        if os.path.getsize(file) == 0:
+            raise InconsistentDatasetError
 
         file_index = file.name.split("_")[0]
         if file_index not in checker.keys():
