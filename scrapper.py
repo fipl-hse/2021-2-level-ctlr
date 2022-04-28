@@ -105,7 +105,7 @@ class HTMLParser:
         sleep(random.uniform(0.0, 1.0))
         # user_agent = UserAgent().get_random_user_agent()
         # headers = {'User-Agent': user_agent}
-        response = requests.get(self.article_url, headers=HEADERS)
+        response = requests.get(self.article_url, headers=HEADERS, timeout=60)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
