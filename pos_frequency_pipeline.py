@@ -41,7 +41,7 @@ class POSFrequencyPipeline:
 
             with open(Path(article.get_meta_file_path()), 'r', encoding='utf-8') as meta_file:
                 meta = json.load(meta_file)
-            meta.update(pos_freq)
+            meta.update({"pos_frequencies": pos_freq})
             with open(Path(article.get_meta_file_path()), 'w', encoding='utf-8') as new_meta_file:
                 json.dump(meta, new_meta_file, sort_keys=False,
                           indent=4, ensure_ascii=False, separators=(',', ': '))
