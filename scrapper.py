@@ -36,9 +36,9 @@ class Crawler:
     """
     Crawler implementation
     """
-    def __init__(self, seed_urls, total_articles: int):
+    def __init__(self, seed_urls, total_max_articles: int):
         self.seed_urls = seed_urls
-        self.total_articles_to_find_and_parse = total_articles
+        self.total_articles_to_find_and_parse = total_max_articles
         self.urls = []
 
     def _extract_url(self, article_bs):
@@ -142,10 +142,10 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    seed_urls, max_articles = validate_config(CRAWLER_CONFIG_PATH)
+    seed_urls_config, total_articles_config = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
 
-    crawler = Crawler(seed_urls=seed_urls, total_articles=max_articles)
+    crawler = Crawler(seed_urls=seed_urls_config, total_max_articles=total_articles_config)
     crawler.find_articles()
 
     for id_article, crawler_url in enumerate(crawler.urls):
