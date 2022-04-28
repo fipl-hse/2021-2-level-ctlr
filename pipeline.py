@@ -2,14 +2,10 @@
 Pipeline for text processing implementation
 """
 from constants import  ASSETS_PATH
-from pathlib import Path
-import os
 import re
 from core_utils.article import Article
 
 from pathlib import Path
-from pymystem3 import Mystem
-import pymorphy2
 
 
 class EmptyDirectoryError(Exception):
@@ -84,27 +80,30 @@ class CorpusManager:
         Returns storage params
         """
         return self._storage
-#
-#
-# class TextProcessingPipeline:
-#     """
-#     Process articles from corpus manager
-#     """
-#
-#     def __init__(self, corpus_manager: CorpusManager):
-#         pass
-#
-#     def run(self):
-#         """
-#         Runs pipeline process scenario
-#         """
-#         pass
-#
-#     def _process(self, raw_text: str):
-#         """
-#         Processes each token and creates MorphToken class instance
-#         """
-#         pass
+
+
+class TextProcessingPipeline:
+    """
+    Process articles from corpus manager
+    """
+
+    def __init__(self, corpus_manager: CorpusManager):
+        self.corpus_manager = corpus_manager
+
+    def run(self):
+        """
+        Runs pipeline process scenario
+        """
+        for article in self.corpus_manager.get_articles().values():
+            raw_text = article.get_raw_text()
+            tokens = self._process(raw_text)
+
+
+    def _process(self, raw_text: str):
+        """
+        Processes each token and creates MorphToken class instance
+        """
+        pass
 
 
 def validate_dataset(path_to_validate):
@@ -116,69 +115,85 @@ def validate_dataset(path_to_validate):
 
     if not path.exists():
         raise FileNotFoundError
-        # raise NotADirectoryError
 
     if not path.is_dir():
         raise NotADirectoryError
 
-    # files_dict = []
-    #
-    # # for i in range(1, 101):
-    # #     file_name = str(i)+'_raw.txt'
-    # #     files_dict.append(file_name)
-    # #     file_for_checking = path_to_validate / file_name
-    # #     if file_for_checking not in path_to_validate:
-    # #         raise FileNotFoundError
-    #
-    # # проверить длину списка
-    #
-    # length = len(path_to_validate.glob('*'))
-    #
-    # for i in range(length):
-    #     file_name = str(i)+'_raw.txt'
-    #     file_name1 = str(i)+'_meta.json'
-    #
-    #     file_for_checking = path_to_validate / file_name
-    #     file_for_checking1 = path_to_validate / file_name1
-    #     if file_for_checking not in path_to_validate:
-    #         raise FileNotFoundError
-    #
-    #     all_files = path_to_validate.glob('*')
-    #     names_dict = []
-    #     for file in all_files:
-    #         name = file.stem
-    #         names_dict.append(name)
-    #
-    #     if names_dict !=
 
-        children_files_txt = list(path_to_validate.glob('*raw.txt'))
-        children_files_json = list(path_to_validate.glob('*.json'))
-        children_files = children_files_json + children_files_txt
-        if not children_files:
-            raise EmptyDirectoryError
-        if len(children_files_txt) != len(children_files_json):
+    for file in path.glob("*.txt"):
+        with open(file, 'r', encoding='utf-8') as text_file:
+            text = text_file.read()
+        raw_data = list(path.glob('*_raw.txt'))
+        meta_data = list(path.glob('*_meta.json'))
+
+        if not len(meta_data) == len(raw_data):
             raise InconsistentDatasetError
-        file_names = []
-        for files_path in children_files:
-            file_names.append(files_path.name)
-        for i in range(1, int(len(list(children_files)) / 2) + 1):
-            if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
+
+        if not text:
+            raise InconsistentDatasetError
+
+        pattern = re.match(r'\d+', file.name)
+        if not pattern:
+            raise InconsistentDatasetError
+
+        article_id = int(pattern.group(0))
+        article_id_dict = []
+
+        if article_id < 1:
+            raise InconsistentDatasetError
+        article_id_dict.append(article_id)
+
+        if not article_id_dict:
+            raise EmptyDirectoryError
+
+        previous_article_id = 0
+        article_id_sorted = sorted(article_id_dict)
+
+        for article_id in article_id_sorted:
+            if article_id - previous_article_id > 1:
                 raise InconsistentDatasetError
-        for file in children_files:
-            if not Path(file).stat().st_size:
+            previous_article_id = article_id
+
+            if article_id_sorted[0] != 1:
                 raise InconsistentDatasetError
 
+            if not text:
+                raise InconsistentDatasetError
+
+            name_pattern = re.match(r'\d+', file.name)
+            if not name_pattern:
+                raise InconsistentDatasetError
+
+            pattern = re.match(r'\d+', file.name)
+            article_id = int(pattern.group(0))
+
+            if article_id < 1:
+                raise InconsistentDatasetError
+            article_id_dict.append(article_id)
 
 
+        if not article_id_dict:
+            raise EmptyDirectoryError
 
+        previous_article_id = 0
+        article_id_sorted = sorted(article_id_dict)
 
+        for article_id in article_id_sorted:
+            if article_id - previous_article_id > 1:
+                raise InconsistentDatasetError
+            previous_article_id = article_id
 
-
+        if article_id_sorted[0] != 1:
+            raise InconsistentDatasetError
 
 
 def main():
     # YOUR CODE HERE
-    pass
+
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
