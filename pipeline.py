@@ -33,8 +33,8 @@ class MorphologicalToken:
     def __init__(self, original_word):
         self.original_word = original_word
         self.normalized_form = ''
-        self.mystem_tags = ''
-        self.pymorphy_tags = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
@@ -141,7 +141,7 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError("Directory is empty", 1)
     filenames = _get_file_names(path_to_validate)
     _validate_filenames(filenames)
-    _validate_files(filenames)
+    _validate_files(filenames, ASSETS_PATH)
     _check_consistency(ASSETS_PATH)
 
 def _validate_filenames(list_to_validate):
@@ -154,17 +154,18 @@ def _validate_filenames(list_to_validate):
         if not _is_whole_name_correct:
             raise InconsistentDatasetError("Filename should be correct")
 
-def _validate_files(filenames):
+def _validate_files(filenames, basepath):
     for filename in filenames:
-        path = ASSETS_PATH / filename
-        if os.stat(path).st_size == 0:
-            raise InconsistentDatasetError("Filename should be not empty")
+        with open(basepath / filename, 'r', encoding='utf-8') as the_file:
+            text = the_file.read()
+        if not text:
+            raise InconsistentDatasetError
 
 def _check_consistency(path):
     txts = [fn for fn in os.listdir(path)
-              if fn.endswith('.txt') and 'cleaned' not in fn]
+            if fn.endswith('raw.txt')]
     jsons = [fn for fn in os.listdir(path)
-              if fn.endswith('.json')]
+             if fn.endswith('meta.json')]
     if len(txts) != len(jsons):
         raise InconsistentDatasetError("Filename should be correct")
 
