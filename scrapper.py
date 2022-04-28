@@ -5,10 +5,8 @@ Scrapper implementation
 from datetime import datetime as dt
 import json
 from pathlib import Path
-# import random
 import re
 import shutil
-# import time
 
 from bs4 import BeautifulSoup
 from fake_headers import Headers
@@ -45,23 +43,11 @@ def _clean_text(text):
 
 
 def _get_page(link):
-    print("attempting to connect to %s", link)
-    #time.sleep(random.uniform(2.0, 4.0))
     headers = Headers().generate()
-    print(headers)
-    response = requests.get(link,
-                            headers=headers,
-                            timeout=5)
+    response = requests.get(link, headers=headers)
     if not response.ok:
         return None
     return BeautifulSoup(response.text, "html.parser")
-    # except requests.exceptions.ConnectionError:
-    #    print("failed to connect to %s. trying again", link)
-        # return _get_page(link)
-    #    raise ServerThrottledError
-    #except requests.exceptions.ReadTimeout:
-        #print("timed out connecting to %s. trying again", link)
-        #return _get_page(link)
 
 
 class Crawler:
@@ -97,7 +83,6 @@ class Crawler:
             try:
                 self._extract_url(_get_page(seed))
             except requests.exceptions.ConnectionError:
-                print("failed to connect to", seed)
                 continue
 
     def get_search_urls(self):
@@ -121,7 +106,6 @@ class HTMLParser:
         return self.article
 
     def _fill_article_with_text(self):
-        #time.sleep(random.uniform(0.0, 1.0))
         pdf_raw = PDFRawFile(self._pdf_url, self.article_id)
         pdf_raw.download()
         self.article.text = pdf_raw.get_text()
@@ -132,7 +116,6 @@ class HTMLParser:
 
         author = article_bs.find("div", {"id": "authorString"}).find("a")
         self.article.author = _clean_text(author.text if author.text else author["title"])
-        print(self.article.author)
 
         topics = article_bs.find("div", {"id": "articleSubject"}).find("div").children
         topics = [_clean_text(topic.text) for topic in topics]
@@ -185,18 +168,12 @@ def _is_valid_url(url_to_validate):
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    # logging.basicConfig(stream=sys.stderr)
-    # logging.getLogger("user_testing").setLevel(logging.DEBUG)
-
     seeds, limit = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls=seeds,
-                      max_articles=limit)
+    crawler = Crawler(seed_urls=seeds, max_articles=limit)
     crawler.find_articles()
 
     for index, url in enumerate(crawler.urls):
-        parser = HTMLParser(article_url=url,
-                            article_id=index+1)
+        parser = HTMLParser(article_url=url, article_id=index+1)
         article = parser.parse()
         article.save_raw()
