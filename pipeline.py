@@ -2,6 +2,14 @@
 Pipeline for text processing implementation
 """
 
+from constants import ASSETS_PATH
+from core_utils.article import Article
+from core_utils.article import ArtifactType
+import os
+from os import walk
+from pathlib import Path
+import re
+import string
 
 class EmptyDirectoryError(Exception):
     """
@@ -24,13 +32,16 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_word = original_word
+        self.normalized_form = ''
+        self.mystem_tags = ''
+        self.pymorphy_tags = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_word.lower()
 
     def get_single_tagged(self):
         """
@@ -51,19 +62,27 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = Path(path_to_raw_txt_data)
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+        _txt_extension = ".txt"
+        _txt_files = [fn for fn in os.listdir(self.path_to_raw_txt_data)
+              if fn.endswith(_txt_extension) and 'cleaned' not in fn]
+        for filename in _txt_files:
+            _article_id = _txt_files.index(filename) + 1
+            if _article_id < len(_txt_files) + 1:
+                  self._storage[_article_id] = Article(url=None, article_id=_article_id)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -72,31 +91,84 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        pass
+        for article in self.corpus_manager.get_articles().values():
+            _text = article.get_raw_text()
+            _cleaned_text = self._process(_text)
+            article.save_as(text=_cleaned_text, kind=ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        _text = raw_text
+        _text = _text.translate(str.maketrans('', '', string.punctuation))
+        _text = self._remove_special_characters(_text)
+        _words = _text.split()
+        _lower_words = []
+        for word in _words:
+            _token = MorphologicalToken(original_word=word)
+            _lower_words.append(_token.get_cleaned())
+        return ' '.join(_lower_words)
 
+    def _remove_special_characters(self, raw_text):
+        """
+        Removes any specact special characters from the raw text
+        """
+        raw_text = raw_text.replace('«', '')
+        raw_text = raw_text.replace('»', '')
+        raw_text = raw_text.replace('–', '')
+        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        for symbol in raw_text:
+            if not pattern.match(symbol):
+                return raw_text.replace(symbol, '')
 
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+    env_path = Path(path_to_validate)
+    if not env_path.exists():
+        raise FileNotFoundError("File not exists", 1)
+    if not env_path.is_dir():
+        raise NotADirectoryError("File not exists", 1)
+    if len(os.listdir(path_to_validate)) == 0:
+        raise EmptyDirectoryError("Directory is empty", 1)
+    filenames = _get_file_names(path_to_validate)
+    _validate_filenames(filenames)
+    return None
+
+def _validate_filenames(list_to_validate):
+    for filename in list_to_validate:
+        _is_extension_correct = filename.endswith(".json") or filename.endswith(".txt")
+        _is_name_length_valid = len(filename) > 4
+        _first_symbol = filename[0]
+        _is_name_begins_correctly = _first_symbol.isdigit() and "_" in filename
+        _is_whole_name_correct = _is_extension_correct and _is_name_length_valid and _is_name_begins_correctly
+        if not _is_whole_name_correct:
+            raise InconsistentDatasetError("Filename should be correct")
+    return None
+
+def _get_file_names(path_to_dir):
+    """
+    Extract names of files in directory
+    """
+    filenames_list = []
+    for (dirpath, dirnames, filenames) in walk(path_to_dir):
+        filenames_list.extend(filenames)
+        return filenames_list
 
 
 def main():
-    # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
