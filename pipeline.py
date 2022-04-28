@@ -132,8 +132,6 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    if not isinstance(path_to_validate, str):
-        raise FileNotFoundError("File not exists", 1)
     if len(path_to_validate) == 0:
         raise FileNotFoundError("File not exists", 1)
     env_path = Path(path_to_validate)
