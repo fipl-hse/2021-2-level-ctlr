@@ -192,11 +192,11 @@ def validate_dataset(path_to_validate):
 def main():
     print('some preparations')
     validate_dataset(ASSETS_PATH)
-    print('implementing corpus manager')
     corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
     print('run pipeline...')
     pipeline.run()
+    print('texts are processed!')
 
 
 if __name__ == "__main__":
