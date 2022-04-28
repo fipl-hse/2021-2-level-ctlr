@@ -1,7 +1,7 @@
 """
 Pipeline for text processing implementation
 """
-
+import re
 from pathlib import Path
 
 import pymorphy2
@@ -117,31 +117,27 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        clean_text = ''
-
-        for symbol in raw_text.replace('-\n', ''):
-            if symbol.isalpha():
-                clean_text += symbol
-            if symbol.isspace() or symbol == '\n':
-                clean_text += ' '
-
         mystem = Mystem()
         morph_analyzer = pymorphy2.MorphAnalyzer()
 
-        clean_text_analysis = mystem.analyze(clean_text)
+        raw_text_analysis = mystem.analyze(raw_text.replace('-\n', '').replace('\n', ' '))
 
         tokens = []
-        for single_word_analysis in clean_text_analysis:
-            if single_word_analysis['text'].isalpha() and single_word_analysis['analysis']:
-                token = MorphologicalToken(single_word_analysis['text'])
-                tokens.append(token)
+        for single_word_analysis in raw_text_analysis:
+            if 'analysis' not in single_word_analysis or not single_word_analysis['analysis']:
+                continue
 
-                analysis = single_word_analysis['analysis']
-                token.normalized_form = analysis[0]['lex']
-                token.tags_mystem = analysis[0]['gr']
+            token = MorphologicalToken(single_word_analysis['text'])
+            tokens.append(token)
 
-                parses = morph_analyzer.parse(single_word_analysis['text'])
-                token.tags_pymorphy = parses[0].tag
+            analysis = single_word_analysis['analysis']
+            token.normalized_form = analysis[0]['lex']
+            token.tags_mystem = analysis[0]['gr']
+
+            parses = morph_analyzer.parse(single_word_analysis['text'])
+            if not parses:
+                continue
+            token.tags_pymorphy = parses[0].tag
 
         return tokens
 
@@ -153,9 +149,6 @@ def validate_dataset(path_to_validate):
     if isinstance(path_to_validate, str):
         path_to_validate = Path(path_to_validate)
 
-    raw_txt = 0
-    meta_json = 0
-
     if not path_to_validate.exists():
         raise FileNotFoundError
 
@@ -165,7 +158,10 @@ def validate_dataset(path_to_validate):
     if not any(path_to_validate.iterdir()):
         raise EmptyDirectoryError
 
-    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name.split('_')[0])):
+    raw_txt = 0
+    meta_json = 0
+
+    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(re.search(r'(\d+)', x.name).group())):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError
 
@@ -173,14 +169,14 @@ def validate_dataset(path_to_validate):
 
             meta_json += 1
 
-            if f'{meta_json}_meta' != file.stem:
+            if f'{meta_json}_meta' not in file.name:
                 raise InconsistentDatasetError
 
         if file.name.endswith('raw.txt'):
 
             raw_txt += 1
 
-            if f'{raw_txt}_raw' != file.stem:
+            if f'{raw_txt}_raw' not in file.name:
                 raise InconsistentDatasetError
 
     if raw_txt != meta_json:
