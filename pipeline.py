@@ -175,12 +175,15 @@ def validate_dataset(path_to_validate):
             if file.stat().st_size == 0:
                 raise InconsistentDatasetError
 
-    files_sorted = {}
     # check dataset numeration
+    files_sorted = {}
+
     for extension, ids in files.items():
         files_sorted[extension] = sorted(ids)
-        for file_number in range(1, len(ids) + 1):
-            if ids[file_number - 1] != file_number:
+
+    for sorted_ids in files_sorted.values():
+        for file_number in range(1, len(sorted_ids) + 1):
+            if sorted_ids[file_number - 1] != file_number:
                 raise InconsistentDatasetError
 
     # check on balanced dict
