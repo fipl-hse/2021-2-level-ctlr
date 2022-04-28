@@ -72,7 +72,7 @@ class CorpusManager:
         """
         path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
 
-        for file in path_to_raw_txt_data.glob('*'):
+        for file in path_to_raw_txt_data.iterdir():
             if '_raw.txt' in file.name:
                 article_id = int(re.search(r'\d+_raw', file.name)[0][:-4])
                 self._storage[article_id] = Article(url=None, article_id=article_id)
@@ -160,13 +160,13 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    if len(list(path_to_validate.glob('*'))) == 0:
+    if len(list(path_to_validate.iterdir())) == 0:
         raise EmptyDirectoryError
 
     counter_txt = 0
     counter_meta = 0
 
-    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name[:x.name.find('_')])):
+    for file in sorted(path_to_validate.iterdir(), key=lambda x: int(x.name[:x.name.find('_')])):
         if file.name.endswith('raw.txt'):
             counter_txt += 1
 
