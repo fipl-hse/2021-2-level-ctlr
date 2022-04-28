@@ -178,7 +178,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
 
-            html_source = requests.get(metadata[1]['url'], headers=HEADERS, timeout=60).text
+            html_source = requests.get(metadata[1]['url'],headers=HEADERS, timeout=60).text
 
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
