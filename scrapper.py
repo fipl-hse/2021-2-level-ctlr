@@ -133,7 +133,8 @@ class HTMLParser:
         item_abstract_bs = article_topics_bs.find_all('div', {'class': 'item abstract'})
         if len(item_abstract_bs) == 2:
             value_bs = item_abstract_bs[1]
-            self.article.topics = value_bs.text.strip().replace('\t', '').split(', ')
+            span_bs = value_bs.find('span', {'class': 'value'})
+            self.article.topics = span_bs.text.strip().replace('\t', '').split(', ')
         else:
             value_bs = ''
             self.article.topics = value_bs
