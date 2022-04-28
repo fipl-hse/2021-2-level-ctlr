@@ -59,9 +59,11 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             sleep(random.randint(2, 4))
-            response = requests.get(url=seed_url, headers=HEADERS)
+            response = requests.get(url=seed_url, headers=HEADERS, timeout=60)
             if not response.ok:
                 continue
+            if len(self.urls)==100:
+                break
             article_bs = BeautifulSoup(response.text, 'lxml')
             self._extract_url(article_bs)
 
@@ -115,7 +117,7 @@ class HTMLParser:
             self.article.text += add_text
 
     def parse(self):
-        response = requests.get(url=self.article_url, timeout=20, headers=HEADERS)
+        response = requests.get(url=self.article_url, timeout=60, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
