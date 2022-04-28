@@ -1,10 +1,11 @@
 """
 Pipeline for text processing implementation
 """
+import re
+
 from pathlib import Path
 from pymystem3 import Mystem
 from pymorphy2 import MorphAnalyzer
-import re
 
 from constants import ASSETS_PATH
 from core_utils.article import Article, ArtifactType
@@ -134,8 +135,7 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    if not isinstance(path_to_validate, Path):
-        path_to_validate = Path(path_to_validate)
+    path_to_validate = Path(path_to_validate)
 
     if not path_to_validate.exists():
         raise FileNotFoundError
@@ -143,24 +143,16 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    if len(list(path_to_validate.glob('*'))) == 0:
-        raise EmptyDirectoryError
-
     counter_txt = 0
-    counter_meta = 0
     for file in path_to_validate.glob('*'):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError
         if file.name.endswith('raw.txt'):
             counter_txt += 1
-            if not path_to_validate / f'{counter_txt}_raw.txt':
+            path_for_meta = path_to_validate / f'{counter_txt}_meta.txt'
+            path_for_txt = path_to_validate / f'{counter_txt}_raw.txt'
+            if not path_for_txt or not path_for_meta:
                 raise InconsistentDatasetError()
-        elif file.name.endswith('meta.json'):
-            counter_meta += 1
-            if not path_to_validate / f'{counter_meta}_meta.txt':
-                raise InconsistentDatasetError()
-    if counter_txt != counter_meta:
-        raise InconsistentDatasetError
 
     pattern_for_filename = re.compile(r'(\d+)_(cleaned.txt|meta.json|multiple_tagged.txt|raw.txt|raw.pdf'
                                       r'|single_tagged.txt)')
