@@ -71,11 +71,12 @@ class CorpusManager:
         Register each dataset entry
         """
         path = Path(self.path_to_raw_txt_data)
-
+        pattern = re.compile(r'\d+')
         for file in path.glob('*'):
-            if '_raw.txt' in file.name:
-                article_id = int(re.search(r'\d+_raw', file.name)[0][:-4])
-                self._storage[article_id] = Article(url=None, article_id=article_id)
+            if '_raw.txt' not in file.name:
+                continue
+            article_id = int(pattern.search(file.name)[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -117,18 +118,16 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
-        for symbol in raw_text:
-            if not pattern.match(symbol):
-                text = raw_text.replace(symbol, '')
+        text = raw_text.replace('-\n', '').replace('\n', ' ')
 
         analyzed_text = Mystem().analyze(text)
         morph = pymorphy2.MorphAnalyzer()
+
         tokens = []
         for token in analyzed_text:
-            if 'analysis' not in token:
-                continue
-            if not token['analysis']:
+            if 'analysis' not in token or not token['analysis'] \
+                    or 'lex' not in token['analysis'][0] \
+                    or 'gr' not in token['analysis'][0]:
                 continue
 
             morph_token = MorphologicalToken(original_word=token['text'])
@@ -154,22 +153,35 @@ def validate_dataset(path_to_validate):
     if not list(path.iterdir()):
         raise EmptyDirectoryError
 
+    numeration = []
     number_raw_txt = 0
     number_meta = 0
 
-    for file in sorted(path.glob('*'), key=lambda x: int(x.name[:x.name.find('_')])):
+    pattern = re.compile(r'\d+')
+
+    for file in path.glob('*'):
+
+        number = int(pattern.search(file.name)[0])
+        if number not in numeration:
+            numeration.append(number)
 
         if file.name.endswith('raw.txt'):
             number_raw_txt += 1
-            if f'{number_raw_txt}_raw' not in file.name:
-                raise InconsistentDatasetError
-
-            with open(file, 'r', encoding='utf-8') as the_file:
-                text = the_file.read()
-            if not text:
-                raise InconsistentDatasetError
         if file.name.endswith('meta.json'):
             number_meta += 1
+
+        if '_raw.txt' in file.name:
+            if file.stat().st_size == 0:
+                raise InconsistentDatasetError
+
+    sorted_numeration = sorted(numeration)
+    if sorted_numeration[0] != 1:
+        raise InconsistentDatasetError
+    previous = 0
+    for number in sorted_numeration:
+        if number - previous != 1:
+            raise InconsistentDatasetError
+        previous = number
 
     if number_raw_txt != number_meta:
         raise InconsistentDatasetError
