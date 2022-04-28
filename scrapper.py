@@ -135,7 +135,7 @@ class HTMLParser:
             value_bs = item_abstract_bs[1]
             self.article.topics = value_bs.text.strip().replace('\t', '').split(', ')
         else:
-            value_bs = None
+            value_bs = ''
             self.article.topics = value_bs
 
         date_raw_bs = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
