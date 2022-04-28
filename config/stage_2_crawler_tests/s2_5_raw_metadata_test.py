@@ -57,9 +57,10 @@ class RawBasicDataValidator(unittest.TestCase):
 
 
 def check_title_in_html(title, html):
+
     split_markers = "&nbsp;|&#160;|&#32;|&#9248;|&#9248;" \
                     r"|&#xA0;|&#x20;|&#x2420;|&#x2423;|&#9251;|\s"
-    split_title = re.split(split_markers, title)
+    split_title = re.split(split_markers, title.replace('"', ''))
     return all(chunk in html for chunk in split_title)
 
 
@@ -101,7 +102,7 @@ class RawMediumDataValidator(unittest.TestCase):
     @pytest.mark.mark8
     @pytest.mark.mark10
     @pytest.mark.stage_2_5_dataset_validation
-    @pytest.mark.skip(reason="because of the slash sign")
+    # @pytest.mark.skip(reason="because of the slash sign")
     def test_validate_metadata_medium(self):
         """
         Ensure collected metadata is valid
