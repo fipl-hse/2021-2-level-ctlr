@@ -73,7 +73,7 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_bs = article_bs.find('h1')
+        title_bs = article_bs.find('div', class_='content_cn').find('h1')
         self.article.title = title_bs.text
 
         self.article.author = 'NOT FOUND'
@@ -125,7 +125,7 @@ def validate_config(crawler_path):
     with open(crawler_path, 'r') as file:
         config = json.load(file)
     article_urls = config['seed_urls']
-    if not isinstance(article_urls, list):
+    if not isinstance(article_urls, list) or not article_urls:
         raise IncorrectURLError
     for article_url in article_urls:
         correct_url = re.match(r'https://', article_url)
@@ -134,7 +134,9 @@ def validate_config(crawler_path):
     total_articles = config['total_articles_to_find_and_parse']
     if not isinstance(total_articles, int):
         raise IncorrectNumberOfArticlesError
-    if total_articles > 100 or total_articles <= 0:
+    if total_articles <= 0:
+        raise IncorrectNumberOfArticlesError
+    if total_articles > 200:
         raise NumberOfArticlesOutOfRangeError
     return article_urls, total_articles
 
