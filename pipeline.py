@@ -69,10 +69,8 @@ class CorpusManager:
         """
         path_to_data = Path(self.path_to_raw_txt_data)
         for file in path_to_data.glob('*.txt'):
-            pattern = re.search(r'\d+', file.name)
-            if pattern:
-                article_id = int(pattern.group(0))
-                self._storage[article_id] = Article(url=None, article_id=article_id)
+            article_id = int(file.stem.split('_')[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -97,18 +95,18 @@ class TextProcessingPipeline:
             raw_text = article.get_raw_text()
             tokens = self._process(raw_text)
 
-            tokens_for_article = []
-            single_tagged_tokens = []
-            multiple_tagged_tokens = []
+            articles_tokens = []
+            single_tagged = []
+            multiple_tagged = []
 
             for token in tokens:
-                tokens_for_article.append(token.get_cleaned())
-                single_tagged_tokens.append(token.get_single_tagged())
-                multiple_tagged_tokens.append(token.get_multiple_tagged())
+                articles_tokens.append(token.get_cleaned())
+                single_tagged.append(token.get_single_tagged())
+                multiple_tagged.append(token.get_multiple_tagged())
 
-            article.save_as(' '.join(tokens_for_article), ArtifactType.cleaned)
-            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
-            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
+            article.save_as(' '.join(articles_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
@@ -116,7 +114,7 @@ class TextProcessingPipeline:
         """
         cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁ]+', raw_text))
         analyzed_text = Mystem().analyze(cleaned_text)
-        morph = pymorphy2.MorphAnalyzer()
+        morph_analyzing = pymorphy2.MorphAnalyzer()
 
         tokens = []
         for token in analyzed_text:
@@ -126,11 +124,11 @@ class TextProcessingPipeline:
             if not token['analysis']:
                 continue
 
-            morph_token = MorphologicalToken(token['text'])
-            morph_token.normalized_form = token['analysis'][0].get('lex')
-            morph_token.tags_mystem = token['analysis'][0].get('gr')
-            tokens.append(morph_token)
-            morph_token.tags_pymorphy = morph.parse(token['text'])[0].tag
+            morph_tokens = MorphologicalToken(token['text'])
+            morph_tokens.normalized_form = token['analysis'][0].get('lex')
+            morph_tokens.tags_mystem = token['analysis'][0].get('gr')
+            tokens.append(morph_tokens)
+            morph_tokens.tags_pymorphy = morph_analyzing.parse(token['text'])[0].tag
         return tokens
 
 
@@ -145,44 +143,28 @@ def validate_dataset(path_to_validate):
     if not path.is_dir():
         raise NotADirectoryError
 
-    all_article_ids = []
+    data = list(path.globe('*'))
+    if not data:
+        raise NotADirectoryError
 
-    for file in path.glob("*.txt"):
-        with open(file, 'r', encoding='utf-8') as text_file:
-            text = text_file.read()
-        raw_data = list(path.glob('*_raw.txt'))
-        meta_data = list(path.glob('*_meta.json'))
+    for file in data:
+        if 'raw.txt' in file.name:
+            with open(file, 'r', encoding='utf-8') as text_file:
+                text = text_file.read()
+                if not text:
+                    raise InconsistentDatasetError
 
-        if not len(meta_data) == len(raw_data):
-            raise InconsistentDatasetError
+    articles_ids = []
+    pattern = re.match(r'\d+', file.name)
+    if not pattern:
+        raise InconsistentDatasetError
 
-        if not text:
-            raise InconsistentDatasetError
-
-        name_pattern = re.match(r'\d+', file.name)
-        if not name_pattern:
-            raise InconsistentDatasetError
-
-        pattern = re.match(r'\d+', file.name)
-        article_id = int(pattern.group(0))
-
-        if article_id < 1:
-            raise InconsistentDatasetError
-        all_article_ids.append(article_id)
-
-    if not all_article_ids:
+    article_id = int(pattern.group(0))
+    articles_ids.append(article_id)
+    if not articles_ids:
         raise EmptyDirectoryError
 
-    previous_article_id = 0
-    sorted_all_ids = sorted(all_article_ids)
 
-    for article_id in sorted_all_ids:
-        if article_id - previous_article_id > 1:
-            raise InconsistentDatasetError
-        previous_article_id = article_id
-
-    if sorted_all_ids[0] != 1:
-        raise InconsistentDatasetError
 
 
 def main():
