@@ -92,8 +92,7 @@ class TextProcessingPipeline:
         Runs pipeline process scenario
         """
         for article in self.corpus_manager.get_articles().values():
-            raw_text = article.get_raw_text()
-            tokens = self._process(raw_text)
+            tokens = self._process(article.get_raw_text())
 
             articles_tokens = []
             single_tagged = []
@@ -151,36 +150,36 @@ def validate_dataset(path_to_validate):
     if len(raw_txt_files) != len(meta_files):
         raise InconsistentDatasetError
 
-    data = list(path.glob('*'))
+    data = list(path.glob('*.txt'))
 
     articles_ids = []
 
     for file in data:
-        if 'raw.txt' in file.name:
-            with open(file, 'r', encoding='utf-8') as text_file:
-                text = text_file.read()
-                if not text:
-                    raise InconsistentDatasetError
+        with open(file, 'r', encoding='utf-8') as text_file:
+            text = text_file.read()
+        if not text:
+            raise InconsistentDatasetError
 
-            pattern = re.match(r'\d+', file.name)
-            if not pattern:
-                raise InconsistentDatasetError
+        pattern = re.match(r'\d+', file.name)
+        if not pattern:
+            raise InconsistentDatasetError
 
-            article_id = int(pattern.group(0))
-            articles_ids.append(article_id)
+        article_id = int(pattern.group(0))
+        articles_ids.append(article_id)
 
     if not articles_ids:
         raise EmptyDirectoryError
 
     previous_article_id = 0
     sorted_all_ids = sorted(articles_ids)
+    if sorted_all_ids[0] != 1:
+        raise InconsistentDatasetError
     for article_id in sorted_all_ids:
         if article_id - previous_article_id > 1:
             raise InconsistentDatasetError
         previous_article_id = article_id
 
-    if sorted_all_ids[0] != 1:
-        raise InconsistentDatasetError
+
 
 
 def main():
