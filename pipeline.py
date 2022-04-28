@@ -203,7 +203,7 @@ def validate_dataset(path_to_validate):
         raise InconsistentDatasetError("Files do not start from 1")
 
     for i, file_id in enumerate(file_ids):
-        if i != file_id:
+        if i + 1 != file_id:
             raise InconsistentDatasetError("Files are inconsistent")
 
         if not (pathlib_path_to_validate / f'{file_id}_raw.txt').is_file() or \
