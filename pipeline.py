@@ -158,8 +158,9 @@ def validate_dataset(path_to_validate):
     if not indices:
         raise EmptyDirectoryError
     previous_index = 0
-    for index in indices:
-        if index - previous_index != 1 or indices[0] != 1:
+    new_indices = sorted(indices)
+    for index in new_indices:
+        if index - previous_index != 1 or new_indices[0] != 1:
             raise InconsistentDatasetError
         previous_index = index
         raw_path = dataset_path / f'{index}_raw.txt'
