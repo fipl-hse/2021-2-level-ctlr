@@ -86,12 +86,10 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        date = article_bs.find('div', {'class': 'text'})
-
-        if date is not None:
-            date_test = date.text.strip()
-            date_for_meta = datetime.strptime(date_test, "%d.%m.%Y, %H:%M")
-            self.article.date = date_for_meta
+        try:
+            self.article.title = article_bs.find('div', class_='text').text.strip()
+        except AttributeError:
+            self.article.title = 'NOT FOUND'
 
     def _fill_article_with_text(self, article_bs):
         text_bs = article_bs.find('div', class_='text')
