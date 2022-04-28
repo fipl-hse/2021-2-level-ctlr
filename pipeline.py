@@ -143,10 +143,19 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError('Path is not a directory')
 
+    pattern_for_filename = re.compile(r'(\d+)_(cleaned.txt|meta.json|multiple_tagged.txt|raw.txt|raw.pdf'
+                                      r'|single_tagged.txt)')
+    all_ids = []
     counter_txt = 0
     for file in path_to_validate.glob('*'):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError(f'{file.name} is empty')
+        match_for_name = pattern_for_filename.match(file.name)
+
+        if not match_for_name:
+            raise InconsistentDatasetError('Incorrect file name')
+        all_ids.append(int(match_for_name.group(1)))
+
         if file.name.endswith('raw.txt'):
             counter_txt += 1
             path_for_meta = path_to_validate / f'{counter_txt}_meta.txt'
@@ -154,14 +163,6 @@ def validate_dataset(path_to_validate):
             if not path_for_txt or not path_for_meta:
                 raise InconsistentDatasetError
 
-    pattern_for_filename = re.compile(r'(\d+)_(cleaned.txt|meta.json|multiple_tagged.txt|raw.txt|raw.pdf'
-                                      r'|single_tagged.txt)')
-    all_ids = []
-    for file in path_to_validate.glob('*'):
-        match_for_name = pattern_for_filename.match(file.name)
-        if not match_for_name:
-            raise InconsistentDatasetError('Incorrect file name')
-        all_ids.append(int(match_for_name.group(1)))
     if not all_ids:
         raise EmptyDirectoryError('Directory is empty!')
 
