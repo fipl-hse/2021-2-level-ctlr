@@ -159,24 +159,28 @@ def validate_dataset(path_to_validate):
     if not data:
         raise EmptyDirectoryError
 
-    number_of_texts = len(list(path_to_validate.glob('*.txt')))
-    number_of_metas = len(list(path_to_validate.glob('*.json')))
+    number_of_texts = 0
+    number_of_metas = 0
+
+    pattern = re.compile(r'[0-9]+')
+    for file in sorted(list(path_to_validate.glob('*')), key=lambda x: int(pattern.search(x.name).group(0))):
+        if "_raw.txt" in file.name:
+            with open(file, 'r', encoding='utf-8') as text_file:
+                text = text_file.read()
+                if not text:
+                    raise InconsistentDatasetError
+            file_id = int(pattern.search(file.name).group(0))
+            if file_id == 0 or file_id - number_of_texts > 1 or \
+                    not (path_to_validate / f'{file_id}_raw.txt').is_file() or \
+                    not (path_to_validate / f'{file_id}_meta.json').is_file():
+                raise InconsistentDatasetError
+            number_of_texts += 1
+
+        if "_meta.json" in file.name:
+            number_of_metas += 1
 
     if number_of_texts != number_of_metas:
         raise InconsistentDatasetError
-
-    pattern = re.compile(r'[0-9]+')
-    for id_number, file in enumerate(sorted(list(path_to_validate.glob('*.txt')),
-                                            key=lambda x: int(pattern.search(x.name).group(0)))):
-        with open(file, 'r', encoding='utf-8') as text_file:
-            text = text_file.read()
-            if not text:
-                raise InconsistentDatasetError
-        file_id = int(pattern.search(file.name).group(0))
-        if file_id == 0 or file_id - id_number > 1 or \
-                not (path_to_validate / f'{file_id}_raw.txt').is_file() or \
-                not (path_to_validate / f'{file_id}_meta.json').is_file():
-            raise InconsistentDatasetError
 
 
 def main():
