@@ -30,9 +30,7 @@ class MorphologicalToken:
 
     def __init__(self, original_word):
         self.original_word = original_word
-        # self.normalized_form = ''
-        # self.tags_mystem = ''
-        # self.tags_pymorphy = ''
+
 
     def get_cleaned(self):
         """
