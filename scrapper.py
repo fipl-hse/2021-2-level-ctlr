@@ -46,10 +46,9 @@ class Crawler:
     """
     Crawler implementation
     """
-    def __init__(self, seed_urls: list, max_articles: int, max_articles_per_seed: int):
+    def __init__(self, seed_urls: list, max_articles: int):
         self.seed_urls = seed_urls
         self.total_max_articles = max_articles
-        self.max_articles_per_seed = max_articles_per_seed
         self.urls = []
 
     @staticmethod
@@ -181,7 +180,7 @@ def too_much_from_seed(articles_links_raw):
     """
     Simple verification of a sufficient number of articles
     """
-    if len(articles_links_raw) == max_num_per_seed or len(articles_links_raw) == max_num_articles:
+    if len(articles_links_raw) == max_num_articles:
         return True
     return False
 
@@ -196,7 +195,6 @@ def validate_config(crawler_path):
 
         seed_urls = params.get('base_urls')
         max_articles = params.get('total_articles_to_find_and_parse')
-        max_articles_per_seed = params.get('max_number_articles_to_get_from_one_seed')
 
         if not isinstance(seed_urls, list):
             raise IncorrectURLError
@@ -207,23 +205,19 @@ def validate_config(crawler_path):
         if not isinstance(max_articles, int) or max_articles < 0:
             raise IncorrectNumberOfArticlesError
 
-        if not isinstance(max_articles_per_seed, int) or max_articles_per_seed > 100:
-            raise NumberOfArticlesOutOfRangeError
-
     except(IncorrectURLError,
            IncorrectNumberOfArticlesError,
            NumberOfArticlesOutOfRangeError) as error:
         raise error
     else:
-        return seed_urls, max_articles, max_articles_per_seed
+        return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
-    seed_urls_list, max_num_articles, max_num_per_seed = validate_config(CRAWLER_CONFIG_PATH)
+    seed_urls_list, max_num_articles = validate_config(CRAWLER_CONFIG_PATH)
     crawler = Crawler(seed_urls=seed_urls_list,
-                      max_articles=max_num_articles,
-                      max_articles_per_seed=max_num_per_seed)
+                      max_articles=max_num_articles)
     crawler.find_articles()
     prepare_environment(ASSETS_PATH)
     for article_id_num, article_url in enumerate(crawler.urls, 1):
