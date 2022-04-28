@@ -135,7 +135,6 @@ class TextProcessingPipeline:
             m_token.tags_pymorphy = morph.parse(token['text'])[0].tag
             processed_tokens.append(m_token)
 
-        if self:
             return processed_tokens
 
 
@@ -165,8 +164,8 @@ def validate_dataset(path_to_validate):
             if f'{texts}_raw' not in file.name:
                 raise InconsistentDatasetError
 
-            with open(file, 'r', encoding='utf-8') as c:
-                text = c.read()
+            with open(file, 'r', encoding='utf-8') as current:
+                text = current.read()
             if not text:
                 raise InconsistentDatasetError
 
@@ -181,7 +180,7 @@ def main():
     validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
-    pipeline.run() #something
+    pipeline.run()
 
 
 if __name__ == "__main__":
