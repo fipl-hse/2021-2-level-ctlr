@@ -130,9 +130,13 @@ class HTMLParser:
         self.article.title = article_title_bs.text.strip()
 
         article_topics_bs = article_bs.find('div', {'class': 'main_entry'})
-        item_abstract_bs = article_topics_bs.find_all('div', {'class': 'item abstract'})[1]
-        value_bs = item_abstract_bs.find('span', {'class': 'value'})
-        self.article.topics = value_bs.text.strip().replace('\t', '').split(', ')
+        item_abstract_bs = article_topics_bs.find_all('div', {'class': 'item abstract'})
+        if len(item_abstract_bs) == 2:
+            value_bs = item_abstract_bs[1]
+            self.article.topics = value_bs.text.strip().replace('\t', '').split(', ')
+        else:
+            value_bs = None
+            self.article.topics = value_bs
 
         date_raw_bs = article_bs.find('meta', {'name': 'DC.Date.dateSubmitted'})['content']
         article_date_bs = datetime.datetime.strptime(date_raw_bs, '%Y-%m-%d')
