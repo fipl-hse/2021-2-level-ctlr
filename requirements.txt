@@ -4,6 +4,4 @@ PyMuPDF==1.19.6
 pymystem3==0.2.0
 requests==2.27.1
 wget==3.2
-pytest==7.1.0
-bs4==0.0.1
 pymorphy2==0.9.1

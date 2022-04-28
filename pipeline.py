@@ -119,7 +119,7 @@ class TextProcessingPipeline:
         multiple_tagged_tokens = []
 
         transferences_and_footers = re.compile(r'(-\n)|(\d+\s+[^\n]([А-Я]\.)+\s[А-Яа-я]+\s\n)'
-                                               r'|(([А-ЯёЁ]([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)')
+                                               r'|(([А-ЯёЁ]([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)|(\n)')
 
         preprocessed_text = transferences_and_footers.sub('', raw_text)
 
@@ -151,15 +151,15 @@ def validate_dataset(path_to_validate):
     if isinstance(path_to_validate, str):
         path_to_validate = Path(path_to_validate)
     if not path_to_validate.exists():
-        raise FileNotFoundError
+        raise FileNotFoundError(f'NO {ASSETS_PATH} FOLDER FOUND.')
     if not path_to_validate.is_dir():
-        raise NotADirectoryError
+        raise NotADirectoryError(f'{ASSETS_PATH} IS NOT A FOLDER.')
     if not list(path_to_validate.glob('**/*')):
-        raise EmptyDirectoryError
+        raise EmptyDirectoryError(f'{ASSETS_PATH} FOLDER IS EMPTY.')
     if check_dataset_numeration(path_to_validate) == -1:
-        raise InconsistentDatasetError
+        raise InconsistentDatasetError('ERROR. INCORRECT DATASET.')
     if check_txt_files(path_to_validate) == -1:
-        raise InconsistentDatasetError
+        raise InconsistentDatasetError('ERROR. EMPTY RAW TXT FILES FOUND.')
 
 
 def check_dataset_numeration(dataset_path):
@@ -172,17 +172,16 @@ def check_dataset_numeration(dataset_path):
         '.txt': [],
         '.pdf': []
     }
-    pattern = re.compile(r'\d+')
+    sorted_files = {}
+    pattern = re.compile(r'(?P<file_id>\d+)(?P<file_name>_\w+)')
 
     for file in list(dataset_path.glob('*')):
-        for file_name_type in files_to_check:
-            if file_name_type in file.stem:
-                files.get(file.suffix).append(int(pattern.match(file.stem).group()))
-                continue
+        if pattern.match(file.stem).group('file_name') in files_to_check:
+            files.get(file.suffix).append(int(pattern.match(file.stem).group('file_id')))
 
     for files_suffix, ids_list in files.items():
-        ids_list.sort()
-        for file_number in range(1, len(ids_list) - 1):
+        sorted_files[files_suffix] = sorted(ids_list)
+        for file_number in range(1, len(ids_list) + 1):
             if ids_list[file_number - 1] != file_number:
                 print(f'Missing file № {file_number} with {files_suffix} suffix')
                 return -1
@@ -193,24 +192,21 @@ def check_dataset_numeration(dataset_path):
 
 
 def check_txt_files(dataset_path):
-    for file in list(dataset_path.glob('*')):
-        if '_raw.txt' in file.name:
-            file_content = file.open('r', encoding='utf-8')
-            file_text = file_content.read()
-            file_content.close()
-            if not file_text:
-                return -1
+    for file in list(dataset_path.glob('*_raw.txt')):
+        if file.stat().st_size == 0:
+            return -1
     return 0
 
 
 def main():
-    print('STARTING PROGRAM...\nVALIDATING DATASET...')
+    print(f'STARTING PROGRAM...\nFOUND {len(list(ASSETS_PATH.glob("*_raw.txt")))} FILES.\n'
+          f'VALIDATING DATASET...')
     validate_dataset(ASSETS_PATH)
     print('DATASET IS CORRECT.\nCREATING CORPUS MANAGER ABSTRACTION...')
     corpus_manager = CorpusManager(ASSETS_PATH)
     print('DONE.\nCREATING PIPELINE INSTANCE...')
     pipe = TextProcessingPipeline(corpus_manager)
-    print('DONE.\nRUNNING TEXT PROCESSING ON COLLECTED FILES...')
+    print('DONE.\nRUNNING TEXT PROCESSING PIPELINE ON COLLECTED FILES...')
     pipe.run()
     print('DONE.\nPROGRAM FINISHED.')
 
