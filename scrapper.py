@@ -107,26 +107,23 @@ class HTMLParser:
 
     def _fill_article_with_date(self, article_bs):
         big_title = article_bs.find('h1')
-        pattern_number_of_pub = re.compile(r'№ \d+')
-        match_number_of_pub = pattern_number_of_pub.search(big_title.text)
-        number_of_pub = match_number_of_pub.group(0).replace(' ', '')
+        match_number_of_pub = re.search(r'№ \d+', big_title.text)
+        match_number_of_pub = match_number_of_pub.group(0).replace(' ', '')
 
         response = requests.get('http://journals.tsu.ru/philology/&journal_page=archive', headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'lxml')
-        table = article_bs.find('table')
-        rows = table.find_all('tr')
+        rows = article_bs.find('table').find_all('tr')
         months = rows[0].find_all('td')
         month_number = 0
         for row in rows:
             cells = row.find_all('td')
             for index, cell in enumerate(cells):
-                if number_of_pub in cell.text and not month_number:
+                if match_number_of_pub in cell.text and not month_number:
                     month_number = index
                     break
         month = MONTHS_DICT[months[month_number].text]
 
-        pattern_of_date = re.compile(r'\d{4}')
-        year = pattern_of_date.search(big_title.text).group(0)
+        year = re.search(r'\d{4}', big_title.text).group(0)
         self.article.date = datetime.datetime.strptime(f'{year}.{month}', '%Y.%m')
 
     def _fill_article_with_text(self, article_bs):
