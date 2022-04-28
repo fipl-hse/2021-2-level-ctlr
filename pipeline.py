@@ -132,6 +132,10 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
+    if not isinstance(path_to_validate, str):
+        raise FileNotFoundError("File not exists", 1)
+    if len(path_to_validate) == 0:
+        raise FileNotFoundError("File not exists", 1)
     env_path = Path(path_to_validate)
     if not env_path.exists():
         raise FileNotFoundError("File not exists", 1)
@@ -162,13 +166,16 @@ def _validate_files(filenames, basepath):
             raise InconsistentDatasetError
 
 def _check_consistency(path):
-    txts = [fn for fn in os.listdir(path)
-            if fn.endswith('raw.txt')]
-    jsons = [fn for fn in os.listdir(path)
-             if fn.endswith('meta.json')]
-    if len(txts) != len(jsons):
-        raise InconsistentDatasetError("Filename should be correct")
+    _txt_ext = "*raw.txt"
+    _json_ext = "*_meta.json"
+    _txt_ids = sorted(map(_path_id, path.glob(_txt_ext)))
+    _json_ids = sorted(map(_path_id, path.glob(_json_ext)))
+    if len(meta_ids) != len(raw_ids):
+        raise InconsistentDatasetError("number of txt and jsins must be equal")
 
+
+def _path_id(path):
+    return int(re.sub(r"[^0-9]", "", path.name))
 
 def _get_file_names(path_to_dir):
     """
