@@ -74,12 +74,11 @@ class Crawler:
     """
     Crawler implementation
     """
-    seed_urls = []
-    max_articles = 0
-    urls = []
+
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
+        self.urls = []
         pass
 
     def _extract_url(self, article_bs):
