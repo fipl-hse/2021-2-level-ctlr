@@ -142,7 +142,6 @@ class TextProcessingPipeline:
 
                 parses = morph_analyzer.parse(single_word_analysis['text'])
                 token.tags_pymorphy = parses[0].tag
-
         return tokens
 
 
