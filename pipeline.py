@@ -170,7 +170,7 @@ def _check_consistency(path):
     _json_ext = "*_meta.json"
     _txt_ids = sorted(map(_path_id, path.glob(_txt_ext)))
     _json_ids = sorted(map(_path_id, path.glob(_json_ext)))
-    if len(meta_ids) != len(raw_ids):
+    if len(_txt_ids) != len(_json_ids):
         raise InconsistentDatasetError("number of txt and jsins must be equal")
 
 
