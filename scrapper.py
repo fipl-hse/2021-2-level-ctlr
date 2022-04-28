@@ -125,7 +125,7 @@ def prepare_environment(base_path):
 def validate_config(crawler_path):
     file = open(crawler_path)
     dict_data = json.load(file)
-    if not isinstance(dict_data["seed_urls"], list):
+    if not isinstance(dict_data["seed_urls"], list) or len(dict_data["seed_urls"]) == 0:
         raise IncorrectURLError("incorrect url", 1)
     seed_urls = dict_data["seed_urls"]
     for url in dict_data["seed_urls"]:
@@ -157,7 +157,7 @@ def is_number_of_articles_in_range(number, range_number):
         raise NumberOfArticlesOutOfRangeError("number is out of range", 1)
 
 def is_number_of_articles_valid(number):
-    if isinstance(number, int):
+    if isinstance(number, int) and number > 0:
         pass
     else:
         raise IncorrectNumberOfArticlesError("number is not an integer", 1)
