@@ -145,48 +145,25 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-
-    if isinstance(path_to_validate, str):
-        path_to_validate = Path(path_to_validate)
-
-    if not path_to_validate.exists():
+    path = Path(path_to_validate)
+    if not path.exists():
         raise FileNotFoundError
-
-    if not path_to_validate.is_dir():
+    if not path.is_dir():
         raise NotADirectoryError
-
-    if not any(path_to_validate.iterdir()):
+    if not any(path.iterdir()):
         raise EmptyDirectoryError
+    for file in path.iterdir():
+        if not file.read_bytes():
+            raise InconsistentDatasetError("empty file")
 
-    file_formats = [".json", ".txt", ".pdf"]
-    checker = {}
+    meta_ids = sorted(map(_id_from_path, path.glob("*_meta.json")))
+    raw_ids = sorted(map(_id_from_path, path.glob("*_raw.txt")))
+    if len(meta_ids) != len(raw_ids):
+        raise InconsistentDatasetError("uneven number of meta and text files")
 
-    # creating a dictionary of file indexes
-    # and checking the formats
-    for file in Path(path_to_validate).iterdir():
 
-        if os.path.getsize(file) == 0:
-            raise InconsistentDatasetError
-
-        file_index = file.name.split("_")[0]
-        if file_index not in checker.keys():
-            checker[file_index] = 1
-        else:
-            checker[file_index] += 1
-
-        if file.suffix and file.suffix not in file_formats:
-            raise FileNotFoundError
-
-    # checking that there are 2 files with said index
-    if not all(value == 2 for value in checker.values()):
-        raise InconsistentDatasetError
-
-    # checking whether keys are consistent from 1 to N (max in files indices)
-    current_i = list(int(x) for x in checker)
-    ideal_i = range(1, max(current_i) + 1)
-    if not set(current_i) & set(ideal_i) == set(ideal_i):
-        raise InconsistentDatasetError
-
+def _id_from_path(path):
+    return int(re.sub(r"[^0-9]", "", path.name))
 
 def main():
     # YOUR CODE HERE
