@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 import shutil
 from datetime import datetime
-import time
+from time import sleep
 import random
 import requests
 from bs4 import BeautifulSoup
@@ -57,8 +57,8 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            time.sleep(random.random())
-            response = requests.get(url=seed_url, headers=HEADERS)
+            sleep(random.randint(1, 5))
+            response = requests.get(url=seed_url, timeout=60)
 
             if not response.ok:
                 continue
@@ -68,7 +68,8 @@ class Crawler:
             urls = self._extract_url(soup_lib)
             for url in urls:
                 if len(self.urls) < self.max_articles:
-                    self.urls.append(url)
+                    if url not in self.urls:
+                        self.urls.append(url)
 
     def get_search_urls(self):
         """
