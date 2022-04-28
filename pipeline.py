@@ -1,14 +1,14 @@
 """
 Pipeline for text processing implementation
 """
+from pathlib import Path
 import re
 
-from pathlib import Path
-from pymystem3 import Mystem
 import pymorphy2
+from pymystem3 import Mystem
 
-from core_utils.article import Article
 from constants import ASSETS_PATH
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -72,10 +72,9 @@ class CorpusManager:
         """
         path = Path(self.path_to_raw_txt_data)
 
-        for file in path.glob('*'):
-            if '_raw.txt' in file.name:
-                article_id = int(re.search(r'\d+_raw', file.name)[0][:-4])
-                self._storage[article_id] = Article(url=None, article_id=article_id)
+        for file in path.glob('*_raw.txt'):
+            article_id = int(file.stem.split('_')[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -109,9 +108,9 @@ class TextProcessingPipeline:
                 single_tagged_tokens.append(token.get_single_tagged())
                 multiple_tagged_tokens.append(token.get_multiple_tagged())
 
-            article.save_as(' '.join(cleaned_tokens), kind='cleaned')
-            article.save_as(' '.join(single_tagged_tokens), kind='single_tagged')
-            article.save_as(' '.join(multiple_tagged_tokens), kind='multiple_tagged')
+            article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """

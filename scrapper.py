@@ -4,16 +4,13 @@ Scrapper implementation
 from datetime import datetime
 import json
 from pathlib import Path
-import re
 from random import randint
+import re
 import shutil
 from time import sleep
 from bs4 import BeautifulSoup
 import requests
-from constants import ASSETS_PATH
-from constants import DOMAIN_NAME
-from constants import CRAWLER_CONFIG_PATH
-from constants import HEADERS
+from constants import ASSETS_PATH, DOMAIN_NAME, CRAWLER_CONFIG_PATH, HEADERS
 from core_utils.article import Article
 
 
