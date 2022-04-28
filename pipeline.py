@@ -2,6 +2,15 @@
 Pipeline for text processing implementation
 """
 
+from pathlib import Path
+import re
+
+from pymorphy3 import MorphAnalyzer
+from pymystem3 import Mystem
+
+from constants import ASSETS_PATH
+from core_utils.article import Article, ArtifactType
+
 
 class EmptyDirectoryError(Exception):
     """
@@ -24,25 +33,28 @@ class MorphologicalToken:
     """
 
     def __init__(self, original_word):
-        pass
+        self.original_form = original_word
+        self.normalized_form = ''
+        self.tags_mystem = ''
+        self.tags_pymorphy = ''
 
     def get_cleaned(self):
         """
         Returns lowercased original form of a token
         """
-        pass
+        return self.original_form.lower()
 
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>'
 
     def get_multiple_tagged(self):
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -51,19 +63,28 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        pass
+        self.path_to_raw_txt_data = path_to_raw_txt_data
+        self._storage = {}
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        pass
+
+        files = list(self.path_to_raw_txt_data.glob('*_raw.txt'))
+
+        for file in files:
+            file_name = file.name
+            match = re.search(r'\d+', file_name)
+            article_id = int(match.group(0))
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
         Returns storage params
         """
-        pass
+        return self._storage
 
 
 class TextProcessingPipeline:
@@ -72,31 +93,103 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        pass
+        articles = self.corpus_manager.get_articles().values()
+
+        for article in articles:
+            raw_text = article.get_raw_text()
+            processed_tokens = self._process(raw_text)
+
+            cleaned_tokens = []
+            single_tagged_tokens = []
+            multiple_tagged_tokens = []
+
+            for processed_token in processed_tokens:
+                cleaned_tokens.append(processed_token.get_cleaned())
+                single_tagged_tokens.append(processed_token.get_single_tagged())
+                multiple_tagged_tokens.append(processed_token.get_multiple_tagged())
+
+            article.save_as(' '.join(cleaned_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        mystem = Mystem()
+        morph_analyzer = MorphAnalyzer()
+        tokens = []
+        for analysis in mystem.analyze(raw_text.replace("\n", " ")):
+            if "analysis" not in analysis:
+                continue
+            if not analysis["analysis"]:
+                continue
+            token = MorphologicalToken(original_word=analysis["text"])
+
+            token.normalized_form = analysis["analysis"][0]["lex"]
+            token.tags_mystem = analysis["analysis"][0]["gr"]
+            token.tags_pymorphy = morph_analyzer.parse(analysis["text"])[0].tag
+
+            tokens.append(token)
+        return tokens
 
 
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    pass
+
+    if isinstance(path_to_validate, str):
+        path_to_validate = Path(path_to_validate)
+
+    if not path_to_validate.exists():
+        raise FileNotFoundError
+
+    if not path_to_validate.is_dir():
+        raise NotADirectoryError
+
+    if not any(path_to_validate.iterdir()):
+        raise EmptyDirectoryError
+
+    file_formats = [".json", ".txt", ".pdf"]
+    checker = {}
+
+    # creating a dictionary of file indexes
+    # and checking the formats
+    for file in Path(path_to_validate).iterdir():
+
+        file_index = file.name.split("_")[0]
+        if file_index not in checker.keys():
+            checker[file_index] = 1
+        else:
+            checker[file_index] += 1
+
+        if file.suffix and file.suffix not in file_formats:
+            raise FileNotFoundError
+
+    # checking that there are 2 files with said index
+    if not all(value == 2 for value in checker.values()):
+        raise InconsistentDatasetError
+
+    # checking whether keys are consistent from 1 to N (max in files indices)
+    current_i = list(int(x) for x in checker)
+    ideal_i = range(1, max(current_i) + 1)
+    if not set(current_i) & set(ideal_i) == set(ideal_i):
+        raise InconsistentDatasetError
 
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
