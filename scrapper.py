@@ -100,7 +100,8 @@ class Crawler:
             _is_url_by_user = (self._is_string_contains(path, 'community') or self._is_string_contains(path, 'user'))
             _is_url_valid_content = self._is_string_contains(path, 'content')
             _is_url_not_comment = _is_url_valid_content and not self._is_string_contains(path, 'comment')
-            if path and path.startswith('/') and _is_url_by_user and _is_url_not_comment:
+            _is_ending_correct = not path.endswith('.')
+            if path and path.startswith('/') and _is_ending_correct and _is_url_by_user and _is_url_not_comment:
                 path = urljoin(url, path)
                 self.urls.append(path)
 
