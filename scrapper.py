@@ -2,7 +2,10 @@
 Scrapper implementation
 """
 
-import json, requests,re, shutil
+import json
+import requests
+import re
+import shutil
 from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
@@ -168,7 +171,7 @@ if __name__ == '__main__':
     crawler = Crawler(seed_urls=urls, max_articles=maximum_articles)
     crawler.find_articles()
 
-    for i, url in enumerate(crawler.urls):
-        parser = HTMLParser(url, i + 1)
+    for index, link in enumerate(crawler.urls):
+        parser = HTMLParser(link, index + 1)
         article = parser.parse()
         article.save_raw()
