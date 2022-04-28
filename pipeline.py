@@ -161,8 +161,8 @@ def _validate_files(filenames, basepath):
         if path.exists():
             with open(path, 'r', encoding='utf-8') as the_file:
                 text = the_file.read()
-        if not text:
-            raise InconsistentDatasetError
+                if not text:
+                    raise InconsistentDatasetError
 
 def _check_consistency(path):
     _txt_ext = "*raw.txt"
