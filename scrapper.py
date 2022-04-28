@@ -120,7 +120,7 @@ def prepare_environment(base_path):
     """
     env_path = Path(base_path)
     if env_path.exists():
-         shutil.rmtree(env_path)
+        shutil.rmtree(env_path)
     env_path.mkdir(parents=True)
 
 
