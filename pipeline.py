@@ -165,6 +165,8 @@ def _validate_files(filenames, basepath):
                     raise InconsistentDatasetError
 
 def _check_consistency(path):
+    if not path.exists():
+        raise FileNotFoundError
     _txt_ext = "*_raw.txt"
     _json_ext = "*_meta.json"
     _txt_ids = sorted(map(_path_id, path.glob(_txt_ext)))
