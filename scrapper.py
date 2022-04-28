@@ -189,4 +189,4 @@ if __name__ == '__main__':
     for index, a_text in enumerate(crawler.urls):
         parser = HTMLParser(a_text, index + 1)
         article = parser.parse()
-        # article.save_raw()
+        article.save_raw()
