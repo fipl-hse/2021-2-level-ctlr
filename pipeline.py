@@ -132,7 +132,7 @@ class TextProcessingPipeline:
 
         tokens = []
         for single_word_analysis in clean_text_analysis:
-            if single_word_analysis['analysis']:
+            if 'analysis' in single_word_analysis:
                 token = MorphologicalToken(single_word_analysis['text'])
                 tokens.append(token)
 
