@@ -12,9 +12,10 @@ class ImprovedArticle(Article):
         with open(self.get_file_path(kind=kind), encoding="utf-8") as file:
             return file.read()
 
-    def save_custom_meta(self, custom_meta):
+    def save_updated_meta(self, update_dict):
+        updated_meta = self._get_meta() | update_dict
         with (ASSETS_PATH / self.get_meta_file_path()).open("w", encoding="utf-8") as file:
-            json.dump(custom_meta, file, sort_keys=False,
+            json.dump(updated_meta, file, sort_keys=False,
                       indent=4, ensure_ascii=False, separators=(",", ": "))
 
     def get_image_path(self):

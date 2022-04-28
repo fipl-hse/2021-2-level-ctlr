@@ -26,8 +26,7 @@ class POSFrequencyPipeline:
             tagged_text = article.get_file(ArtifactType.single_tagged)
             pos = re.findall(r"(?<=<)[A-Z]*(?=[,=])", tagged_text)
             pos_frequencies = dict(Counter(pos))
-            meta = article._get_meta() | {"pos_frequencies": pos_frequencies}
-            article.save_custom_meta(meta)
+            article.save_updated_meta({"pos_frequencies": pos_frequencies})
             visualize(statistics=pos_frequencies, path_to_save=article.get_image_path())
 
 
