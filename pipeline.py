@@ -114,17 +114,13 @@ class TextProcessingPipeline:
         Processes each token and creates MorphToken class instance
         """
         article_text = raw_text.replace('-\n', '')
-        for symbol in ['\n', '\r']:
-            article_text = article_text.replace(symbol, ' ')
         m_tokens_list = []
         analyzed_text_mystem = Mystem().analyze(article_text)
         pymorphy2_analyzer = pymorphy2.MorphAnalyzer()
         for analyzed_word in analyzed_text_mystem:
-            if analyzed_word['text'] == ' ':
+            if (analyzed_word['text'] == ' ') or ('analysis' not in analyzed_word.keys()):
                 continue
             original_word = analyzed_word['text']
-            if 'analysis' not in analyzed_word.keys():
-                continue
             if not analyzed_word['analysis']:
                 continue
             if 'lex' not in analyzed_word['analysis'][0].keys():
@@ -132,10 +128,13 @@ class TextProcessingPipeline:
             if 'gr' not in analyzed_word['analysis'][0].keys():
                 continue
             token = MorphologicalToken(original_word)
-            token.normalized_form = analyzed_word['analysis'][0].get('lex')
-            token.tags_mystem = analyzed_word['analysis'][0].get('gr')
+            normalized_form = analyzed_word['analysis'][0].get('lex')
+            tags_mystem = analyzed_word['analysis'][0].get('gr')
+            tags_pymorphy = pymorphy2_analyzer.parse(original_word)[0].tag
+            token.normalized_form = normalized_form
+            token.tags_mystem = tags_mystem
+            token.tags_pymorphy = tags_pymorphy
             m_tokens_list.append(token)
-            token.tags_pymorphy = pymorphy2_analyzer.parse(original_word)[0].tag
         return m_tokens_list
 
 
@@ -148,23 +147,24 @@ def validate_dataset(path_to_validate):
         raise FileNotFoundError
     if not path_to_validate.is_dir():
         raise NotADirectoryError
-    children_files = list(path_to_validate.glob('*raw.txt'))
-    children_files.extend(list(path_to_validate.glob('*.json')))
+    children_files_txt = list(path_to_validate.glob('*raw.txt'))
+    children_files_json = list(path_to_validate.glob('*.json'))
+    children_files = children_files_json + children_files_txt
     if not children_files:
         raise EmptyDirectoryError
+    if len(children_files_txt) != len(children_files_json):
+        raise InconsistentDatasetError
     file_names = []
     for files_path in children_files:
         file_names.append(files_path.name)
-    if len(file_names) % 2 != 0:
-        raise InconsistentDatasetError
     for i in range(1, int(len(list(children_files)) / 2) + 1):
         if (f'{i}_raw.txt' not in file_names) or (f'{i}_meta.json' not in file_names):
             raise InconsistentDatasetError
     for file in children_files:
-        with open(file, 'r', encoding='utf-8') as text_file:
-            text = text_file.read()
-        if not text:
+        if not Path(file).stat().st_size:
             raise InconsistentDatasetError
+
+
 
 
 def main():

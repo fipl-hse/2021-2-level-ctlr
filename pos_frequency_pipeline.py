@@ -30,12 +30,9 @@ class POSFrequencyPipeline:
                 if not text_n_tags:
                     raise EmptyFileError
             pos_all = pos_pattern.findall(text_n_tags)
-            print(len(pos_all))
             for pos in pos_all:
                 if pos not in frequencies_dict:
                     frequencies_dict[pos] = pos_all.count(pos)
-            visualize(statistics=frequencies_dict,
-                      path_to_save=ASSETS_PATH / f'{article_item.article_id}_image.png')
             with open(article_item.get_meta_file_path(), "r", encoding='utf-8') as meta_file:
                 meta_data = json.load(meta_file)
                 if not meta_data:
@@ -44,8 +41,8 @@ class POSFrequencyPipeline:
             with open(article_item.get_meta_file_path(), 'w', encoding='utf-8') as file:
                 json.dump(meta_data, file, sort_keys=False,
                           indent=4, ensure_ascii=False, separators=(',', ': '))
-
-
+            visualize(statistics=frequencies_dict,
+                      path_to_save=ASSETS_PATH / f'{article_item.article_id}_image.png')
 
 
 def main():
