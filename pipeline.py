@@ -141,6 +141,8 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError("Directory is empty", 1)
     filenames = _get_file_names(path_to_validate)
     _validate_filenames(filenames)
+    _validate_files(filenames)
+    _check_consistency(ASSETS_PATH)
 
 def _validate_filenames(list_to_validate):
     for filename in list_to_validate:
@@ -151,6 +153,21 @@ def _validate_filenames(list_to_validate):
         _is_whole_name_correct = _is_extension_correct and _is_name_length_valid and _is_name_begins_correctly
         if not _is_whole_name_correct:
             raise InconsistentDatasetError("Filename should be correct")
+
+def _validate_files(filenames):
+    for filename in filenames:
+        path = ASSETS_PATH / filename
+        if os.stat(path).st_size == 0:
+            raise InconsistentDatasetError("Filename should be not empty")
+
+def _check_consistency(path):
+    txts = [fn for fn in os.listdir(path)
+              if fn.endswith('.txt') and 'cleaned' not in fn]
+    jsons = [fn for fn in os.listdir(path)
+              if fn.endswith('.json')]
+    if len(txts) != len(jsons):
+        raise InconsistentDatasetError("Filename should be correct")
+
 
 def _get_file_names(path_to_dir):
     """
