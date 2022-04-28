@@ -4,7 +4,6 @@ Scrapper implementation
 import datetime
 import json
 from pathlib import Path
-import random
 import shutil
 from time import sleep
 
