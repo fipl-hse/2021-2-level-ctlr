@@ -111,6 +111,10 @@ class HTMLParser:
 
         self.article.title = article_bs.find('h1').text
 
+        all_post_list_urls_bs = article_bs.find_all('a', class_='post-pre')
+        print(all_post_list_urls_bs)
+
+
     def _fill_article_with_text(self, article_bs):
         text = article_bs.find('div', class_='post-text').text
         self.article.text = text
