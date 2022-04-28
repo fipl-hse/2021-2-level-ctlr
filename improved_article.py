@@ -17,5 +17,5 @@ class ImprovedArticle(Article):
             json.dump(custom_meta, file, sort_keys=False,
                       indent=4, ensure_ascii=False, separators=(",", ": "))
 
-    def moo(self):
-        return "moo"
+    def get_image_path(self):
+        return ASSETS_PATH / f"{self.article_id}_image.png"

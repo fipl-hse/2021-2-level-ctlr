@@ -25,8 +25,10 @@ class POSFrequencyPipeline:
         for article in self.corpus_manager.get_articles().values():
             tagged_text = article.get_file(ArtifactType.single_tagged)
             pos = re.findall(r"(?<=<)[A-Z]*(?=[,=])", tagged_text)
-            meta = article._get_meta() | {"pos_frequencies": dict(Counter(pos))}
+            pos_frequencies = dict(Counter(pos))
+            meta = article._get_meta() | {"pos_frequencies": pos_frequencies}
             article.save_custom_meta(meta)
+            visualize(statistics=pos_frequencies, path_to_save=article.get_image_path())
 
 
 def main():
