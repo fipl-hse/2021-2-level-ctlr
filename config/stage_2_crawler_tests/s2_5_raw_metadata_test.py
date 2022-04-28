@@ -113,19 +113,20 @@ class RawMediumDataValidator(unittest.TestCase):
             self.assertTrue(requests.get(metadata[1]['url']),
                             msg=msg % metadata[1]['url'])
 
-            html_source = requests.get(metadata[1]['url']).text
+            html_source = requests.get(metadata[1]['url'])
+            html_source.encoding = "windows-1251"
             msg = "Title is not found by specified in metadata " \
                   "URL %s. Check how you collect titles"
             self.assertTrue(check_title_in_html(metadata[1]['title'],
-                                                html_source),
+                                                html_source.text),
                             msg=msg % metadata[1]['url'])
 
             # author is presented? NOT FOUND otherwise?
             try:
                 if isinstance(metadata[1]['author'], str):
-                    self.assertTrue(metadata[1]['author'] in html_source)
+                    self.assertTrue(metadata[1]['author'] in html_source.text)
                 elif isinstance(metadata[1]['author'], list):
-                    self.assertTrue(all(author in html_source
+                    self.assertTrue(all(author in html_source.text
                                         for author in metadata[1]['author']))
                 else:
                     error_message = f"Author field {metadata[1]['author']} has " \
@@ -178,8 +179,8 @@ class RawAdvancedDataValidator(unittest.TestCase):
             if metadata[1]['url'].endswith(".pdf"):
                 continue
 
-            html_source = requests.get(metadata[1]['url']).text
-
+            html_source = requests.get(metadata[1]['url'])
+            html_source.encoding = "windows-1251"
             message = f"Date <{metadata[1]['date']}> do not match given " \
                       f"format <{self.data_pattern}> " \
                       f"(url <{metadata[1]['url']}>). " \
@@ -195,7 +196,7 @@ class RawAdvancedDataValidator(unittest.TestCase):
                               f"(topic <{topic}>) for url " \
                               f"<{metadata[1]['url']}> are not found. " \
                               f"Check how you create topics."
-                    self.assertTrue(topic in html_source, msg=message)
+                    self.assertTrue(topic in html_source.text, msg=message)
 
 
 if __name__ == "__main__":
