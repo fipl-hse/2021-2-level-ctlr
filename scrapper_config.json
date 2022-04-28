@@ -1,4 +1,4 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": ["https://newsland.com/hot", "https://newsland.com"],
+    "total_articles_to_find_and_parse": 100
 }
