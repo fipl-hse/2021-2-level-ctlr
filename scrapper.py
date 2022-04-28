@@ -5,7 +5,7 @@ Scrapper implementation
 from urllib.parse import urlparse
 from urllib.parse import urljoin
 import json
-import os
+from pathlib import Path
 import datetime
 import shutil
 import requests
@@ -118,9 +118,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if base_path.is_dir():
-        shutil.rmtree(base_path)
-    os.makedirs(base_path)
+    env_path = Path(base_path)
+    if env_path.exists():
+         shutil.rmtree(env_path)
+    env_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
