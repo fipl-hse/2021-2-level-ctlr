@@ -175,7 +175,14 @@ def validate_dataset(path_to_validate):
 
     if sorted_all_ids[0] != 1:
         raise InconsistentDatasetError()
+    if not check_balance(path_to_validate):
+        raise InconsistentDatasetError('Dataset is imbalanced')
 
+
+def check_balance(path_to_validate):
+    """
+    Checks the balance between *_raw.txt and *_meta.json files
+    """
     counter_txt = 0
     counter_meta = 0
     for file in path_to_validate.glob('*'):
@@ -184,7 +191,8 @@ def validate_dataset(path_to_validate):
         elif file.name.endswith('meta.json'):
             counter_meta += 1
     if counter_txt != counter_meta:
-        raise InconsistentDatasetError('Dataset is imbalanced')
+        return False
+    return True
 
 
 def main():
