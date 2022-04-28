@@ -3,6 +3,7 @@ Pipeline for text processing implementation
 """
 from pathlib import Path
 from pymystem3 import Mystem
+from pymorphy2 import MorphAnalyzer
 import re
 
 from constants import ASSETS_PATH
@@ -51,7 +52,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        pass
+        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
 
 
 class CorpusManager:
@@ -69,11 +70,13 @@ class CorpusManager:
         Register each dataset entry
         """
         path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
+        pattern = re.compile(r'\d+')
         for file in path_to_raw_txt_data.glob("*.txt"):
-            file_match = re.search(r'\d+', file.name)
-            if file_match:
-                article_id = int(file_match.group(0))
-                self._storage[article_id] = Article(url=None, article_id=article_id)
+            file_match = re.search(pattern, file.name)
+            if not file_match:
+                continue
+            article_id = int(file_match.group(0))
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -100,29 +103,30 @@ class TextProcessingPipeline:
             tokens = self._process(raw_text)
             cleaned_tokens = []
             single_tagged_tokens = []
+            multiple_tagged_tokens = []
             for token in tokens:
                 cleaned_tokens.append(token.get_cleaned())
                 single_tagged_tokens.append(token.get_single_tagged())
+                multiple_tagged_tokens.append(token.get_multiple_tagged())
             article.save_as(" ".join(cleaned_tokens), kind=ArtifactType.cleaned)
             article.save_as(" ".join(single_tagged_tokens), kind=ArtifactType.single_tagged)
+            article.save_as(" ".join(multiple_tagged_tokens), kind=ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        text = Mystem().analyze(raw_text)
+        processed_text = Mystem().analyze(raw_text)
         tokens = []
-        for word in text:
-            if 'analysis' not in word:
+        pymorph_analyzer = MorphAnalyzer()
+        for processed_word in processed_text:
+            if not processed_word.get('text') or not processed_word.get('analysis'):
                 continue
-            if not word['analysis']:
-                continue
-            morph_token = MorphologicalToken(original_word=word['text'])
-            morph_token.normalized_form = word['analysis'][0]['lex']
-            morph_token.tags_mystem = word['analysis'][0]['gr']
-
+            morph_token = MorphologicalToken(original_word=processed_word['text'])
+            morph_token.normalized_form = processed_word['analysis'][0]['lex']
+            morph_token.tags_mystem = processed_word['analysis'][0]['gr']
+            morph_token.tags_pymorphy = pymorph_analyzer.parse(processed_word['text'])[0].tag
             tokens.append(morph_token)
-
         return tokens
 
 
@@ -142,23 +146,42 @@ def validate_dataset(path_to_validate):
     if len(list(path_to_validate.glob('*'))) == 0:
         raise EmptyDirectoryError
 
-    counter_txt, counter_meta = 0, 0
-
-    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name.split('_')[0])):
+    counter_txt = 0
+    counter_meta = 0
+    for file in path_to_validate.glob('*'):
+        if file.stat().st_size == 0:
+            raise InconsistentDatasetError
         if file.name.endswith('raw.txt'):
             counter_txt += 1
-
-            if f'{counter_txt}_raw' not in file.name:
-                raise InconsistentDatasetError
-            with open(file, encoding='utf-8') as f:
-                if not f.read():
-                    raise InconsistentDatasetError
-
-        if file.name.endswith('.json'):
+            if not path_to_validate / f'{counter_txt}_raw.txt':
+                raise InconsistentDatasetError()
+        elif file.name.endswith('meta.json'):
             counter_meta += 1
-
+            if not path_to_validate / f'{counter_meta}_meta.txt':
+                raise InconsistentDatasetError()
     if counter_txt != counter_meta:
         raise InconsistentDatasetError
+
+    pattern_for_filename = re.compile(r'(\d+)_(cleaned.txt|meta.json|multiple_tagged.txt|raw.txt|raw.pdf'
+                                      r'|single_tagged.txt)')
+    all_ids = []
+    for file in path_to_validate.glob('*'):
+        match_for_name = pattern_for_filename.match(file.name)
+        if not match_for_name:
+            raise InconsistentDatasetError("Incorrect file name")
+        all_ids.append(int(match_for_name.group(1)))
+    if not all_ids:
+        raise EmptyDirectoryError
+
+    sorted_all_ids = sorted(all_ids)
+    previous_id_of_file = 0
+    for id_of_file in sorted_all_ids:
+        if id_of_file - previous_id_of_file > 1:
+            raise InconsistentDatasetError
+        previous_id_of_file = id_of_file
+
+    if sorted_all_ids[0] != 1:
+        raise InconsistentDatasetError()
 
 
 def main():
