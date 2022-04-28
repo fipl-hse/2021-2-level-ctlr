@@ -44,8 +44,10 @@ class Crawler:
     def _extract_url(self, article_bs):
         articles_block = article_bs.find('div', class_='tnb_img clear')
         articles_bs = articles_block.find_all('p', recursive=False)
+        urls = []
         for art_bs in articles_bs:
-            self.urls.append('https://daily-nn.ru' + art_bs.find('a')['href'])
+            urls.append('https://daily-nn.ru' + art_bs.find('a')['href'])
+        return urls
 
     def find_articles(self):
         """
@@ -57,7 +59,11 @@ class Crawler:
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
-            self._extract_url(soup)
+            s_urls = self._extract_url(soup)
+            for url in s_urls:
+                if len(self.urls) < self.total_articles_to_find_and_parse:
+                    if url not in self.urls:
+                        self.urls.append(url)
 
     def get_search_urls(self):
         """
