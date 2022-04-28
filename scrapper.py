@@ -2,10 +2,12 @@
 Scrapper implementation
 """
 
-import json, requests, shutil, urllib.error
+import json, requests,re, shutil
 from bs4 import BeautifulSoup
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from core_utils.article import Article
+from datetime import datetime
+
 
 
 class IncorrectURLError(Exception):
@@ -38,43 +40,46 @@ class Crawler:
 
 
     def _extract_url(self, article_bs):
+        urls_dict = []
 
-        class_bs = article_bs.find('div', class_="content")
-        title_bs = class_bs.findall('div', class_="text_box")
+        for url in self.seed_urls:
+            response = requests.get(url)
 
-        for links_bs in title_bs:
-            if len(self.urls) < self.max_articles:
-                break
+        article_bs = BeautifulSoup(response.text, 'html.parser')
+
+        content = article_bs.find('section', class_='article_list content_list_js')
+        all_urls = content.find_all('a')
+        for url_to_article in all_urls:
+            url = url_to_article['href']
+            site_url = r'https://aif.ru'
+            correct_url = re.search(r'https://', url)
+            if correct_url:
+                urls_dict.append(url)
+            else:
+                urls_dict.append(site_url + url)
 
 
     def find_articles(self):
         """
         Finds articles
         """
-
-        response = requests.get(self.seed_urls)
+        for url in self.seed_urls:
+            response = requests.get(url)
 
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         all_links = article_bs.find_all('a')
         seed_urls = []
 
-        for link in all_links:
-            try:
-                seed_urls.append(link['href'])
-            except (KeyError, urllib.error.URLError, urllib.error.HTTPError):
-                print('Found incorrect link')
-
-            for elements in seed_urls:
-                if ('http://' and 'https://') not in elements:
-                    seed_urls.remove(elements)
+        for article in article_bs:
+            if len(self.urls) < self.max_articles:
+                self._extract_url(article)
 
 
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-
         return self.seed_urls
 
 
@@ -84,9 +89,27 @@ class HTMLParser:
         self.article_id = article_id
         self.article = Article(article_url, article_id)
 
+
     def _fill_article_with_text(self, article_bs):
         text_of_article_bs = article_bs.find('span')
         self.article.text = text_of_article_bs.text
+
+
+    def _fill_article_with_meta_information(self, article_bs):
+        self.article.title = article_bs.find('h1', itemprop="headline").text
+
+        self.article.tag = article_bs.find("span", itemprop="keywords", class_="item-prop-span")
+        self.article.topics = article_bs.find()
+
+        date_raw = article_bs.find("time", itemprop="datePublished")
+        date_parsed = datetime.strptime(date_raw, '%d-%m-%Y %H:%M')
+        self.article.date = date_parsed
+
+        try:
+            self.article.author = article_bs.find('span', itemprop="name", class_="item-prop-span").text
+        except AttributeError:
+            self.article.author = 'NOT FOUND'
+
 
     def parse(self):
         response = requests.get(self.article_url)
@@ -108,7 +131,7 @@ def prepare_environment(base_path):
     except FileNotFoundError:
         print('File does not exist')
 
-    base_path.mkdir(parent=True)
+    base_path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
@@ -134,14 +157,18 @@ def validate_config(crawler_path):
     for url in seed_urls:
         if url[0:7] != 'http://' and url[0:8] != 'https://':
             raise IncorrectURLError
-    return max_articles, seed_urls
+    return seed_urls, max_articles
 
 
 if __name__ == '__main__':
     # YOUR CODE HERE
 
-    seed_urls_try, max_articles_try = validate_config(CRAWLER_CONFIG_PATH)
+    urls, maximum_articles = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-
-    crawler = Crawler(seed_urls_try, max_articles_try)
+    crawler = Crawler(seed_urls=urls, max_articles=maximum_articles)
     crawler.find_articles()
+
+    for i, url in enumerate(crawler.urls):
+        parser = HTMLParser(url, i + 1)
+        article = parser.parse()
+        article.save_raw()
