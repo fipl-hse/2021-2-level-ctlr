@@ -49,7 +49,6 @@ class MorphologicalToken:
         Returns normalized lemma with MyStem tags
         """
         return f'{self.normalized_form}<{self.tags_mystem}>'
-        pass
 
     def get_multiple_tagged(self):
         """
@@ -85,8 +84,6 @@ class CorpusManager:
         Returns storage params
         """
         return self._storage
-        pass
-
 
 class TextProcessingPipeline:
     """
@@ -148,8 +145,6 @@ class TextProcessingPipeline:
             token.tags_pymorphy = morph_analyzer.parse(single_word_analysis['text'])[0].tag
 
         return tokens
-        pass
-
 
 def validate_dataset(path_to_validate):
     """
