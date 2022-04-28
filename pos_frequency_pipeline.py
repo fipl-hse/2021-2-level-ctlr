@@ -34,10 +34,7 @@ class POSFrequencyPipeline:
             pos_freq = {}
             pattern = re.compile(r'<([A-Z]+)')
             for pos in pattern.findall(tags):
-                if pos not in pos_freq:
-                    pos_freq[pos] = 0
-                else:
-                    pos_freq[pos] = pos_freq.get(pos) + 1
+                pos_freq[pos] = pos_freq.get(pos, 0) + 1
 
             with open(Path(article.get_meta_file_path()), 'r', encoding='utf-8') as meta_file:
                 meta = json.load(meta_file)
