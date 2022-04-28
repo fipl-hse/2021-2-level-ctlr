@@ -7,7 +7,7 @@ from pymorphy3 import MorphAnalyzer
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from core_utils.article import Article, ArtifactType
+from improved_article import ImprovedArticle, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -52,7 +52,7 @@ class MorphologicalToken:
         """
         Returns normalized lemma with PyMorphy tags
         """
-        return f"{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy}"
+        return f"{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})"
 
 
 class CorpusManager:
@@ -71,7 +71,7 @@ class CorpusManager:
         """
         for file in self.path_to_raw_text_data.glob("*_raw.txt"):
             index = int(file.name[:-8])
-            self._storage[index] = Article(None, index)
+            self._storage[index] = ImprovedArticle(None, index)
 
     def get_articles(self):
         """
