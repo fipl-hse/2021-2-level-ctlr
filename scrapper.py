@@ -4,7 +4,7 @@ Scrapper implementation
 
 import json
 import re
-# from datetime import datetime
+from pathlib import Path
 import shutil
 from time import sleep
 import random
@@ -83,51 +83,30 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        title_parent = article_bs.find('div', class_='article__header__title')
-        title = title_parent.find('h1', class_='article__header__title-in js-slide-title').text  # print the title
-        self.article.title = title.strip()   # delete spaces
+        # topic
+        topic = article_bs.find('a', class_='article__header__category').text
+        self.article.topics = topic
 
-        # bs_date = article_bs.find('span', class_='article__header__date').text
-        # months = {"янв": "01", "фев": "02", "мар": "03", "апр": "04", "май": "05", "июн": "06", "июл": "07",
-        #           "авг": "08", "сен": "09", "окт": "10", "ноя": "11", "дек": "12"}
-        # for m in months:
-        #     if m in bs_date:
-        #         bs_date = bs_date.replace(m, months[m])
-        # years = ['2020', '2021', '2022']
-        # for y in years:
-        #     if y in bs_date:
-        #         bs_date = bs_date.replace(', ', '.')
-        #     else:
-        #         bs_date = bs_date.replace(', ', '.2022 ')
-        #
-        # bs_date = bs_date.replace(bs_date[2], '.', 1)
+        # title
+        # try:
+        #     title = article_bs.find('h1', class_='article__header__title-in js-slide-title').text
+        #     txt = title.strip()
+        #     self.article.title = txt
+        # except AttributeError:
+        self.article.title = 'NOT FOUND'
 
-        # self.article.date = datetime.strptime(bs_date, '%d.%m.%Y %H:%M')
-
-        # author_parent = article_bs.find('a', class_='article__authors__author')
-        # if author_parent in article_bs:
-        #     author = author_parent.find('span', class_='article__authors__author__name')
-        #     self.article.author = author.text
-        # else:
+        # authors
         self.article.author = 'NOT FOUND'
-
-        self.article.date = 'NOT FOUND'
-
-        self.article.topics = 'NOT FOUND'
 
     def _fill_article_with_text(self, article_bs):
         self.article.text = ''
         block_1 = article_bs.find('div', class_='article__text article__text_free')
-        # block_1_1 = block_1.find('div', class_="article__text__overview")
         txt_group1 = block_1.find('p')
-        # txt_group1 = txt_group1.select_one('a').decompose()
-
         for i in txt_group1:
             self.article.text += i.text
 
         block_2 = article_bs.find('div', class_='article__text')
         txt_group2 = block_2.find('p')
-        # txt_group2 = txt_group2.select_one('a').decompose()  # delete irrelevant tag
         for k in txt_group2:
             self.article.text += k.text
 
@@ -145,10 +124,12 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if base_path.exists():
-        shutil.rmtree(base_path)
+    path = Path(base_path)
 
-    base_path.mkdir(parents=True)
+    if path.exists():
+        shutil.rmtree(path)
+
+    path.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
