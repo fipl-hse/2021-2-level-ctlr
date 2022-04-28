@@ -134,7 +134,7 @@ def validate_dataset(path_to_validate):
     """
 
     env_path = Path(path_to_validate)
-    if not env_path.exists():
+    if not os.path.exists(path_to_validate) or os.path.getsize(path_to_validate) <= 0:
         raise FileNotFoundError("File not exists", 1)
     if not env_path.is_dir():
         raise NotADirectoryError("File not exists", 1)
