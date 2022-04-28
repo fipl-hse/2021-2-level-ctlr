@@ -1,5 +1,4 @@
 {
   "base_urls": ["https://www.psychologies.ru/articles/", "https://www.psychologies.ru/articles/2/", "https://www.psychologies.ru/articles/3/"],
-  "total_articles_to_find_and_parse": 100,
-  "max_number_articles_to_get_from_one_seed": 20
+  "total_articles_to_find_and_parse": 100
 }
