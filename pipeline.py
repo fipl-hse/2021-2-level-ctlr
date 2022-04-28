@@ -133,6 +133,8 @@ class TextProcessingPipeline:
                 continue
             if "analysis" not in token:
                 continue
+            if "LATN" in token['analysis'][0]['gr']:
+                continue
             morph_token = MorphologicalToken(original_word=token['text'])
             morph_token.normalized_form = token['analysis'][0]['lex']
             morph_token.tags_mystem = token['analysis'][0]['gr']
