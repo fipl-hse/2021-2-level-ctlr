@@ -156,7 +156,9 @@ class TextProcessingPipeline:
             parsed_word = morph.parse(original_word)
 
             if not parsed_word:
-                morphological_token.tags_pymorphy = parsed_word[0].tag
+                continue
+
+            morphological_token.tags_pymorphy = parsed_word[0].tag
 
             morphological_tokens.append(morphological_token)
 
