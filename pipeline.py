@@ -2,6 +2,7 @@
 Pipeline for text processing implementation
 """
 
+import os
 import re
 from pathlib import Path
 
@@ -74,12 +75,11 @@ class CorpusManager:
         path = Path(self.path_to_raw_txt_data)
         digit = re.compile(r'\d+')
         for file in path.glob('*'):
-            digit_in_title = digit.match(file.name)
-            if not digit_in_title:
+            article_id = digit.match(file.name).group()
+            if not article_id:
                 continue
-            #article_id = int(digit_in_title.group())
-            article = Article(None, int(digit_in_title.group()))
-            self._storage[int(digit_in_title.group())] = article
+            article = Article(None, int(article_id))
+            self._storage[int(article_id)] = article
 
     def get_articles(self):
         """
@@ -129,6 +129,8 @@ class TextProcessingPipeline:
                     or ('lex' not in token['analysis'][0]
                         or 'gr' not in token['analysis'][0]):
                 continue
+            if ('text' not in token) or (not token['text']):
+                continue
             morphological_token = MorphologicalToken(token['text'])
             morphological_token.normalized_form = token['analysis'][0]['lex']
             morphological_token.tags_mystem = token['analysis'][0]['gr']
@@ -149,6 +151,8 @@ def validate_dataset(path_to_validate):
     indices = []
     digit_pattern = re.compile(r'\d+')
     for files in dataset_path.glob('*'):
+        if os.stat(files).st_size == 0:
+            raise InconsistentDatasetError
         digit = digit_pattern.match(files.stem)
         if not digit:
             raise InconsistentDatasetError
@@ -159,17 +163,17 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError
     previous_index = 0
     new_indices = sorted(indices)
+    if new_indices[0] != 1:
+        raise InconsistentDatasetError
     for index in new_indices:
-        if index - previous_index != 1 or new_indices[0] != 1:
+        if index - previous_index != 1:
             raise InconsistentDatasetError
         previous_index = index
         raw_path = dataset_path / f'{index}_raw.txt'
         meta_path = dataset_path / f'{index}_meta.json'
         if not raw_path.exists() or not meta_path.exists():
             raise InconsistentDatasetError
-        with open(raw_path, 'r', encoding='utf-8') as file:
-            if not file.read():
-                raise InconsistentDatasetError
+
 
 
 def main():
