@@ -130,7 +130,7 @@ fix all the issues. Health check would be existence of a raw dataset in the `tmp
 folder on your computer. For more details on how to implement `scrapper.py` refer to the 
 [scrapper tutorial](./scrapper.md).
 
-### Stage 1. Validate dataset first
+### Stage 1. date dataset first
 
 Pipeline expects that dataset is collected. It must not start working if dataset is invalid.
 The very first thing that should happen after pipeline is run is the validation of the dataset.
