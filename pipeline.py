@@ -139,7 +139,7 @@ def validate_dataset(path_to_validate):
     _check_consistency(path_to_validate)
 
 def _validate_path(path_to_validate):
-    if not instance(path_to_validate, Path):
+    if not isinstance(path_to_validate, Path):
         raise FileNotFoundError("Must be Path", 1)
     env_path = Path(path_to_validate)
     if not os.path.exists(path_to_validate) or os.path.getsize(path_to_validate) <= 0:
