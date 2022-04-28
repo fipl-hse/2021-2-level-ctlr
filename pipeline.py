@@ -6,7 +6,7 @@ import os
 import re
 from pathlib import Path
 
-import pymorphy2
+from pymorphy2 import MorphAnalyzer
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
@@ -122,7 +122,7 @@ class TextProcessingPipeline:
         cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁ]+', raw_text))
         analyzed_cleaned_text = Mystem().analyze(cleaned_text)
         tokens = []
-        morph = pymorphy2.MorphAnalyzer()
+        morph = MorphAnalyzer()
         for token in analyzed_cleaned_text:
             if ('analysis' not in token) \
                     or (not token['analysis']) \
