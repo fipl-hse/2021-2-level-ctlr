@@ -1,28 +1,31 @@
 """
 Pipeline for text processing implementation
 """
-import re
+from typing import List
+
 from pathlib import Path
-
+from pymorphy2 import MorphAnalyzer
 from pymystem3 import Mystem
-import pymorphy2
 
+from article import Article
 from constants import ASSETS_PATH
-from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
     """
-    No data to process
+    Custom error
     """
 
 
 class InconsistentDatasetError(Exception):
     """
-    Corrupt data:
-        - numeration is expected to start from 1 and to be continuous
-        - a number of text files must be equal to the number of meta files
-        - text files must not be empty
+    Custom error
+    """
+
+
+class UnknownDatasetError(Exception):
+    """
+    Custom error
     """
 
 
@@ -30,54 +33,37 @@ class MorphologicalToken:
     """
     Stores language params for each processed token
     """
+    def __init__(self, original_word, normalized_form):
+        self.original = original_word
+        self.normalized = normalized_form
+        self.mystem_tags = ''
+        self.pymorphy_tags = ''
 
-    def __init__(self, original_word):
-        self.original_word = original_word
-        self.normalized_form = ''
-        self.tags_mystem = ''
-        self.tags_pymorphy = ''
-
-    def get_cleaned(self):
-        """
-        Returns lowercased original form of a token
-        """
-        return self.original_word.lower()
-
-    def get_single_tagged(self):
-        """
-        Returns normalized lemma with MyStem tags
-        """
-        return f'{self.normalized_form}<{self.tags_mystem}>'
-
-    def get_multiple_tagged(self):
-        """
-        Returns normalized lemma with PyMorphy tags
-        """
-        return f'{self.normalized_form}<{self.tags_mystem}>({self.tags_pymorphy})'
+    def __str__(self):
+        return f'{self.normalized}<{self.mystem_tags}>({str(self.pymorphy_tags)})'
 
 
 class CorpusManager:
     """
     Works with articles and stores them
     """
-
     def __init__(self, path_to_raw_txt_data: str):
-        self.path_to_raw_txt_data = Path(path_to_raw_txt_data)
-        self._storage = {}
-        self._scan_dataset()
+        self.path_to_raw = path_to_raw_txt_data
+        self._storage = self._scan_dataset()
 
-    def _scan_dataset(self):
+    @staticmethod
+    def _scan_dataset():
         """
         Register each dataset entry
         """
-        pattern = re.compile(r'\d+')
-        for file in self.path_to_raw_txt_data.iterdir():
-            res = pattern.search(file.name)
-            if not pattern:
-                continue
-            article_id = int(res.group(0))
-            article = Article(url=None, article_id=article_id)
-            self._storage[article_id] = article
+        path = Path(ASSETS_PATH)
+        arts = {}
+        for file in path.iterdir():
+            file_name = file.relative_to(path)
+            if str(file_name).endswith('_raw.txt'):
+                index = str(file_name).split('_raw.txt')[0]
+                arts[index] = Article(url=None, article_id=int(index))
+        return arts
 
     def get_articles(self):
         """
@@ -90,45 +76,37 @@ class TextProcessingPipeline:
     """
     Process articles from corpus manager
     """
-
     def __init__(self, corpus_manager: CorpusManager):
-        self.corpus_manager = corpus_manager
+        self.corpus = corpus_manager
+        self.current_raw_text = ''
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        articles = self.corpus_manager.get_articles().values()
-        for article in articles:
-            raw_text = article.get_raw_text()
-            tokens = self._process(raw_text)
-            cleaned_tokens = []
-            single_tagged_tokens = []
-            multiple_tagged_tokens = []
-            for token in tokens:
-                cleaned_tokens.append(token.get_cleaned())
-                single_tagged_tokens.append(token.get_single_tagged())
-                multiple_tagged_tokens.append(token.get_multiple_tagged())
-            article.save_as(' '.join(cleaned_tokens), kind=ArtifactType.cleaned)
-            article.save_as(' '.join(single_tagged_tokens), kind=ArtifactType.single_tagged)
-            article.save_as(' '.join(multiple_tagged_tokens), kind=ArtifactType.multiple_tagged)
+        for article in self.corpus.get_articles().values():
+            self.current_raw_text = article.get_raw_text()
+            tokens = self._process()
+            processed = ' '.join(map(str, tokens))
+            article.save_processed(processed)
 
-    def _process(self, raw_text: str):
-        """
-        Processes each token and creates MorphToken class instance
-        """
-        text = raw_text.replace('-\n', '')
-        analyzed_text = Mystem().analyze(text)
-        morph_analyzer = pymorphy2.MorphAnalyzer()
+    def _process(self) -> List[type(MorphologicalToken)]:
+        mystem = Mystem()
+        pymorphy = MorphAnalyzer()
+        words = mystem.analyze(self.current_raw_text)
         tokens = []
-        for analyzed_word in analyzed_text:
-            if analyzed_word.get('analysis') and analyzed_word.get('text'):
-                if analyzed_word['analysis'][0].get('lex') and analyzed_word['analysis'][0].get('gr'):
-                    morphological_token = MorphologicalToken(original_word=analyzed_word['text'])
-                    morphological_token.normalized_form = analyzed_word['analysis'][0]['lex']
-                    morphological_token.tags_mystem = analyzed_word['analysis'][0]['gr']
-                    morphological_token.tags_pymorphy = morph_analyzer.parse(analyzed_word['text'])[0].tag
-                    tokens.append(morphological_token)
+        for word in words:
+            if word.get('analysis') and word.get('text'):
+                try:
+                    token = MorphologicalToken(original_word=word['text'], normalized_form=word['analysis'][0]['lex'])
+                    token.mystem_tags = word['analysis'][0]['gr'].strip()
+                    token.pymorphy_tags = pymorphy.parse(word['text'])[0].tag
+                    tokens.append(token)
+                except (IndexError, KeyError):
+                    token = MorphologicalToken(original_word=word['text'], normalized_form=word['text'])
+                    if str(pymorphy.parse(word['text'])[0].tag) != 'UNKN':
+                        token.pymorphy_tags = pymorphy.parse(word['text'])[0].tag
+                    tokens.append(token)
         return tokens
 
 
@@ -141,43 +119,23 @@ def validate_dataset(path_to_validate):
         raise FileNotFoundError
     if not path.is_dir():
         raise NotADirectoryError
-
-    all_ids = []
-    pattern = re.compile(r'(\d+)_(?:raw.txt|meta.json|raw.pdf'
-                         r'|cleaned.txt|single_tagged.txt'
-                         r'|multiple_tagged.txt|image.png)')
-    for file in path.iterdir():
-        if file.stat().st_size == 0:
-            raise InconsistentDatasetError("File is empty")
-        res = pattern.match(file.name)
-        if not res:
-            raise InconsistentDatasetError("Incorrect file name")
-        all_ids.append(int(res.group(1)))
-
-    if not all_ids:
+    if not list(path.iterdir()):
         raise EmptyDirectoryError
-
-    ids_without_zero = [i for i in all_ids if i != 0]
-    sorted_all_ids = sorted(ids_without_zero)
-    previous_article_id = 0
-    for article_id in sorted_all_ids:
-        if article_id - previous_article_id > 1:
-            raise InconsistentDatasetError("Article ids are not consistent")
-        previous_article_id = article_id
-
-    if sorted_all_ids[0] != 1:
-        raise InconsistentDatasetError("Article ids do not start from 1")
-
-    for num in set(sorted_all_ids):
-        raw_path = path / f'{num}_raw.txt'
-        meta_path = path / f'{num}_meta.json'
-        if not raw_path.exists() or not meta_path.exists():
-            raise InconsistentDatasetError(f"There are no meta or raw files for {num} article")
+    raws = list(path.glob('*_raw.txt'))
+    metas = list(path.glob('*_meta.json'))
+    if not len(metas) == len(raws):
+        raise InconsistentDatasetError
+    meta_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), metas)))
+    raw_indices = sorted(list(map(lambda x: int(x.name.split('_')[0]), raws)))
+    if not raw_indices == meta_indices:
+        raise InconsistentDatasetError
 
 
 def main():
     validate_dataset(ASSETS_PATH)
+    print('validated dataset')
     corpus_manager = CorpusManager(ASSETS_PATH)
+    print('onto processing')
     pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
     pipeline.run()
 
