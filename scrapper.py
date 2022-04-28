@@ -52,8 +52,8 @@ class Crawler:
         Finds articles
         """
         for article_url in self.seed_urls:
-            sleep(randint(1, 10))
-            response = requests.get(article_url)
+            sleep(randint(1, 5))
+            response = requests.get(article_url, timeout=60)
             if not response.ok:
                 continue
             soup = BeautifulSoup(response.text, 'lxml')
