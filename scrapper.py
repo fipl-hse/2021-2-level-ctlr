@@ -103,6 +103,9 @@ class HTMLParser:
         self.article.topics = meta_info[2]['content'].split(', ')
 
         # date
+        self._fill_article_with_date(article_bs)
+
+    def _fill_article_with_date(self, article_bs):
         big_title = article_bs.find('h1')
         pattern_number_of_pub = re.compile(r'№ \d+')
         match_number_of_pub = pattern_number_of_pub.search(big_title.text)
