@@ -70,19 +70,11 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        dataset = list(self.path.glob("*_raw.txt"))
-        dataset.sort(key=self._get_file_id)
 
-        for file in dataset:
-            file_id = self._get_file_id(file)
+        for file in self.path.glob("*_raw.txt"):
+            pattern = re.compile(r'\d+')
+            file_id = int(pattern.match(file.stem).group())
             self._storage[file_id] = Article(url=None, article_id=file_id)
-
-    def _get_file_id(self, file):
-        """
-        Gets file id
-        """
-        pattern = re.compile(r'\d+')
-        return int(pattern.match(file.stem).group())
 
     def get_articles(self):
         """
@@ -123,13 +115,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        pattern = re.compile(r'[А-Яа-яA-Za-z ёЁ]')
-
-        cleaned_text = raw_text
-
-        for symbol in raw_text:
-            if not pattern.match(symbol):
-                cleaned_text = raw_text.replace(symbol, '')
+        cleaned_text = raw_text.replace('-\n', '')
 
         tokens = []
 
@@ -142,11 +128,12 @@ class TextProcessingPipeline:
                 continue
 
             token = MorphologicalToken(single_word['text'])
-            tokens.append(token)
 
-            token.normalized_form = single_word['analysis'][0]['lex']
-            token.tags_mystem = single_word['analysis'][0]['gr']
-            token.tags_pymorphy = analyzer.parse(single_word['text'])[0].tag
+            token.normalized_form = single_word.get('analysis')[0].get('lex')
+            token.tags_mystem = single_word.get('analysis')[0].get('gr')
+            token.tags_pymorphy = analyzer.parse(single_word.get('text'))[0].tag
+
+            tokens.append(token)
 
         return tokens
 
@@ -174,33 +161,30 @@ def validate_dataset(path_to_validate):
         ".txt": []
     }
 
-    pattern = re.compile(r'\d+')
+    # pattern = re.compile(r'\d+')
+    pattern = re.compile(r'(\d+)(_\w+)')
 
     for file in list(path.glob('*')):
 
-        # check txt files
-
         # add in dict file id with relevant filename extension
-        for file_name_type in needed_file_names:
-            if file_name_type in file.stem:
-                files.get(file.suffix).append(int(pattern.match(file.stem).group()))
-                continue
+        if pattern.match(file.stem).group(2) in needed_file_names:
+            files.get(file.suffix).append(int(pattern.match(file.stem).group(1)))
 
+        # check txt files emptiness
         if '_raw.txt' in file.name:
-            with file.open(encoding='utf=8') as opened_file:
-                file_text = opened_file.read()
-                if not file_text:
-                    raise InconsistentDatasetError
+            if file.stat().st_size == 0:
+                raise InconsistentDatasetError
 
+    files_sorted = {}
     # check dataset numeration
-    for ids in files.values():
-        ids.sort()
-        for file_number in range(1, len(ids) - 1):
+    for extension, ids in files.items():
+        files_sorted[extension] = sorted(ids)
+        for file_number in range(1, len(ids) + 1):
             if ids[file_number - 1] != file_number:
                 raise InconsistentDatasetError
 
-    # check on imbalanced dict
-    files_values = list(files.values())
+    # check on balanced dict
+    files_values = list(files_sorted.values())
     if files_values[0] != files_values[2]:
         raise InconsistentDatasetError
 
