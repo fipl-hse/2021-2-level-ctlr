@@ -6,6 +6,7 @@ import json
 import re
 from pathlib import Path
 import shutil
+from datetime import datetime
 from time import sleep
 import random
 import requests
@@ -56,7 +57,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 3))
+            sleep(random.randint(1, 5))
             response = requests.get(url=seed_url)
 
             if not response.ok:
@@ -88,15 +89,20 @@ class HTMLParser:
         self.article.topics = topic
 
         # title
-        # try:
-        #     title = article_bs.find('h1', class_='article__header__title-in js-slide-title').text
-        #     txt = title.strip()
-        #     self.article.title = txt
-        # except AttributeError:
-        self.article.title = 'NOT FOUND'
+        try:
+            title = article_bs.find('h1', class_='article__header__title-in js-slide-title').text
+            txt = title.strip()
+            self.article.title = txt
+        except AttributeError:
+            self.article.title = 'NOT FOUND'
 
         # authors
         self.article.author = 'NOT FOUND'
+        # date
+        bs_date = article_bs.find("meta", {"itemprop": "dateModified"})['content']
+        date = bs_date[:10]
+        article_date = datetime.strptime(date, '%Y-%m-%d')
+        self.article.date = article_date
 
     def _fill_article_with_text(self, article_bs):
         self.article.text = ''
