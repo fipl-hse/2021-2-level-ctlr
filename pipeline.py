@@ -170,16 +170,12 @@ def validate_dataset(path_to_validate):
             raise InconsistentDatasetError
 
         if file.name.endswith('meta.json'):
-
             meta_json += 1
-
             if f'{meta_json}_meta' != file.stem:
                 raise InconsistentDatasetError
 
         if file.name.endswith('raw.txt'):
-
             raw_txt += 1
-
             if f'{raw_txt}_raw' != file.stem:
                 raise InconsistentDatasetError
 
