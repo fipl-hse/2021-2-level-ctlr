@@ -101,8 +101,7 @@ class HTMLParser:
         pdf.download()
 
         pdf_text = pdf.get_text()
-        pattern = re.compile(r'\w(-\s)\w')
-        pdf_text = re.sub(pattern, "", pdf_text)
+        pdf_text = re.sub(r'-\s', "", pdf_text)
         if 'СПИСОК ЛИТЕРАТУРЫ' in pdf_text:
             split_pdf = pdf_text.split('СПИСОК ЛИТЕРАТУРЫ')
             self.article.text = split_pdf[0]
