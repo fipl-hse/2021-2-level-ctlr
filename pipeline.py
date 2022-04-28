@@ -117,22 +117,22 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        clean_text = ''
+        cleaned = ''
 
         for symbol in raw_text.replace('-\n', ''):
             if symbol.isalpha():
-                clean_text += symbol
-            if symbol.isspace() or symbol == '\n':
-                clean_text += ' '
+                cleaned += symbol
+            if symbol.isspace():
+                cleaned += ' '
 
         mystem = Mystem()
         morph_analyzer = pymorphy2.MorphAnalyzer()
 
-        clean_text_analysis = mystem.analyze(clean_text)
+        clean_text_analysis = mystem.analyze(cleaned)
 
         tokens = []
         for single_word_analysis in clean_text_analysis:
-            if single_word_analysis['text'].isalpha() and single_word_analysis['analysis']:
+            if single_word_analysis['analysis']:
                 token = MorphologicalToken(single_word_analysis['text'])
                 tokens.append(token)
 
@@ -162,19 +162,19 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError
 
-    if not any(path_to_validate.iterdir()):
+    if not list(path_to_validate.iterdir()):
         raise EmptyDirectoryError
 
     for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name.split('_')[0])):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError
 
-        if file.name.endswith('meta.json'):
+        if 'meta.json' in file.name:
             meta_json += 1
             if f'{meta_json}_meta' != file.stem:
                 raise InconsistentDatasetError
 
-        if file.name.endswith('raw.txt'):
+        if 'raw.txt' in file.name:
             raw_txt += 1
             if f'{raw_txt}_raw' != file.stem:
                 raise InconsistentDatasetError
