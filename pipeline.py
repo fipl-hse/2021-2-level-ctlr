@@ -174,8 +174,8 @@ def validate_dataset(path_to_validate):
 def main():
     # YOUR CODE HERE
     validate_dataset(ASSETS_PATH)
-    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
-    text_processing_pipe_of_insight = TextProcessingPipeline(corpus_manager=corpus_manager)
+    corpus_manager = CorpusManager(ASSETS_PATH)
+    text_processing_pipe_of_insight = TextProcessingPipeline(corpus_manager)
     text_processing_pipe_of_insight.run()
 
 if __name__ == "__main__":
