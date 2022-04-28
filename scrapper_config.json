@@ -1,8 +1,13 @@
+
 {
-    "seed_urls": ["https://newsland.com/hot", "https://newsland.com"],
+    "seed_urls": [
+        "https://newsland.com/hot",
+        "https://newsland.com/gidepark",
+        "https://newsland.com/communities",
+        "https://newsland.com",
+        "https://newsland.com/hot?tag_id=21779",
+        "https://newsland.com/hot?tag_id=8234",
+        "https://newsland.com/hot?tag_id=328"
+    ],
     "total_articles_to_find_and_parse": 100
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> d435c739906de51920bb825a1891e724ce80530a
