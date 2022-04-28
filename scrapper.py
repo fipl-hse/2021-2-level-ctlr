@@ -9,14 +9,14 @@ import datetime
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
-from random_user_agent.user_agent import UserAgent
+# from random_user_agent.user_agent import UserAgent
 
 from core_utils.article import Article
 from core_utils.pdf_utils import PDFRawFile
 
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
-# from constants import HEADERS
+from constants import HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -72,9 +72,9 @@ class Crawler:
             if len(self.urls) + 1 > self.max_articles:
                 break
             sleep(random.uniform(0.0, 1.0))
-            user_agent = UserAgent().get_random_user_agent()
-            headers = {'User-Agent': user_agent}
-            response = requests.get(url, headers=headers)  # get html code
+            # user_agent = UserAgent().get_random_user_agent()
+            # headers = {'User-Agent': user_agent}
+            response = requests.get(url, headers=HEADERS)  # get html code
 
             if not response.ok:
                 continue
@@ -103,9 +103,9 @@ class HTMLParser:
         Extracts all necessary data from the article web page
         """
         sleep(random.uniform(0.0, 1.0))
-        user_agent = UserAgent().get_random_user_agent()
-        headers = {'User-Agent': user_agent}
-        response = requests.get(self.article_url, headers=headers)
+        # user_agent = UserAgent().get_random_user_agent()
+        # headers = {'User-Agent': user_agent}
+        response = requests.get(self.article_url, headers=HEADERS)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
