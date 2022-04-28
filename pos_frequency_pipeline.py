@@ -27,14 +27,15 @@ class POSFrequencyPipeline:
                 text = file.read()
             if not text:
                 raise EmptyFileError
-            tokens = text.split()
+            tokens_pattern = re.compile(r'[а-яёА-ЯЁ]+<\S+>')
+            tokens = tokens_pattern.findall(text)
             pos_frequencies = {}
-            pos_pattern = re.compile('[A-Z]+')
+            pos_pattern = re.compile('<([A-Z]+)')
             for token in tokens:
                 pos = pos_pattern.search(token)
                 if not pos:
                     continue
-                pos = pos.group()
+                pos = pos.group(1)
                 if pos not in pos_frequencies:
                     pos_frequencies[pos] = 1
                 else:
