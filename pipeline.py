@@ -1,7 +1,7 @@
 """
 Pipeline for text processing implementation
 """
-import re
+
 from pathlib import Path
 
 import pymorphy2
@@ -62,7 +62,7 @@ class CorpusManager:
     """
 
     def __init__(self, path_to_raw_txt_data: str):
-        self.path = Path(path_to_raw_txt_data)
+        self.path_to_raw_txt_data = path_to_raw_txt_data
         self._storage = {}
         self._scan_dataset()
 
@@ -70,15 +70,11 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        dataset = list(self.path.glob('*_raw.txt'))
-        dataset.sort(key=self._extract_file_id)
-        for file in dataset:
-            file_id = self._extract_file_id(file)
-            self._storage[file_id] = Article(url=None, article_id=file_id)
+        path_raw = Path(self.path_to_raw_txt_data)
 
-    def _extract_file_id(self, file):
-        pattern = re.compile(r'\d+')
-        return int(pattern.match(file.stem).group())
+        for file in path_raw.glob('*_raw.txt'):
+            article_id = int(file.stem.split('_')[0])
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -99,48 +95,54 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        for article in self.corpus_manager.get_articles().values():
-            tokens = self._process(article.get_raw_text())
-            tokenized_text = ' '.join(tokens[0])
-            tokenized_mystem_text = ' '.join(tokens[1])
-            tokenized_double_tagged_text = ' '.join(tokens[2])
+        articles = CorpusManager.get_articles(self.corpus_manager).values()
 
-            article.save_as(text=tokenized_text, kind=ArtifactType.cleaned)
-            article.save_as(text=tokenized_mystem_text, kind=ArtifactType.single_tagged)
-            article.save_as(text=tokenized_double_tagged_text, kind=ArtifactType.multiple_tagged)
+        for article in articles:
+            raw_text = Article.get_raw_text(article)
+            tokens = self._process(raw_text)
+
+            cleaned = []
+            single_tagged = []
+            multiple_tagged = []
+            for token in tokens:
+                cleaned.append(token.get_cleaned())
+                single_tagged.append(token.get_single_tagged())
+                multiple_tagged.append(token.get_multiple_tagged())
+
+            article.save_as(' '.join(cleaned), ArtifactType.cleaned)
+            article.save_as(' '.join(single_tagged), ArtifactType.single_tagged)
+            article.save_as(' '.join(multiple_tagged), ArtifactType.multiple_tagged)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
+        clean_text = ''
+
+        for symbol in raw_text.replace('-\n', ''):
+            if symbol.isalpha():
+                clean_text += symbol
+            if symbol.isspace() or symbol == '\n':
+                clean_text += ' '
+
+        mystem = Mystem()
+        morph_analyzer = pymorphy2.MorphAnalyzer()
+
+        clean_text_analysis = mystem.analyze(clean_text)
+
         tokens = []
-        cleaned_tokens = []
-        mystem_tokens = []
-        multiple_tagged_tokens = []
+        for single_word_analysis in clean_text_analysis:
+            if single_word_analysis['text'].isalpha() and single_word_analysis['analysis']:
+                token = MorphologicalToken(single_word_analysis['text'])
+                tokens.append(token)
 
-        transferences_and_footers = re.compile(r'(-\n)|(\d+\s+[^\n]([А-Я]\.)+\s[А-Яа-я]+\s\n)'
-                                               r'|(([А-ЯёЁ]([А-Яа-яёЁ\-]+\s)+)\s+\d\s\n)')
+                analysis = single_word_analysis['analysis']
+                token.normalized_form = analysis[0]['lex']
+                token.tags_mystem = analysis[0]['gr']
 
-        preprocessed_text = transferences_and_footers.sub('', raw_text)
+                parses = morph_analyzer.parse(single_word_analysis['text'])
+                token.tags_pymorphy = parses[0].tag
 
-        result = Mystem().analyze(preprocessed_text)
-        morph = pymorphy2.MorphAnalyzer()
-
-        for processed_word in result:
-            if processed_word.get('analysis') is not None and processed_word.get('analysis'):
-                mystem_token = MorphologicalToken(processed_word['text'])
-                mystem_token.normalized_form = processed_word['analysis'][0]['lex']
-                mystem_token.tags_mystem = processed_word['analysis'][0]['gr']
-
-                mystem_token.tags_pymorphy = morph.parse(mystem_token.original_word)[0].tag
-
-                cleaned_tokens.append(MorphologicalToken(mystem_token.original_word).get_cleaned())
-                mystem_tokens.append(mystem_token.get_single_tagged())
-                multiple_tagged_tokens.append(mystem_token.get_multiple_tagged())
-
-        tokens.append(cleaned_tokens)
-        tokens.append(mystem_tokens)
-        tokens.append(multiple_tagged_tokens)
         return tokens
 
 
@@ -150,64 +152,46 @@ def validate_dataset(path_to_validate):
     """
     if isinstance(path_to_validate, str):
         path_to_validate = Path(path_to_validate)
+
+    raw_txt = 0
+    meta_json = 0
+
     if not path_to_validate.exists():
         raise FileNotFoundError
+
     if not path_to_validate.is_dir():
         raise NotADirectoryError
-    if not list(path_to_validate.glob('**/*')):
+
+    if not any(path_to_validate.iterdir()):
         raise EmptyDirectoryError
-    if check_dataset_numeration(path_to_validate) == -1:
+
+    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(x.name.split('_')[0])):
+        if file.stat().st_size == 0:
+            raise InconsistentDatasetError
+
+        if file.name.endswith('meta.json'):
+
+            meta_json += 1
+
+            if f'{meta_json}_meta' != file.stem:
+                raise InconsistentDatasetError
+
+        if file.name.endswith('raw.txt'):
+
+            raw_txt += 1
+
+            if f'{raw_txt}_raw' != file.stem:
+                raise InconsistentDatasetError
+
+    if raw_txt != meta_json:
         raise InconsistentDatasetError
-    if check_txt_files(path_to_validate) == -1:
-        raise InconsistentDatasetError
-
-
-def check_dataset_numeration(dataset_path):
-    """
-    Checks that the dataset is valid
-    """
-    files_to_check = ['_raw', '_meta']
-    files = {
-        '.json': [],
-        '.txt': [],
-        '.pdf': []
-    }
-    pattern = re.compile(r'\d+')
-
-    for file in list(dataset_path.glob('*')):
-        for file_name_type in files_to_check:
-            if file_name_type in file.stem:
-                files.get(file.suffix).append(int(pattern.match(file.stem).group()))
-                continue
-
-    for files_suffix, ids_list in files.items():
-        ids_list.sort()
-        for file_number in range(1, len(ids_list) - 1):
-            if ids_list[file_number - 1] != file_number:
-                print(f'Missing file № {file_number} with {files_suffix} suffix')
-                return -1
-
-    if files.get('.json') != files.get('.txt'):
-        return -1
-    return 0
-
-
-def check_txt_files(dataset_path):
-    for file in list(dataset_path.glob('*')):
-        if '_raw.txt' in file.name:
-            file_content = file.open('r', encoding='utf-8')
-            file_text = file_content.read()
-            file_content.close()
-            if not file_text:
-                return -1
-    return 0
 
 
 def main():
     validate_dataset(ASSETS_PATH)
-    corpus_manager = CorpusManager(ASSETS_PATH)
-    pipe = TextProcessingPipeline(corpus_manager)
-    pipe.run()
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
