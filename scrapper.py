@@ -6,7 +6,6 @@ import json
 import re
 # from datetime import datetime
 import shutil
-import pathlib
 from time import sleep
 import random
 import requests
