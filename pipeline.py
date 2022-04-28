@@ -73,7 +73,7 @@ class CorpusManager:
         pattern = re.compile(r'\d+')
         for file in self.path_to_raw_txt_data.iterdir():
             res = pattern.search(file.name)
-            if not pattern:
+            if not res:
                 continue
             article_id = int(res.group(0))
             article = Article(url=None, article_id=article_id)
