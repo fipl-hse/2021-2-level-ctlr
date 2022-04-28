@@ -92,6 +92,44 @@ class Crawler:
         return self.seed_urls
 
 
+class CrawlerRecursive(Crawler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._crawled = set()
+
+    def find_articles(self):
+        self.recurse(self.seed_urls.pop())
+
+    def recurse(self, seed):
+        if len(self.urls) == self.max_articles:
+            return
+        if seed in self._crawled:
+            return
+        self._crawled.add(seed)
+
+        try:
+            page = _get_page(seed)
+        except requests.exceptions.ConnectionError:
+            return
+        # if the page is an issue of articles, extract them
+        if "showToc" in seed:
+            self._extract_url(page)
+            return
+        # if the page is an archive of issues, recurse over them
+        if "archive" in seed:
+            for link in page.find_all("a"):
+                if "href" not in link.attrs:
+                    continue
+                href = link.attrs["href"]
+                if "showToc" in href:
+                    self.recurse(href)
+                # also recurse over next pages in archive.
+                # the order (issues before next page) matters for priority.
+                if "issuesPage" in href:
+                    self.recurse(href)
+            return
+
+
 class HTMLParser:
     def __init__(self, article_url, article_id):
         self._pdf_url = article_url.replace("view", "download") + ".pdf"
@@ -170,7 +208,7 @@ def _is_valid_url(url_to_validate):
 if __name__ == '__main__':
     seeds, limit = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    crawler = Crawler(seed_urls=seeds, max_articles=limit)
+    crawler = CrawlerRecursive(seed_urls=seeds, max_articles=limit)
     crawler.find_articles()
 
     for index, url in enumerate(crawler.urls):
