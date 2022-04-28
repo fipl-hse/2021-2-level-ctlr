@@ -132,7 +132,13 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
+    _validate_path(path_to_validate)
+    filenames = _get_file_names(path_to_validate)
+    _validate_filenames(filenames)
+    _validate_files(filenames, ASSETS_PATH)
+    _check_consistency(path_to_validate)
 
+def _validate_path(path_to_validate):
     env_path = Path(path_to_validate)
     if not os.path.exists(path_to_validate) or os.path.getsize(path_to_validate) <= 0:
         raise FileNotFoundError("File not exists", 1)
@@ -140,10 +146,6 @@ def validate_dataset(path_to_validate):
         raise NotADirectoryError("File not exists", 1)
     if len(os.listdir(path_to_validate)) == 0:
         raise EmptyDirectoryError("Directory is empty", 1)
-    filenames = _get_file_names(path_to_validate)
-    _validate_filenames(filenames)
-    _validate_files(filenames, ASSETS_PATH)
-    _check_consistency(ASSETS_PATH)
 
 def _validate_filenames(list_to_validate):
     for filename in list_to_validate:
@@ -165,8 +167,8 @@ def _validate_files(filenames, basepath):
                     raise InconsistentDatasetError
 
 def _check_consistency(path):
-    if not path.exists():
-        raise FileNotFoundError
+    _env_path = Path(path)
+    _validate_path(path)
     _txt_ext = "*_raw.txt"
     _json_ext = "*_meta.json"
     _txt_ids = sorted(map(_path_id, path.glob(_txt_ext)))
