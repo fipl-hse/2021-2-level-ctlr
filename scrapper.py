@@ -118,7 +118,8 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    shutil.rmtree(base_path)
+    if base_path.is_dir():
+        shutil.rmtree(base_path)
     os.makedirs(base_path)
 
 
