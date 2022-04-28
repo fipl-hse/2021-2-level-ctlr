@@ -32,16 +32,19 @@ class POSFrequencyPipeline:
                     raise EmptyFileError
 
             pos_freq = {}
-            pattern = re.compile(r'<([A-Z])+')
+            pattern = re.compile(r'<([A-Z]+)')
             for pos in pattern.findall(tags):
                 if pos not in pos_freq:
                     pos_freq[pos] = 0
                 else:
                     pos_freq[pos] = pos_freq.get(pos) + 1
 
-            with open(Path(article.get_meta_file_path()), 'a', encoding='utf-8') as meta_file:
-                meta_file.write("\n")
-                json.dump(pos_freq, meta_file)
+            with open(Path(article.get_meta_file_path()), 'r', encoding='utf-8') as meta_file:
+                meta = json.load(meta_file)
+            meta.update(pos_freq)
+            with open(Path(article.get_meta_file_path()), 'w', encoding='utf-8') as new_meta_file:
+                json.dump(meta, new_meta_file, sort_keys=False,
+                          indent=4, ensure_ascii=False, separators=(',', ': '))
 
             visualize(pos_freq, path_to_save=ASSETS_PATH / f'{article.article_id}_image.png')
 
