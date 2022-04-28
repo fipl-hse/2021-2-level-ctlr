@@ -129,12 +129,17 @@ class TextProcessingPipeline:
         for token in analyzed_cleaned_text:
             if not token.get('analysis') or not token.get('text'):
                 continue
+            if not isinstance(token['analysis'], list) or not isinstance(token['analysis'][0], dict):
+                continue
             if 'lex' not in token['analysis'][0] or 'gr' not in token['analysis'][0]:
                 continue
             morphological_token = MorphologicalToken(original_word=token['text'])
             morphological_token.normalized_form = token['analysis'][0]['lex']
             morphological_token.tags_mystem = token['analysis'][0]['gr']
-            morphological_token.tags_pymorphy = morph.parse(token['text'])[0].tag
+            parsed_word = morph.parse(token['text'])
+            if not parsed_word:
+                continue
+            morphological_token.tags_pymorphy = parsed_word[0].tag
             tokens.append(morphological_token)
         return tokens
 
