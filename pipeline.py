@@ -4,7 +4,6 @@ Pipeline for text processing implementation
 
 from pathlib import Path
 import re
-import os
 
 from pymorphy3 import MorphAnalyzer
 from pymystem3 import Mystem
