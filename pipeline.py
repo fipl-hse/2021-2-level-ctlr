@@ -160,7 +160,7 @@ def _validate_files(filenames, basepath):
         path = basepath / filename
         if path.exists():
             with open(path, 'r', encoding='utf-8') as the_file:
-             text = the_file.read()
+                text = the_file.read()
         if not text:
             raise InconsistentDatasetError
 
