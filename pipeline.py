@@ -70,13 +70,14 @@ class CorpusManager:
         """
         Register each dataset entry
         """
-        path_to_raw_txt_data = Path(self.path_to_raw_txt_data)
-        for file in path_to_raw_txt_data.glob('*.txt'):
-            pattern = re.search(r'\d+', file.name)
-            if pattern:
-                article_id = int(pattern.group(0))
-                article = Article(url=None, article_id=article_id)
-                self._storage[article_id] = article
+        path = Path(self.path_to_raw_txt_data)
+        pattern = re.compile(r'\d+')
+        for file in path.glob('*'):
+            number = pattern.match(file.name)
+            if not number:
+                continue
+            article = Article(None, int(number.group()))
+            self._storage[int(number.group())] = article
 
     def get_articles(self):
         """
