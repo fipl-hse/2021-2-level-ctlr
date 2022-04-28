@@ -77,9 +77,9 @@ class CorpusManager:
             digit_in_title = digit.match(file.name)
             if not digit_in_title:
                 continue
-            article_id = int(digit_in_title.group())
-            article = Article(None, article_id)
-            self._storage[article_id] = article
+            #article_id = int(digit_in_title.group())
+            article = Article(None, int(digit_in_title.group()))
+            self._storage[int(digit_in_title.group())] = article
 
     def get_articles(self):
         """
@@ -101,10 +101,10 @@ class TextProcessingPipeline:
         Runs pipeline process scenario
         """
         articles = self.corpus_manager.get_articles().values()
-        cleaned_tokens = []
-        single_tagged = []
-        multiple_tagged = []
         for article in articles:
+            cleaned_tokens = []
+            single_tagged = []
+            multiple_tagged = []
             raw_text = article.get_raw_text()
             tokens = self._process(raw_text)
             for token in tokens:
