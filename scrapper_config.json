@@ -1,16 +1,16 @@
 {
     "seed_urls": [
-        "https://languagejournal.spbu.ru/issue/view/578",
-        "https://languagejournal.spbu.ru/issue/view/553",
+        "https://languagejournal.spbu.ru/issue/view/409",
+        "https://languagejournal.spbu.ru/issue/view/385",
+        "https://languagejournal.spbu.ru/issue/view/682",
         "https://languagejournal.spbu.ru/issue/view/645",
         "https://languagejournal.spbu.ru/issue/view/600",
         "https://languagejournal.spbu.ru/issue/view/587",
-        "https://languagejournal.spbu.ru/issue/view/682",
+        "https://languagejournal.spbu.ru/issue/view/578",
+        "https://languagejournal.spbu.ru/issue/view/553",
         "https://languagejournal.spbu.ru/issue/view/507",
         "https://languagejournal.spbu.ru/issue/view/465",
         "https://languagejournal.spbu.ru/issue/view/431",
-        "https://languagejournal.spbu.ru/issue/view/409",
-        "https://languagejournal.spbu.ru/issue/view/385",
         "https://languagejournal.spbu.ru/issue/view/363"
     ],
     "total_articles_to_find_and_parse": 2
