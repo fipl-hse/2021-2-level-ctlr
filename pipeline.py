@@ -71,9 +71,10 @@ class CorpusManager:
         Register each dataset entry
         """
         path_raw = Path(self.path_to_raw_txt_data)
+        article_pattern = re.compile(r'(\d+)')
 
         for file in path_raw.glob('*_raw.txt'):
-            article_id = int(file.stem.split('_')[0])
+            article_id = int(re.search(article_pattern, file.name).group())
             self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
@@ -124,7 +125,10 @@ class TextProcessingPipeline:
 
         tokens = []
         for single_word_analysis in raw_text_analysis:
-            if 'analysis' not in single_word_analysis or not single_word_analysis['analysis']:
+            if ('analysis' not in single_word_analysis or
+                    not single_word_analysis['analysis'] or
+                    'lex' not in single_word_analysis['analysis'][0] or
+                    'gr' not in single_word_analysis['analysis'][0]):
                 continue
 
             token = MorphologicalToken(single_word_analysis['text'])
@@ -135,7 +139,7 @@ class TextProcessingPipeline:
             token.tags_mystem = analysis[0]['gr']
 
             parses = morph_analyzer.parse(single_word_analysis['text'])
-            if not parses:
+            if not parses or not parses[0].tag:
                 continue
             token.tags_pymorphy = parses[0].tag
 
