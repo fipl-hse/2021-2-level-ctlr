@@ -2,7 +2,6 @@
     "seed_urls":
     ["https://daily-nn.ru/society/",
     "https://daily-nn.ru/society/?PAGEN_1=2",
-    "https://daily-nn.ru/society/?PAGEN_1=3",
-    "https://daily-nn.ru/society/?PAGEN_1=4"],
+    "https://daily-nn.ru/society/?PAGEN_1=3"],
     "total_articles_to_find_and_parse": 100
 }

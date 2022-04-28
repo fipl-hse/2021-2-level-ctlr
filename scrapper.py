@@ -52,7 +52,7 @@ class Crawler:
         Finds articles
         """
         for article_url in self.seed_urls:
-            sleep(randint(1, 5))
+            sleep(randint(1, 10))
             response = requests.get(article_url)
             if not response.ok:
                 continue
