@@ -195,7 +195,7 @@ def validate_dataset(path_to_validate):
             file_ids.append(file_id)
 
     if not file_ids:
-        raise EmptyDirectoryError("The assets directory is empty")
+        raise EmptyDirectoryError("The directory is empty")
 
     file_ids = sorted(file_ids)
 
