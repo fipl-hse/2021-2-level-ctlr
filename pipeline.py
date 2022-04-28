@@ -132,8 +132,7 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    if len(path_to_validate) == 0:
-        raise FileNotFoundError("File not exists", 1)
+
     env_path = Path(path_to_validate)
     if not env_path.exists():
         raise FileNotFoundError("File not exists", 1)
@@ -158,8 +157,10 @@ def _validate_filenames(list_to_validate):
 
 def _validate_files(filenames, basepath):
     for filename in filenames:
-        with open(basepath / filename, 'r', encoding='utf-8') as the_file:
-            text = the_file.read()
+        path = basepath / filename
+        if path.exists():
+            with open(path, 'r', encoding='utf-8') as the_file:
+             text = the_file.read()
         if not text:
             raise InconsistentDatasetError
 
