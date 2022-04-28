@@ -143,9 +143,15 @@ def validate_dataset(path_to_validate):
     if not path.is_dir():
         raise NotADirectoryError
 
+    raw_txt_files = list(path.glob('*raw.txt'))
+    meta_files = list(path.glob('*meta.json'))
+    all_files = meta_files + raw_txt_files
+    if not all_files:
+        raise EmptyDirectoryError
+    if len(raw_txt_files) != len(meta_files):
+        raise InconsistentDatasetError
+
     data = list(path.glob('*'))
-    if not data:
-        raise NotADirectoryError
 
     articles_ids = []
 
@@ -156,12 +162,12 @@ def validate_dataset(path_to_validate):
                 if not text:
                     raise InconsistentDatasetError
 
-        pattern = re.match(r'\d+', file.name)
-        if not pattern:
-            raise InconsistentDatasetError
+            pattern = re.match(r'\d+', file.name)
+            if not pattern:
+                raise InconsistentDatasetError
 
-        article_id = int(pattern.group(0))
-        articles_ids.append(article_id)
+            article_id = int(pattern.group(0))
+            articles_ids.append(article_id)
 
     if not articles_ids:
         raise EmptyDirectoryError
