@@ -179,7 +179,7 @@ def validate_dataset(path_to_validate):
     # check dataset numeration
     for extension, ids in files.items():
         files_sorted[extension] = sorted(ids)
-        for file_number in range(1, len(ids) - 1):
+        for file_number in range(1, len(ids) + 1):
             if ids[file_number - 1] != file_number:
                 raise InconsistentDatasetError
 
