@@ -1,15 +1,14 @@
 """
 Pipeline for text processing implementation
 """
-
-from constants import ASSETS_PATH
-from core_utils.article import Article
-from core_utils.article import ArtifactType
 import os
 from os import walk
 from pathlib import Path
 import re
 import string
+from constants import ASSETS_PATH
+from core_utils.article import Article
+from core_utils.article import ArtifactType
 
 class EmptyDirectoryError(Exception):
     """
@@ -76,7 +75,7 @@ class CorpusManager:
         for filename in _txt_files:
             _article_id = _txt_files.index(filename) + 1
             if _article_id < len(_txt_files) + 1:
-                  self._storage[_article_id] = Article(url=None, article_id=_article_id)
+                self._storage[_article_id] = Article(url=None, article_id=_article_id)
 
     def get_articles(self):
         """
@@ -127,6 +126,7 @@ class TextProcessingPipeline:
         for symbol in raw_text:
             if not pattern.match(symbol):
                 return raw_text.replace(symbol, '')
+        return raw_text
 
 def validate_dataset(path_to_validate):
     """
@@ -141,7 +141,6 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError("Directory is empty", 1)
     filenames = _get_file_names(path_to_validate)
     _validate_filenames(filenames)
-    return None
 
 def _validate_filenames(list_to_validate):
     for filename in list_to_validate:
@@ -159,7 +158,7 @@ def _get_file_names(path_to_dir):
     Extract names of files in directory
     """
     filenames_list = []
-    for (dirpath, dirnames, filenames) in walk(path_to_dir):
+    for (_, _, filenames) in walk(path_to_dir):
         filenames_list.extend(filenames)
         return filenames_list
 
