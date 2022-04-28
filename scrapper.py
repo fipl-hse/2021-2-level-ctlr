@@ -129,7 +129,10 @@ class HTMLParser:
     def _fill_article_with_meta_information(self, article_bs):
         self.article.article_id = self.article_id
         self.article.title = article_bs.find("h1").text
-        self.article.author = _clean_text(article_bs.find("div", {"id": "authorString"}).text)
+
+        author = article_bs.find("div", {"id": "authorString"}).find("a")
+        self.article.author = _clean_text(author.text if author.text else author["title"])
+        print(self.article.author)
 
         topics = article_bs.find("div", {"id": "articleSubject"}).find("div").children
         topics = [_clean_text(topic.text) for topic in topics]
