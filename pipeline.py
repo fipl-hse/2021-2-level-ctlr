@@ -71,13 +71,12 @@ class CorpusManager:
         Register each dataset entry
         """
         path = Path(self.path_to_raw_txt_data)
-        pattern = re.compile(r'\d+')
-        for file in path.glob('*'):
-            number = pattern.match(file.name)
-            if not number:
-                continue
-            article = Article(None, int(number.group()))
-            self._storage[int(number.group())] = article
+        for file in path.glob('*.txt'):
+            pattern = re.search(r'\d+', file.name)
+            if pattern:
+                article_id = int(pattern.group(0))
+                article = Article(url=None, article_id=article_id)
+                self._storage[article_id] = article
 
     def get_articles(self):
         """
@@ -98,18 +97,16 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        articles = self.corpus_manager.get_articles().values()
-        for article in articles:
-            raw_text = article.get_raw_text()
-            tokens = self._process(raw_text)
-            article_tokens = []
+        for article in self.corpus_manager.get_articles().values():
+            tokens = self._process(article.get_raw_text())
+            tokens_for_article = []
             single_tagged_tokens = []
             multiple_tagged_tokens = []
             for token in tokens:
-                article_tokens.append(token.get_cleaned())
+                tokens_for_article.append(token.get_cleaned())
                 single_tagged_tokens.append(token.get_single_tagged())
                 multiple_tagged_tokens.append(token.get_multiple_tagged())
-            article.save_as(' '.join(article_tokens), ArtifactType.cleaned)
+            article.save_as(' '.join(tokens_for_article), ArtifactType.cleaned)
             article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
             article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
 
@@ -121,22 +118,21 @@ class TextProcessingPipeline:
         for symbol in raw_text:
             if not pattern.match(symbol):
                 raw_text = raw_text.replace(symbol, '')
-
         text_analysis = Mystem().analyze(raw_text)
         morph = pymorphy2.MorphAnalyzer()
-        processed_tokens = []
-        for token in text_analysis:
-            if 'analysis' not in token:
+        tokens = []
+        for word in text_analysis:
+            if 'analysis' not in word:
                 continue
-            if not token['analysis']:
+            if not word['analysis']:
                 continue
-            m_token = MorphologicalToken(original_word=token['text'])
-            m_token.normalized_form = token['analysis'][0].get('lex')
-            m_token.tags_mystem = token['analysis'][0].get('gr')
-            m_token.tags_pymorphy = morph.parse(token['text'])[0].tag
-            processed_tokens.append(m_token)
+            token = MorphologicalToken(word['text'])
+            token.normalized_form = word['analysis'][0]['lex']
+            token.tags_mystem = word['analysis'][0]['gr']
+            token.tags_pymorphy = morph.parse(word['text'])[0].tag
+            tokens.append(token)
 
-            return processed_tokens
+        return tokens
 
 
 def validate_dataset(path_to_validate):
