@@ -71,7 +71,7 @@ class CorpusManager:
         Register each dataset entry
         """
         for file in self.path_to_raw_text_data.glob("*_raw.txt"):
-            index = int(file.name[:-8])
+            index = _id_from_path(file)
             self._storage[index] = ImprovedArticle(None, index)
 
     def get_articles(self):

@@ -1,7 +1,7 @@
 beautifulsoup4==4.11.1
+fake-headers==1.0.2
+pymorphy3==1.1.0
 pymupdf==1.19.6
+pymystem3==0.2.0
 requests==2.27.1
 wget==3.2
-fake-headers==1.0.2
-pymystem3==0.2.0
-pymorphy3==1.1.0
