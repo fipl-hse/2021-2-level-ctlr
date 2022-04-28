@@ -12,7 +12,7 @@ import random
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
