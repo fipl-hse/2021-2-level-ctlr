@@ -24,6 +24,9 @@ class POSFrequencyPipeline:
     def run(self):
         for article in self.corpus_manager.get_articles().values():
             tagged_text = article.get_file(ArtifactType.single_tagged)
+            if not tagged_text:
+                raise EmptyFileError
+
             pos = re.findall(r"(?<=<)[A-Z]*(?=[,=])", tagged_text)
             pos_frequencies = dict(Counter(pos))
             article.save_updated_meta({"pos_frequencies": pos_frequencies})

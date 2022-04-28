@@ -1,7 +1,8 @@
 """
 Pipeline for text processing implementation
 """
-
+import re
+from pathlib import Path
 
 from pymorphy3 import MorphAnalyzer
 from pymystem3 import Mystem
@@ -129,8 +130,25 @@ def validate_dataset(path_to_validate):
     """
     Validates folder with assets
     """
-    # Dummy validation
-    return None
+    path = Path(path_to_validate)
+    if not path.exists():
+        raise FileNotFoundError
+    if not path.is_dir():
+        raise NotADirectoryError
+    if not any(path.iterdir()):
+        raise EmptyDirectoryError
+    for file in path.iterdir():
+        if not file.read_bytes():
+            raise InconsistentDatasetError("empty file")
+
+    meta_ids = sorted(map(_id_from_path, path.glob("*_meta.json")))
+    raw_ids = sorted(map(_id_from_path, path.glob("*_raw.txt")))
+    if len(meta_ids) != len(raw_ids):
+        raise InconsistentDatasetError("uneven number of meta and text files")
+
+
+def _id_from_path(path):
+    return int(re.sub(r"[^0-9]", "", path.name))
 
 
 def main():
