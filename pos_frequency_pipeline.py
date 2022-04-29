@@ -2,12 +2,13 @@
 Implementation of POSFrequencyPipeline for score ten only.
 """
 
+import os
 import json
 import re
 
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
-from pipeline import CorpusManager
+from pipeline import CorpusManager, TextProcessingPipeline
 
 
 class EmptyFileError(Exception):
@@ -19,27 +20,34 @@ class EmptyFileError(Exception):
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
+        self.morph_analysis = TextProcessingPipeline(corpus_manager)
 
     def run(self):
         for article in self.corpus_manager.get_articles().values():
+            articles = []
             single_tagged_path = article.get_file_path('single_tagged')
-            with open(single_tagged_path, 'r', encoding='utf-8') as file:
-                text = file.read()
-            if not text:
+            with open(single_tagged_path, 'r', encoding='utf-8') as file_single_tagged:
+                text_single_tagged = file_single_tagged.read()
+            if not text_single_tagged:
                 raise EmptyFileError
-            tokens_pattern = re.compile(r'[а-яёА-ЯЁ]+<\S+>')
-            tokens = tokens_pattern.findall(text)
             pos_frequencies = {}
             pos_pattern = re.compile('<([A-Z]+)')
-            for token in tokens:
-                pos = pos_pattern.search(token)
-                if not pos:
-                    continue
-                pos = pos.group(1)
+            pos_dict = pos_pattern.findall(text_single_tagged)
+            if not pos_dict:
+                continue
+            for pos in pos_dict:
                 if pos not in pos_frequencies:
                     pos_frequencies[pos] = 1
                 else:
                     pos_frequencies[pos] += 1
+            tokens = self.morph_analysis._process(article.get_raw_text())
+            articles.append(tokens)
+            count = 0
+            for tokens in articles:
+                for token in tokens:
+                    if (('NOUN' or 'NPRO') and 'plur') in token.tags_pymorphy:
+                        count += 1
+                print(count)
             with open(article.get_meta_file_path(), 'r', encoding='utf-8') as meta_file:
                 meta_data = json.load(meta_file)
                 if not meta_data:
