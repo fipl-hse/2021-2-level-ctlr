@@ -52,7 +52,7 @@ class Crawler:
                      not_full_urls if not 'http' in not_full_url]
 
         for full_url in full_urls:
-            if len(self.urls) < self.total_max_articles and full_url not in self.urls:
+            if len(self.urls) < self.max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
 
     def find_articles(self):
@@ -60,7 +60,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep (2)
+            sleep (random.randint(1, 6))
             response = requests.get(url=seed_url, timeout=60)
             if not response.ok:
                 continue
@@ -136,5 +136,6 @@ if __name__ == '__main__':
     ID = 1
     for article_url_main in crawler.urls:
         article_parser = HTMLParser(article_url = article_url_main, article_id = ID)
+        article = article_parser.parse()
         article.save_raw()
         ID += 1
