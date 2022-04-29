@@ -7,7 +7,7 @@ import re
 from constants import ASSETS_PATH
 from core_utils.article import ArtifactType
 from core_utils.visualizer import visualize
-from pipeline import CorpusManager, validate_dataset
+from pipeline import CorpusManager
 
 
 class EmptyFileError(Exception):
@@ -35,6 +35,13 @@ class POSFrequencyPipeline:
                     frequency_dict[tag] = 1
                 else:
                     frequency_dict[tag] += 1
+            noun_pattern = re.compile(r'([a-яё]+)<(SPRO|S)')
+            all_nouns = noun_pattern.finditer(text)
+            longest_noun = ''
+            for noun in all_nouns:
+                if len(noun.group(1)) > len(longest_noun):
+                    longest_noun = noun.group(1)
+            print(longest_noun)
             with open(ASSETS_PATH / article.get_meta_file_path(), 'r', encoding='utf-8') as file:
                 data = json.load(file)
             data.update({'pos_frequencies': frequency_dict})
@@ -46,7 +53,6 @@ class POSFrequencyPipeline:
 
 def main():
     # YOUR CODE HERE
-    validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = POSFrequencyPipeline(corpus_manager=corpus_manager)
     pipeline.run()

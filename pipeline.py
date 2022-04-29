@@ -156,7 +156,7 @@ def validate_dataset(path_to_validate):
     all_ids = []
     compiled_expression = re.compile(r'(\d+)_(?:raw.txt|meta.json|raw.pdf'
                                      r'|cleaned.txt|single_tagged.txt'
-                                     r'|multiple_tagged.txt|image.png)')
+                                     r'|multiple_tagged.txt)')
     for file in path.iterdir():
         if file.stat().st_size == 0:
             raise InconsistentDatasetError("File is empty")
