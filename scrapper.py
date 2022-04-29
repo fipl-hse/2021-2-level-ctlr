@@ -125,7 +125,7 @@ def validate_config(crawler_path):
     """
     with open(crawler_path) as file:
         configuration = json.load(file)
- 
+
     if not configuration ['seed_urls']:
         raise IncorrectURLError
 
