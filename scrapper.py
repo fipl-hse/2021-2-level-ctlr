@@ -3,6 +3,7 @@ Scrapper implementation
 """
 from datetime import datetime
 import json
+from pathlib import Path
 import random
 import shutil
 from time import sleep
@@ -11,7 +12,7 @@ from bs4 import BeautifulSoup
 import requests
 
 from core_utils.article import Article
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HTTP_PATTERN
 
 class IncorrectURLError(Exception):
     """
