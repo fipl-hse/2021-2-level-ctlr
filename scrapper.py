@@ -93,7 +93,7 @@ class HTMLParser:
                 self.article.author = 'NOT FOUND'
                 #KEY_WORDS
         self.article.topics = 'NOT FOUND'
-        
+
         try:
             raw_date = article_bs.find_all('span',
                                            class_='article-info__data')[1].text
