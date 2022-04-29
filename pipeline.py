@@ -178,13 +178,10 @@ def validate_dataset(path_to_validate):
 
     for txt, json in zip(txts, jsons):
         match_txt = re.match(digit_pattern, txt.name).group()
-        if not match_txt:
+        match_json = re.match(digit_pattern, json.name).group()
+        if not match_txt or not match_json:
             raise InconsistentDatasetError
         txt_indices.append(int(match_txt))
-
-        match_json = re.match(digit_pattern, json.name).group()
-        if not match_json:
-            raise InconsistentDatasetError
         json_indices.append(int(match_json))
 
     txt_indices = sorted(txt_indices)
@@ -208,11 +205,11 @@ def validate_dataset(path_to_validate):
     if sorted(txt_indices) != sorted(json_indices):
         raise InconsistentDatasetError
 
-    if not check_if_balanced(path_to_validate):
+    if not check_if_balanced_and_numeration(path_to_validate):
         raise InconsistentDatasetError
 
 
-def check_if_balanced(path_to_validate):
+def check_if_balanced_and_numeration(path_to_validate):
     txts = list(path_to_validate.glob('*_raw.txt'))
     jsons = list(path_to_validate.glob('*_meta.json'))
     if len(txts) != len(jsons):
