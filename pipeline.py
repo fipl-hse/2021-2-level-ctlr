@@ -58,6 +58,7 @@ class MorphologicalToken:
 
 class CorpusManager:
     """
+    6,
     Works with articles and stores them
     """
 
@@ -115,8 +116,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        cleaned_text = ' '.join(re.findall(r'[а-яёА-ЯЁ]+', raw_text))
-        analyzed_cleaned_text = Mystem().analyze(cleaned_text)
+        analyzed_cleaned_text = Mystem().analyze(raw_text)
         tokens = []
         morph = MorphAnalyzer()
         for token in analyzed_cleaned_text:
@@ -128,7 +128,10 @@ class TextProcessingPipeline:
             morphological_token = MorphologicalToken(token['text'])
             morphological_token.normalized_form = token['analysis'][0]['lex']
             morphological_token.tags_mystem = token['analysis'][0]['gr']
-            morphological_token.tags_pymorphy = morph.parse(token['text'])[0].tag
+            word = morph.parse(token['text'])
+            if not word:
+                continue
+            morphological_token.tags_pymorphy = word[0].tag
             tokens.append(morphological_token)
         return tokens
 
@@ -160,11 +163,30 @@ def validate_dataset(path_to_validate):
     json_indices = []
 
     for txt, json in zip(txts, jsons):
+        match_txt = digit_pattern.match(txt.name)
+        if not match_txt:
+            raise InconsistentDatasetError
         txt_indices.append(int(digit_pattern.search(txt.name).group()))
-        json_indices.append(int(digit_pattern.search(json.name).group()))
+        match_json = digit_pattern.match(json.name)
+        if not match_json:
+            raise InconsistentDatasetError
+        txt_indices.append(int(digit_pattern.search(json.name).group()))
 
     for file in path_to_dataset.iterdir():
         if file.stat().st_size == 0:
+            raise InconsistentDatasetError
+
+    if txt_indices[0] != 1 or json_indices[0] != 1:
+        raise InconsistentDatasetError
+
+    ideal_list_with_indices =
+
+    for i, txt_id in enumerate(txt_indices):
+        if i + 1 != txt_id:
+            raise InconsistentDatasetError
+
+    for i, json_id in enumerate(json_indices):
+        if i + 1 != json_id:
             raise InconsistentDatasetError
 
     if sorted(txt_indices) != sorted(json_indices):
