@@ -5,7 +5,7 @@ Implementation of POSFrequencyPipeline for score ten only.
 import json
 import re
 
-from pymorphy2 import MorphAnalyzer
+import pymorphy2
 
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
@@ -31,8 +31,7 @@ class POSFrequencyPipeline:
             if not text_single_tagged:
                 raise EmptyFileError
             pos_frequencies = {}
-            pos_pattern = re.compile('<([A-Z]+)')
-            pos_dict = pos_pattern.findall(text_single_tagged)
+            pos_dict = re.findall(r'<([A-Z]+)', text_single_tagged)
             if not pos_dict:
                 continue
             for pos in pos_dict:
@@ -40,12 +39,10 @@ class POSFrequencyPipeline:
                     pos_frequencies[pos] = 1
                 else:
                     pos_frequencies[pos] += 1
-            morph = MorphAnalyzer()
             tokens = []
             for token in article.get_raw_text().split():
                 morphological_token = MorphologicalToken(token)
-                parse_word = morph.parse(token)
-                morphological_token.tags_pymorphy = parse_word[0].tag
+                morphological_token.tags_pymorphy = pymorphy2.MorphAnalyzer().parse(token)[0].tag
                 tokens.append(morphological_token)
             articles.append(tokens)
             count = 0
