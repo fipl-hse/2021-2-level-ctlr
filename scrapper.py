@@ -74,40 +74,40 @@ class Crawler:
         """
         return self.seed_urls
  
- class HTMLParser:
-     def __init__(self, article_url, article_id):
-        self.article_url = article_url
-        self.article_id = article_id
-        self.article = Article(self.article_url, self.article_id)
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+       self.article_url = article_url
+       self.article_id = article_id
+       self.article = Article(self.article_url, self.article_id)
    
-     def _fill_article_with_meta_information(self, article_bs):
+    def _fill_article_with_meta_information(self, article_bs):
         # заголовок
-         self.article.title = article_bs.find('h2').text.strip()
+        self.article.title = article_bs.find('h2').text.strip()
         # автор
-         try:
-             self.article.author = article_bs.find('p', 'strong', 'em').text.strip().split('  ')[0]
-         except AttributeError:
-             self.article.author = 'NOT FOUND'
+        try:
+            self.article.author = article_bs.find('p', 'strong', 'em').text.strip().split('  ')[0]
+        except AttributeError:
+            self.article.author = 'NOT FOUND'
         #KEY_WORDS
         self.article.topics = 'NOT FOUND'
         # дата
-         raw_date = article_bs.find('div', class_='mddata').find('time')['datetime'][:-5]
-         self.article.date = datetime.strptime(raw_date, '%Y-%m-%dT%H:%M:%S')
+        raw_date = article_bs.find('div', class_='mddata').find('time')['datetime'][:-5]
+        self.article.date = datetime.strptime(raw_date, '%Y-%m-%dT%H:%M:%S')
 
-     def _fill_article_with_text(self, article_bs):
-         self.article.text = ''
-         texts_bs = article_bs.find('div')
-         list_with_texts = texts_bs.find_all('p')
-         for text_bs in list_with_texts:
-             self.article.text += text_bs.text
+    def _fill_article_with_text(self, article_bs):
+        self.article.text = ''
+        texts_bs = article_bs.find('div')
+        list_with_texts = texts_bs.find_all('p')
+        for text_bs in list_with_texts:
+            self.article.text += text_bs.text
 
-     def parse(self):
-         response = requests.get(url=self.article_url, timeout=60)
-         article_bs = BeautifulSoup(response.text, 'lxml')
-         self._fill_article_with_text(article_bs)
-         self._fill_article_with_meta_information(article_bs)
+    def parse(self):
+        response = requests.get(url=self.article_url, timeout=60)
+        article_bs = BeautifulSoup(response.text, 'lxml')
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
 
-         return self.article
+        return self.article
    
 
 
