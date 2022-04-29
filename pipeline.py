@@ -118,15 +118,10 @@ class TextProcessingPipeline:
         analyzed_text_mystem = Mystem().analyze(article_text)
         pymorphy2_analyzer = pymorphy2.MorphAnalyzer()
         for analyzed_word in analyzed_text_mystem:
-            if (analyzed_word['text'] == ' ') or ('analysis' not in analyzed_word.keys()):
+            if (analyzed_word['text'] == ' ') or (not analyzed_word.get('analysis')) or not \
+                    (analyzed_word['analysis'][0].get('lex') and analyzed_word['analysis'][0].get('gr')):
                 continue
             original_word = analyzed_word['text']
-            if not analyzed_word['analysis']:
-                continue
-            if 'lex' not in analyzed_word['analysis'][0].keys():
-                continue
-            if 'gr' not in analyzed_word['analysis'][0].keys():
-                continue
             token = MorphologicalToken(original_word)
             normalized_form = analyzed_word['analysis'][0].get('lex')
             tags_mystem = analyzed_word['analysis'][0].get('gr')
@@ -163,8 +158,6 @@ def validate_dataset(path_to_validate):
     for file in children_files:
         if not Path(file).stat().st_size:
             raise InconsistentDatasetError
-
-
 
 
 def main():
