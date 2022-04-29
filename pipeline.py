@@ -126,7 +126,7 @@ class TextProcessingPipeline:
                     if pos_name not in freqs_dict:
                         freqs_dict[pos_name] = 1
                     else:
-                        freqs_dict[pos_name] +=1
+                        freqs_dict[pos_name] += 1
                 return freqs_dict
 
     def _process(self, raw_text: str):
@@ -210,6 +210,7 @@ def validate_dataset(path_to_validate):
 
     if sorted(txt_indices) != sorted(json_indices):
         raise InconsistentDatasetError
+
 
 def main():
     validate_dataset(ASSETS_PATH)
