@@ -43,7 +43,6 @@ class MorphologicalToken:
         """
         return self.original_word.lower()
 
-
     def get_single_tagged(self):
         """
         Returns normalized lemma with MyStem tags
@@ -93,20 +92,41 @@ class TextProcessingPipeline:
     """
 
     def __init__(self, corpus_manager: CorpusManager):
-        pass
+        self.corpus_manager = corpus_manager
 
     def run(self):
         """
         Runs pipeline process scenario
         """
-        pass
+        for article in self.corpus_manager.get_articles().values():
+            _text = article.get_raw_text()
+            _cleaned_text = self._process(_text)
+            article.save_as(text=_cleaned_text, kind=ArtifactType.cleaned)
 
     def _process(self, raw_text: str):
         """
         Processes each token and creates MorphToken class instance
         """
-        pass
+        _text = raw_text
+        _text = _text.translate(str.maketrans('', '', string.punctuation))
+        _text = self._remove_special_characters(_text)
+        _words = _text.split()
+        _lower_words = []
 
+        for word in _words:
+            _token = MorphologicalToken(original_word=word)
+            _lower_words.append(_token.get_cleaned())
+
+        return ' '.join(_lower_words)
+
+        raw_text = raw_text.replace('«', '')
+        raw_text = raw_text.replace('»', '')
+        raw_text = raw_text.replace('–', '')
+        pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+        for symbol in raw_text:
+            if not pattern.match(symbol):
+                return raw_text.replace(symbol, '')
+        return raw_text
 
 def validate_dataset(path_to_validate):
     """
@@ -163,7 +183,10 @@ def _validate_files(filenames, basepath):
 
 def main():
     # YOUR CODE HERE
-    pass
+    validate_dataset(ASSETS_PATH)
+    corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+    pipeline.run()
 
 
 if __name__ == "__main__":
