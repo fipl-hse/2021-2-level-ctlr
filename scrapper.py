@@ -33,12 +33,12 @@ class IncorrectNumberOfArticlesError(Exception):
     """
 
 
-class Crawler:  # way
+class Crawler:
     """
     Crawler implementation
     """
-    def __init__(self, seed_urls, max_articles: int):
 
+    def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
@@ -70,11 +70,11 @@ class Crawler:  # way
 
             if not response.ok:
                 continue
-            #  print(seed_url)
+            # print(seed_url)
 
             soup = BeautifulSoup(response.text, 'lxml')
-            #  soup = BeautifulSoup(response.text, 'html.parser')
-            #  with open("meta2.txt", "w") as file:
+            # soup = BeautifulSoup(response.text, 'html.parser')
+            # with open("meta2.txt", "w") as file:
             #    file.write(str(soup))
             self._extract_url(soup)
 
