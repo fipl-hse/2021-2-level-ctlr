@@ -134,15 +134,15 @@ def validate_config(crawler_path):
             raise IncorrectURLError
 
     seed_urls = configuration["seed_urls"]
-    total_articles = configuration["total_articles"]
+    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
 
-    if not isinstance(total_articles, int) or total_articles <= 0:
+    if not isinstance(total_articles_to_find_and_parse, int) or total_articles_to_find_and_parse <= 0:
         raise IncorrectNumberOfArticlesError
 
     if total_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    return seed_urls, total_articles
+    return seed_urls, total_articles_to_find_and_parse
 
 
 if __name__ == '__main__':
