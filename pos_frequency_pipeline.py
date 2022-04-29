@@ -1,7 +1,7 @@
 """
 Implementation of POSFrequencyPipeline for score ten only.
 """
-
+import json
 from collections import Counter
 import re
 
@@ -40,7 +40,7 @@ def get_file(article, kind=ArtifactType):
 
 
 def save_updated_meta(article, update_dict):
-    updated_meta = article._get_meta() | update_dict
+    updated_meta = get_meta(article) | update_dict
     with (ASSETS_PATH / article.get_meta_file_path()).open("w", encoding="utf-8") as file:
         json.dump(updated_meta, file, sort_keys=False,
                   indent=4, ensure_ascii=False, separators=(",", ": "))
@@ -48,6 +48,17 @@ def save_updated_meta(article, update_dict):
 
 def get_image_path(article):
     return ASSETS_PATH / f"{article.article_id}_image.png"
+
+
+def get_meta(article):
+    return {
+        'id': self.article_id,
+        'url': self.url,
+        'title': self.title,
+        'date': self._date_to_text(),
+        'author': self.author,
+        'topics': self.topics
+    }
 
 
 def main():
