@@ -8,7 +8,7 @@ from pymorphy3 import MorphAnalyzer
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
-from improved_article import ImprovedArticle, ArtifactType
+from core_utils.article import Article, ArtifactType
 
 
 class EmptyDirectoryError(Exception):
@@ -72,7 +72,7 @@ class CorpusManager:
         """
         for file in self.path_to_raw_text_data.glob("*_raw.txt"):
             index = _id_from_path(file)
-            self._storage[index] = ImprovedArticle(None, index)
+            self._storage[index] = Article(None, index)
 
     def get_articles(self):
         """
@@ -94,6 +94,7 @@ class TextProcessingPipeline:
         Runs pipeline process scenario
         """
         for article in self.corpus_manager.get_articles().values():
+            print(article.article_id)
             text = article.get_raw_text()
             tokens = self._process(text)
             article.save_as(" ".join(map(lambda x: x.get_cleaned(), tokens)),
@@ -102,6 +103,8 @@ class TextProcessingPipeline:
                             ArtifactType.single_tagged)
             article.save_as(" ".join(map(lambda x: x.get_multiple_tagged(), tokens)),
                             ArtifactType.multiple_tagged)
+
+
 
     def _process(self, raw_text: str):
         """
@@ -138,11 +141,16 @@ def validate_dataset(path_to_validate):
     if not any(path.iterdir()):
         raise EmptyDirectoryError
     for file in path.iterdir():
-        if not file.read_bytes():
+        if not file.stat().st_size:
             raise InconsistentDatasetError("empty file")
 
     meta_ids = sorted(map(_id_from_path, path.glob("*_meta.json")))
     raw_ids = sorted(map(_id_from_path, path.glob("*_raw.txt")))
+
+    if not all(map(lambda a: a[0] == a[1], zip(meta_ids, range(1, len(meta_ids) + 1)))):
+        raise InconsistentDatasetError("meta files should be listed 1 to N")
+    if not all(map(lambda a: a[0] == a[1], zip(raw_ids, range(1, len(meta_ids) + 1)))):
+        raise InconsistentDatasetError("raw files should be listed 1 to N")
     if len(meta_ids) != len(raw_ids):
         raise InconsistentDatasetError("uneven number of meta and text files")
 

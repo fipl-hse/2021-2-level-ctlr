@@ -23,14 +23,31 @@ class POSFrequencyPipeline:
 
     def run(self):
         for article in self.corpus_manager.get_articles().values():
-            tagged_text = article.get_file(ArtifactType.single_tagged)
+            print(article.article_id)
+            tagged_text = get_file(article, ArtifactType.single_tagged)
             if not tagged_text:
                 raise EmptyFileError
 
             pos = re.findall(r"(?<=<)[A-Z]*(?=[,=])", tagged_text)
             pos_frequencies = dict(Counter(pos))
-            article.save_updated_meta({"pos_frequencies": pos_frequencies})
-            visualize(statistics=pos_frequencies, path_to_save=article.get_image_path())
+            save_updated_meta(article, {"pos_frequencies": pos_frequencies})
+            visualize(statistics=pos_frequencies, path_to_save=get_image_path(article))
+
+
+def get_file(article, kind=ArtifactType):
+    with open(article.get_file_path(kind=kind), encoding="utf-8") as file:
+        return file.read()
+
+
+def save_updated_meta(article, update_dict):
+    updated_meta = article._get_meta() | update_dict
+    with (ASSETS_PATH / article.get_meta_file_path()).open("w", encoding="utf-8") as file:
+        json.dump(updated_meta, file, sort_keys=False,
+                  indent=4, ensure_ascii=False, separators=(",", ": "))
+
+
+def get_image_path(article):
+    return ASSETS_PATH / f"{article.article_id}_image.png"
 
 
 def main():
