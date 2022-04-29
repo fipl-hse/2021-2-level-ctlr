@@ -1,44 +1,35 @@
 """
-Crawler implementation
+Scrapper implementation
 """
-import os
+import datetime
 import json
+from pathlib import Path
 import random
-from datetime import datetime
+import shutil
 from time import sleep
-import requests
+
 from bs4 import BeautifulSoup
+import requests
+
 from core_utils.article import Article
-from constants import CRAWLER_CONFIG_PATH, HEADERS, ASSETS_PATH
+from constants import HTTP_PATTERN, ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 
 class IncorrectURLError(Exception):
     """
-    Custom error
+    Seed URL does not match standard pattern
     """
 
 
 class NumberOfArticlesOutOfRangeError(Exception):
     """
-    Custom error
+    Total number of articles to parse is too big
     """
 
 
 class IncorrectNumberOfArticlesError(Exception):
     """
-    Custom error
-    """
-
-
-class AtypicalTypeOfDate(Exception):
-    """
-    Custom error
-    """
-
-
-class UnknownConfigError(Exception):
-    """
-    Most general error
+    Total number of articles to parse in not integer
     """
 
 
@@ -46,126 +37,103 @@ class Crawler:
     """
     Crawler implementation
     """
-    def __init__(self, seed_urls: list, max_articles: int):
+
+    def __init__(self, seed_urls, total_max_articles):
         self.seed_urls = seed_urls
-        self.total_max_articles = max_articles
+        self.total_max_articles = total_max_articles
         self.urls = []
 
-    @staticmethod
-    def extract_url(article_link):
-        """
-        Adding the domain to the links of articles
-        """
-        return 'https://www.psychologies.ru' + article_link
+    def _extract_url(self, article_bs):
+        not_full_urls = []
+        all_urls_bs = article_bs.find_all('a', class_='rubric-anons_title')
+        for url_bs in all_urls_bs:
+            url_to_article = url_bs['href']
+            not_full_urls.append(url_to_article)
+        full_urls = [HTTP_PATTERN + not_full_url for not_full_url in
+                     not_full_urls if not 'http' in not_full_url]
 
-    def get_search_urls(self):
-        """
-        Returns seed_urls param
-        """
-        return self.seed_urls
+        for full_url in full_urls:
+            if len(self.urls) < self.total_max_articles and full_url not in self.urls:
+                if requests.get(full_url).status_code == 200:
+                    self.urls.append(full_url)
 
     def find_articles(self):
         """
         Finds articles
         """
+        for seed_url in self.seed_urls:
+            response = requests.get(url=seed_url)
+            if not response.ok:
+                continue
+            soup = BeautifulSoup(response.text, 'lxml')
+            self._extract_url(soup)
+            sleep(2)
 
-        for url in self.seed_urls:
-            response = requests.get(url, headers=HEADERS)
-            if not response:
-                raise IncorrectURLError
-
-            page_soup = BeautifulSoup(response.content, features='lxml')
-            articles_links_raw = []
-            article_soup_razdels = page_soup.find_all('div', class_="razdel-section")
-            # if not too_much_from_seed(articles_links_raw):
-            for razdel in article_soup_razdels:
-                article_soups = razdel.find_all('div', class_='row-container rubric-anons')
-                for article_soup in article_soups:
-                    articles_links_raw.append(
-                        article_soup.find('a',class_="rubric-anons_title")['href'])
-                    if too_much_from_seed(articles_links_raw):
-                        break
-                if too_much_from_seed(articles_links_raw):
-                    break
-            if not too_much_from_seed(articles_links_raw):
-                rubs_class = "rubric-anons_list section-three-blocks"
-                article_soup_rubrics = page_soup.find_all('div', class_= rubs_class)
-                for rubric in article_soup_rubrics:
-                    article_soups = rubric.find_all('div', class_='item grid_2')
-                    for article_soup in article_soups:
-                        articles_links_raw.append(article_soup.find('a', class_="link")['href'])
-                        if too_much_from_seed(articles_links_raw):
-                            break
-                    if too_much_from_seed(articles_links_raw):
-                        break
-
-            for article_link in articles_links_raw:
-                seed_url = self.extract_url(article_link)
-                self.urls.append(seed_url)
+    def get_search_urls(self):
+        """
+        Returns seed_urls param
+        """
+        pass
 
 
-class ArticleParser:
-    """
-    ArticleParser implementation
-    """
-    def __init__(self, full_url: str, article_id: int):
-        self.full_url = full_url
+class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
         self.article_id = article_id
-        self.article = Article(url=full_url, article_id=article_id)
+        self.article = Article(self.article_url, self.article_id)
 
-    def _fill_article_with_text(self, article_soup):
-        article_text = article_soup.find('section',
-                                         itemprop='articleBody').find_all(['h2','h3','p'])
-        for par in article_text:
-            self.article.text += par.text.strip() + '\n'
-
-    def _fill_article_with_meta_information(self, article_soup):
+    def _fill_article_with_meta_information(self, article_bs):
+        author_p_tag = article_bs.find(
+            lambda tag: tag.name == "p" and 'Источник:' in tag.text)
         try:
-            self.article.title = article_soup.find('h1', class_='article__title').text
-        except TypeError:
-            self.article.title ="NOT FOUND"
+            self.article.author = author_p_tag.find_all('sup')[1].text
+        except (AttributeError, IndexError):
+            try:
+                author_span_tag = article_bs.find(
+                    'span', class_='article-info__authors')
+                self.article.author = author_span_tag.find_all('span')[1].text
+            except (AttributeError, IndexError):
+                self.article.author = 'NOT FOUND'
+        self.article.topics = [
+            topic.text for topic in article_bs.find_all(
+                'a', class_='themes__theme')
+        ]
         try:
-            self.article.author = article_soup.find('div', itemprop="author").meta['content']
-        except TypeError:
-            self.article.author ="NOT FOUND"
-        try:
-            artical_topics_raw = article_soup.find(
-                'div', class_='article').find(
-                    'div', class_='themes mb-3')('a', class_='themes__theme')
-            for artical_topic in artical_topics_raw:
-                self.article.topics.append(artical_topic.text)
-        except TypeError:
-            self.article.topics.append("NOT FOUND")
-        article_date_raw = article_soup.find('meta', itemprop='datePublished')['content']
-        self.article.date = self.unify_date_format(article_date_raw)
+            raw_date = article_bs.find_all('span',
+                                           class_='article-info__data')[1].text
+            months_dict = {'января': '01',
+                           'февраля': '02',
+                           'марта': '03',
+                           'апреля': '04',
+                           'мая': '05',
+                           'июня': '06',
+                           'июля': '07',
+                           'августа': '08',
+                           'сентября': '09',
+                           'октября': '10',
+                           'ноября': '11',
+                           'декабря': '12',
+                           }
+            for month in months_dict:
+                if month in raw_date:
+                    raw_date = raw_date.replace(month, months_dict[month])
+            self.article.date = datetime.datetime.strptime(raw_date,'%d %m %Y')
+        except (ValueError, IndexError):
+            self.article.date = datetime.datetime.today()
+        self.article.title = article_bs.find("meta", property="og:title")[
+            'content']
 
-    @staticmethod
-    def unify_date_format(date_str):
-        """
-        Unifies date format
-
-        From    2022-04-22T11:48:45.453Z
-        or      2022-04-22T11:48:45Z
-
-        To      2022-04-22 11:48:45
-        """
-        try:
-            article_date_datetime = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%fZ")
-        except ValueError:
-            article_date_datetime = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%SZ")
-        return article_date_datetime.strftime("%Y-%m-%d %H:%M:%S")
+    def _fill_article_with_text(self, article_bs):
+        text = article_bs.find('div', class_='article').text
+        self.article.text = text
 
     def parse(self):
-        """
-        Parses each article
-        """
-        response = requests.get(self.full_url, headers=HEADERS)
-        if not response:
-            raise IncorrectURLError
+        response = requests.get(url=self.article_url)
 
-        article_soup = BeautifulSoup(response.text, 'lxml')
-        self._fill_article_with_text(article_soup)
-        self._fill_article_with_meta_information(article_soup)
+        article_bs = BeautifulSoup(response.text, 'lxml')
+
+        self._fill_article_with_text(article_bs)
+        self._fill_article_with_meta_information(article_bs)
         return self.article
 
 
@@ -173,55 +141,50 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    if not os.path.exists(base_path):
-        os.makedirs(base_path)
-
-def too_much_from_seed(articles_links_raw):
-    """
-    Simple verification of a sufficient number of articles
-    """
-    if len(articles_links_raw) == max_num_articles:
-        return True
-    return False
+    path_for_environment = Path(base_path)
+    if path_for_environment.exists():
+        shutil.rmtree(base_path)
+    path_for_environment.mkdir(parents=True)
 
 
 def validate_config(crawler_path):
     """
     Validates given config
     """
-    try:
-        with open(crawler_path, 'r', encoding='utf-8') as config:
-            params = json.load(config)
+    with open(crawler_path) as file:
+        configuration = json.load(file)
 
-        seed_urls = params.get('base_urls')
-        max_articles = params.get('total_articles_to_find_and_parse')
+    if not configuration['seed_urls']:
+        raise IncorrectURLError
 
-        if not isinstance(seed_urls, list):
+    for url in configuration["seed_urls"]:
+        if HTTP_PATTERN not in url:
             raise IncorrectURLError
-        for url in seed_urls:
-            if not isinstance(url, str) or not url.startswith('http'):
-                raise IncorrectURLError
 
-        if not isinstance(max_articles, int) or max_articles < 0:
-            raise IncorrectNumberOfArticlesError
+    seed_urls = configuration["seed_urls"]
+    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
 
-    except(IncorrectURLError,
-           IncorrectNumberOfArticlesError,
-           NumberOfArticlesOutOfRangeError) as error:
-        raise error
-    else:
-        return seed_urls, max_articles
+    if not isinstance(total_articles_to_find_and_parse, int):
+        raise IncorrectNumberOfArticlesError
+    if total_articles_to_find_and_parse <= 0:
+        raise IncorrectNumberOfArticlesError
+
+    if total_articles_to_find_and_parse > 200:
+        raise NumberOfArticlesOutOfRangeError
+
+    return seed_urls, total_articles_to_find_and_parse
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    seed_urls_list, max_num_articles = validate_config(CRAWLER_CONFIG_PATH)
-    crawler = Crawler(seed_urls=seed_urls_list,
-                      max_articles=max_num_articles)
-    crawler.find_articles()
+    seed_urls_main, total_articles_main = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    for article_id_num, article_url in enumerate(crawler.urls, 1):
-        parser = ArticleParser(full_url=article_url, article_id=article_id_num)
-        article = parser.parse()
+
+    crawler = Crawler(seed_urls_main, total_articles_main)
+    crawler.find_articles()
+
+    ID = 1
+    for article_url_main in crawler.urls:
+        article_parser = HTMLParser(article_url=article_url_main, article_id=ID)
+        article = article_parser.parse()
         article.save_raw()
-        sleep(random.randrange(5, 7))
+        ID += 1
