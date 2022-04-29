@@ -5,11 +5,9 @@ Implementation of POSFrequencyPipeline for score ten only.
 import json
 import re
 
-from pymorphy2 import MorphAnalyzer
-
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
-from pipeline import CorpusManager, TextProcessingPipeline, MorphologicalToken
+from pipeline import CorpusManager
 
 
 class EmptyFileError(Exception):
@@ -21,7 +19,6 @@ class EmptyFileError(Exception):
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
-        self.morph_analysis = TextProcessingPipeline(corpus_manager)
 
     def run(self):
         for article in self.corpus_manager.get_articles().values():
