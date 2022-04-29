@@ -70,9 +70,9 @@ class CorpusManager:
         """
         Register each dataset entry
         """
+        pattern = re.compile(r'\d+')
 
         for file in self.path.glob("*_raw.txt"):
-            pattern = re.compile(r'\d+')
             file_id = int(pattern.match(file.stem).group())
             self._storage[file_id] = Article(url=None, article_id=file_id)
 
@@ -107,6 +107,7 @@ class TextProcessingPipeline:
                 single_tagged.append(token.get_single_tagged())
                 multiple_tagged.append(token.get_multiple_tagged())
 
+            # build frequencies by using pymorphy
             article.save_as(' '.join(cleaned), ArtifactType.cleaned)
             article.save_as(' '.join(single_tagged), ArtifactType.single_tagged)
             article.save_as(' '.join(multiple_tagged), ArtifactType.multiple_tagged)
@@ -131,6 +132,11 @@ class TextProcessingPipeline:
 
             token.normalized_form = single_word.get('analysis')[0].get('lex')
             token.tags_mystem = single_word.get('analysis')[0].get('gr')
+
+            # improved
+            result_pymorphy = analyzer.parse(single_word.get('text'))[0]
+            if not result_pymorphy.tag:
+                continue
             token.tags_pymorphy = analyzer.parse(single_word.get('text'))[0].tag
 
             tokens.append(token)
@@ -161,19 +167,21 @@ def validate_dataset(path_to_validate):
         ".txt": []
     }
 
-    # pattern = re.compile(r'\d+')
     pattern = re.compile(r'(\d+)(_\w+)')
 
-    for file in list(path.glob('*')):
+    for file_id, file in enumerate(sorted(list(path.glob('*'))), start=1):
 
         # add in dict file id with relevant filename extension
+        # removed a loop iterating over need_file_names
         if pattern.match(file.stem).group(2) in needed_file_names:
-            files.get(file.suffix).append(int(pattern.match(file.stem).group(1)))
+            if not pattern.match(file.stem).group(1):
+                files.get(file.suffix).append(file_id)
+            else:
+                files.get(file.suffix).append(int(pattern.match(file.stem).group(1)))
 
         # check txt files emptiness
-        if '_raw.txt' in file.name:
-            if file.stat().st_size == 0:
-                raise InconsistentDatasetError
+        if ('_raw.txt' in file.name) and (file.stat().st_size == 0):
+            raise InconsistentDatasetError
 
     # check dataset numeration
     files_sorted = {}
