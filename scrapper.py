@@ -57,15 +57,15 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep(random.randint(1, 8))
+            sleep(random.randint(1, 5))
             response = requests.get(url=seed_url)
 
             if not response.ok:
                 continue
 
-            s_lib = BeautifulSoup(response.text, 'lxml')
+            soup_lib = BeautifulSoup(response.text, 'lxml')
 
-            urls = self._extract_url(s_lib)
+            urls = self._extract_url(soup_lib)
             for url in urls:
                 if len(self.urls) < self.max_articles:
                     if url not in self.urls:
