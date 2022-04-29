@@ -124,6 +124,7 @@ class TextProcessingPipeline:
         a_morph = pymorphy2.MorphAnalyzer()
 
         tokens = []
+
         for token in a_text:
             if 'analysis' not in token or not token['analysis'] \
                     or 'lex' not in token['analysis'][0] \
