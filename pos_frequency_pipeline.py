@@ -6,7 +6,6 @@ import json
 import re
 
 from pymorphy2 import MorphAnalyzer
-from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
@@ -27,8 +26,8 @@ class POSFrequencyPipeline:
     def run(self):
         for article in self.corpus_manager.get_articles().values():
             articles = []
-            single_tagged_path = article.get_file_path('single_tagged')
-            with open(single_tagged_path, 'r', encoding='utf-8') as file_single_tagged:
+            with open(article.get_file_path('single_tagged'),
+                      'r', encoding='utf-8') as file_single_tagged:
                 text_single_tagged = file_single_tagged.read()
             if not text_single_tagged:
                 raise EmptyFileError
@@ -46,8 +45,7 @@ class POSFrequencyPipeline:
             tokens = []
             for token in article.get_raw_text().split():
                 morphological_token = MorphologicalToken(token)
-                parse_word = morph.parse(token)
-                morphological_token.tags_pymorphy = parse_word[0].tag
+                morphological_token.tags_pymorphy = morph.parse(token)[0].tag
                 tokens.append(morphological_token)
             articles.append(tokens)
             for tokens in articles:
