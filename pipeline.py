@@ -181,8 +181,10 @@ def check_dataset_numeration(dataset_path):
 
     for files_suffix, ids_list in files.items():
         sorted_files[files_suffix] = sorted(ids_list)
-        for file_number in range(1, len(ids_list) + 1):
-            if ids_list[file_number - 1] != file_number:
+
+    for files_suffix, sorted_ids_list in sorted_files.items():
+        for file_number in range(1, len(sorted_ids_list) + 1):
+            if sorted_ids_list[file_number - 1] != file_number:
                 print(f'Missing file № {file_number} with {files_suffix} suffix')
                 return -1
 
