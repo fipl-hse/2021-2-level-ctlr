@@ -32,15 +32,15 @@ class POSFrequencyPipeline:
 
         for article in self.corpus_manager.get_articles().values():
             # multiple_tagged
-            with open(article.get_file_path(ArtifactType.multiple_tagged), encoding='utf=8') as file:
+            with open(article.get_file_path(ArtifactType.single_tagged), encoding='utf=8') as file:
                 file_text = file.read()
                 if not file_text:
                     raise EmptyFileError
 
             # calculate frequencies of each part of speech
             freq_dict = {}
-            # pattern = re.compile(r'<([A-Z]+)')
-            pattern = re.compile(r'[(]([A-Z]+)')
+            pattern = re.compile(r'<([A-Z]+)')
+            # pattern = re.compile(r'[(]([A-Z]+)')
 
             for pos_tag in pattern.findall(file_text):
                 freq_dict[pos_tag] = freq_dict.get(pos_tag, 0) + 1
