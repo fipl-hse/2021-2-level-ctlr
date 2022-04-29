@@ -1,3 +1,6 @@
+"""
+POSFrequency Pipeline implementation
+"""
 import json
 import re
 
