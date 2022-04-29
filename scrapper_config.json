@@ -1,8 +1,5 @@
 {
     "seed_urls": [
-        "https://esquire.ru/news/politics-news/",
-        "https://esquire.ru/news/business-news/",
-        "https://esquire.ru/news/fashion-news/",
         "https://esquire.ru/news/offtop/",
         "https://esquire.ru/news/film-news/",
         "https://esquire.ru/news/culture-and-entertainment/",
@@ -28,5 +25,5 @@
         "https://esquire.ru/editorial-blog/esquire-blog/"
 
     ],
-    "total_articles_to_find_and_parse": 1
+    "total_articles_to_find_and_parse": 3
 }

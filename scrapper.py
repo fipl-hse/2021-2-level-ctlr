@@ -99,10 +99,19 @@ class HTMLParser:
         if title is not None:
             self.article.title = title.text
 
-        topics = article_bs.find('div', {'class': 'tags article-detail__tags'})
+        topics = article_bs.find_all('div', {'class': 'tags__item'})
+        topic_list = []
         if topics is not None:
-            topic_list = topics.find('a', {'class': 'tags__link'})
-            self.article.topics = topic_list.text.strip().capitalize()
+            for topic in topics:
+                topic_list.append(topic.find('a').text.strip())
+            self.article.topics = ','.join(topic_list)
+
+        tags = article_bs.find_all('div', {'class': 'breadcrumbs__item'})
+        tag_list = []
+        if tags is not None:
+            for tag in tags:
+                tag_list.append(tag.find('a').text.strip())
+            self.article.tags = ','.join(tag_list)
 
     def parse(self):
         response = requests.get(url=self.article_url, headers=HEADERS)
