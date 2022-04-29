@@ -168,6 +168,9 @@ def validate_dataset(path_to_validate):
         with open(file, 'r', encoding='utf-8') as text_file:
             text = text_file.read()
 
+        if text_file is None:
+            raise AssertionError
+
         if text is None:
             raise InconsistentDatasetError
 
