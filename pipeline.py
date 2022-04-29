@@ -64,16 +64,16 @@ class CorpusManager:
 
     def __init__(self, path_to_raw_txt_data: str):
         self._storage = {}
-        self.path = Path(path_to_raw_txt_data)
+        self.path_to_raw_txt_data = Path(path_to_raw_txt_data)
+        self._scan_dataset()
 
     def _scan_dataset(self):
         """
         Register each dataset entry
         """
-        files = self.path.glob("*")
-        pattern = re.compile(r'[0-9]+')
-        for texts in files:
-            if "_raw.txt" in texts.name:
+        pattern = re.compile(r'\d+')
+        for texts in self.path_to_raw_txt_data.glob("*_raw.txt"):
+            if re.match(pattern, texts.name):
                 article_id = int(pattern.search(texts.name).group(0))
                 self._storage[article_id] = Article(url=None, article_id=article_id)
 
@@ -81,7 +81,6 @@ class CorpusManager:
         """
         Returns storage params
         """
-        self._scan_dataset()
         return self._storage
 
 
@@ -97,9 +96,7 @@ class TextProcessingPipeline:
         """
         Runs pipeline process scenario
         """
-        articles = self.corpus_manager.get_articles()
-
-        for article in articles.values():
+        for article in self.corpus_manager.get_articles().values():
             article_text = article.get_raw_text()
             cleaned_tokens = []
             single_tagged_tokens = []
@@ -125,9 +122,11 @@ class TextProcessingPipeline:
 
         tokens = []
         for token in analyzed_text:
-            if not token.get("analysis"):
-                continue
-            if "analysis" not in token:
+            if not token.keys() & {"analysis", "text"} or \
+                    not token.get("analysis") or not token.get("text") or \
+                    not token.get("analysis")[0].keys() & {"lex", "gr"} or \
+                    not token.get("analysis")[0].get("lex") or \
+                    not token.get("analysis")[0].get("gr"):
                 continue
             morph_token = MorphologicalToken(original_word=token['text'])
             morph_token.normalized_form = token['analysis'][0]['lex']
@@ -155,27 +154,18 @@ def validate_dataset(path_to_validate):
     if not data:
         raise EmptyDirectoryError
 
-    number_of_texts = 0
-    number_of_metas = 0
+    pattern = re.compile(r'\d+')
+    raw_texts = sorted(list(path_to_validate.glob('*_raw.txt')), key=lambda x: int(pattern.search(x.name).group(0)))
+    metas = sorted(list(path_to_validate.glob('*_meta.json')), key=lambda x: int(pattern.search(x.name).group(0)))
 
-    pattern = re.compile(r'[0-9]+')
-    for file in sorted(list(path_to_validate.glob('*')), key=lambda x: int(pattern.search(x.name).group(0))):
-        if "_raw.txt" in file.name:
-            with open(file, 'r', encoding='utf-8') as text_file:
-                text = text_file.read()
-                if not text:
-                    raise InconsistentDatasetError
-            file_id = int(pattern.search(file.name).group(0))
-            if file_id == 0 or file_id - number_of_texts > 1 or \
-                    not (path_to_validate / f'{file_id}_raw.txt').is_file() or \
-                    not (path_to_validate / f'{file_id}_meta.json').is_file():
-                raise InconsistentDatasetError
-            number_of_texts += 1
+    for text_index, text in enumerate(raw_texts):
+        if text.stat().st_size == 0:
+            raise InconsistentDatasetError
+        file_id = int(pattern.search(text.name).group(0))
+        if file_id - text_index != 1 or not (path_to_validate / f'{file_id}_meta.json').is_file():
+            raise InconsistentDatasetError
 
-        if "_meta.json" in file.name:
-            number_of_metas += 1
-
-    if number_of_texts != number_of_metas:
+    if len(raw_texts) != len(metas):
         raise InconsistentDatasetError
 
 
