@@ -139,7 +139,7 @@ class TextProcessingPipeline:
             token.tags_mystem = analysis[0]['gr']
 
             parses = morph_analyzer.parse(single_word_analysis['text'])
-            if not parses or not parses[0].tag:
+            if not parses:
                 continue
             token.tags_pymorphy = parses[0].tag
 
@@ -162,29 +162,22 @@ def validate_dataset(path_to_validate):
     if not any(path_to_validate.iterdir()):
         raise EmptyDirectoryError
 
-    raw_txt = 0
-    meta_json = 0
+    article_ids = []
+    pattern = re.compile(r'(\d+)')
 
-    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(re.search(r'(\d+)', x.name).group())):
+    if not any(re.search(pattern, file.name) for file in path_to_validate.glob('*')):
+        raise InconsistentDatasetError
+
+    for file in sorted(path_to_validate.glob('*'), key=lambda x: int(re.search(pattern, x.name).group())):
         if file.stat().st_size == 0:
             raise InconsistentDatasetError
 
-        if file.name.endswith('meta.json'):
+        article_ids.append(int(re.search(pattern, file.name).group()))
 
-            meta_json += 1
-
-            if f'{meta_json}_meta' not in file.name:
-                raise InconsistentDatasetError
-
-        if file.name.endswith('raw.txt'):
-
-            raw_txt += 1
-
-            if f'{raw_txt}_raw' not in file.name:
-                raise InconsistentDatasetError
-
-    if raw_txt != meta_json:
-        raise InconsistentDatasetError
+    for article_id in sorted(article_ids):
+        if (not (path_to_validate / f'{article_id}_meta.json').exists() or
+                not (path_to_validate / f'{article_id}_raw.txt').exists()):
+            raise InconsistentDatasetError
 
 
 def main():
