@@ -39,7 +39,7 @@ class POSFrequencyPipeline:
             with open(article.get_file_path('multiple_tagged'),
                       'r', encoding='utf-8') as file_multiple_tagged:
                 text_multiple_tagged = file_multiple_tagged.read()
-            noun_find = re.findall('\(NOUN[a-z,\s]+plur[a-z,\s]+\)', text_multiple_tagged)
+            noun_find = re.findall(r'\(NOUN[a-z,\s]+plur[a-z,\s]+\)', text_multiple_tagged)
             print(len(noun_find))
             with open(article.get_meta_file_path(), 'r', encoding='utf-8') as meta_file:
                 meta_data = json.load(meta_file)
