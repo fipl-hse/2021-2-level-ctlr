@@ -184,10 +184,11 @@ def validate_dataset(path_to_validate):
             raise InconsistentDatasetError
 
     # check dataset numeration
-    files_sorted = {}
+    # files_sorted = {}
+    files_sorted = {extension: sorted(ids) for extension, ids in files.items()}
 
-    for extension, ids in files.items():
-        files_sorted[extension] = sorted(ids)
+    # for extension, ids in files.items():
+    # files_sorted[extension] = sorted(ids)
 
     for sorted_ids in files_sorted.values():
         for file_number in range(1, len(sorted_ids) + 1):
