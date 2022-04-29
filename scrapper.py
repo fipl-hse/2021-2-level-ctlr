@@ -4,6 +4,7 @@ Scrapper implementation
 from datetime import datetime
 from pathlib import Path
 import random
+import json
 import shutil
 from time import sleep
 
@@ -123,7 +124,27 @@ def validate_config(crawler_path):
     """
     Validates given config
     """
-    pass
+    with open(crawler_path) as file:
+        scrapper_config = json.load(file)
+
+    for url in scrapper_config["seed_urls"]:
+        if HTTP_PATTERN not in url:
+            print(url)
+            raise IncorrectURLError
+
+    seed_urls = scrapper_config["seed_urls"]
+    total_articles_to_find_and_parse = scrapper_config["total_articles_to_find_and_parse"]
+
+    if not seed_urls:
+        raise IncorrectURLError
+
+    if not isinstance(total_articles_to_find_and_parse, int) or total_articles_to_find_and_parse <= 0:
+        raise IncorrectNumberOfArticlesError
+
+    if total_articles_to_find_and_parse > 200:
+        raise NumberOfArticlesOutOfRangeError
+
+    return seed_urls, total_articles_to_find_and_parse
 
 
 if __name__ == '__main__':
@@ -135,7 +156,7 @@ if __name__ == '__main__':
 
     COUNTER_ID = 1
     for article_url_main in crawler.urls:
-        article_parser = HTMLParser(article_url = crawler_url, article_id = COUNTER_ID)
+        article_parser = HTMLParser(article_url = article_url_main, article_id = COUNTER_ID)
         article = article_parser.parse()
         article.save_raw()
         COUNTER_ID += 1
