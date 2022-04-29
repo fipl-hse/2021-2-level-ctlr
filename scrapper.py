@@ -11,8 +11,9 @@ from time import sleep
 import requests
 import html2text
 from bs4 import BeautifulSoup
-from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
 from article import Article
+from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
+
 
 
 class IncorrectURLError(Exception):
@@ -91,10 +92,10 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        self.article.title = article_bs.find('article')  #  .find_all('a')[0].contents[0]
+        self.article.title = article_bs.find('article')#.find_all('a')[0].contents[0]
         print(article_bs.find('article'))
         author = article_bs.find(class_="extra").contents
-        author = re.findall(r"""РўРµРєСЃС‚: [\w ]+[^,'"<]""", str(author))[0][7:]
+        author = re.findall(r"""Текст: [\w ]+[^,'"<]""", str(author))[0][7:]
         self.article.author = author
         self.article.date = datetime.today()
 
