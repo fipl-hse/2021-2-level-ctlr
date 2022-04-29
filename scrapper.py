@@ -58,7 +58,7 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(url=seed_url)
-            wait = random.randint(1, 9)
+            wait = random.randint(1, 15)
             sleep(wait)
 
             if not response.ok:
