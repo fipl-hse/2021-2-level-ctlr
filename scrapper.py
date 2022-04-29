@@ -38,48 +38,48 @@ class Crawler:
     """
     def __init__(self, seed_urls, max_articles: int):
         self.seed_urls = seed_urls
-        self.total_max_articles = total_max_articles
+        self.max_articles = max_articles
         self.urls = []
-        
+
 
     def _extract_url(self, article_bs):
         not_full_urls = []
         all_urls_bs = article_bs.find_all('a', class_='mnname')
-        for url_bs in all_url_bs:
+        for url_bs in all_urls_bs:
             url_to_article = url_bs['href']
             not_full_urls.append(url_to_article)
         full_urls = [HTTP_PATTERN + not_full_url for not_full_url in
                      not_full_urls if not 'http' in not_full_url]
-                                          
+
         for full_url in full_urls:
             if len(self.urls) < self.total_max_articles and full_url not in self.urls:
                 self.urls.append(full_url)
-                                       
+
     def find_articles(self):
         """
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep (2)                              
-            response = request.get(url=seed_url, timeout=60)
+            sleep (2)
+            response = requests.get(url=seed_url, timeout=60)
             if not response.ok:
                 continue
             soup = BeautifulSoup (response.text, 'lxml')
             self._extract_url(soup)
-            
-                                          
+
+
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
         return self.seed_urls
- 
+
 class HTMLParser:
     def __init__(self, article_url, article_id):
-       self.article_url = article_url
-       self.article_id = article_id
-       self.article = Article(self.article_url, self.article_id)
-   
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(self.article_url, self.article_id)
+
     def _fill_article_with_meta_information(self, article_bs):
         # заголовок
         self.article.title = article_bs.find('h2').text.strip()
@@ -108,7 +108,7 @@ class HTMLParser:
         self._fill_article_with_meta_information(article_bs)
 
         return self.article
-   
+
 
 
 def prepare_environment(base_path):
@@ -117,8 +117,8 @@ def prepare_environment(base_path):
     """
     main_path = Path(base_path)
     if main_path.exists():
-        shitil.rmtree(base_path)                                     
-    path_for_environment.mkdir(parents = True)
+        shutil.rmtree(base_path)
+    main_path.mkdir(parents = True)
 
 def validate_config(crawler_path):
     """
@@ -128,13 +128,13 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    seed_urls_main, total_articles_main = validate_config(CRAMER_CONFIG_PATH)
+    seed_urls_main, total_articles_main = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
     crawler = Crawler(seed_urls_main, total_articles_main)
-    crawler.find_articles()                                      
-    
+    crawler.find_articles()
+
     ID = 1
-    for article_url_main in crawler.urles:
-        article_parser = HTMLParser(article_url = article_url_main, articcle_id = ID)
+    for article_url_main in crawler.urls:
+        article_parser = HTMLParser(article_url = article_url_main, article_id = ID)
         article.save_raw()
-        ID += 1                                  
+        ID += 1
