@@ -162,13 +162,14 @@ def validate_dataset(path_to_validate):
     number_raw_txt = 0
     number_meta = 0
 
-    pattern = re.compile(r'\d+')
+    pattern = re.compile(r'(\d+)')
 
     for file in path.glob('*'):
-
-        number = int(pattern.search(file.name)[0])
-        if not number:
+        new_pattern = pattern.match(file.name)
+        if not new_pattern:
             raise InconsistentDatasetError
+
+        number = int(new_pattern.group(1))
         numeration.append(number)
 
         if file.name.endswith('raw.txt'):
@@ -197,7 +198,6 @@ def main():
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
     pipeline.run()
-
 
 
 if __name__ == "__main__":
