@@ -124,9 +124,17 @@ class TextProcessingPipeline:
             if not processed_word.get('text') or not processed_word.get('analysis'):
                 continue
             morph_token = MorphologicalToken(original_word=processed_word['text'])
-            morph_token.normalized_form = processed_word['analysis'][0]['lex']
-            morph_token.tags_mystem = processed_word['analysis'][0]['gr']
-            morph_token.tags_pymorphy = pymorph_analyzer.parse(processed_word['text'])[0].tag
+            mystem_analys = processed_word['analysis'][0]
+            if not mystem_analys.get('lex'):
+                continue
+            morph_token.normalized_form = mystem_analys['lex']
+            if not mystem_analys.get('gr'):
+                continue
+            morph_token.tags_mystem = mystem_analys['gr']
+
+            morph_analys = pymorph_analyzer.parse(processed_word['text'])
+            if morph_analys:
+                morph_token.tags_pymorphy = morph_analys[0].tag
             tokens.append(morph_token)
         return tokens
 
@@ -143,8 +151,8 @@ def validate_dataset(path_to_validate):
     if not path_to_validate.is_dir():
         raise NotADirectoryError('Path is not a directory')
 
-    pattern_for_filename = re.compile(r'(\d+)_(cleaned.txt|meta.json|multiple_tagged.txt|raw.txt|raw.pdf'
-                                      r'|single_tagged.txt|image.png)')
+    pattern_for_filename = re.compile(r'(\d+)_(meta.json|raw.txt|raw.pdf|single_tagged.txt|cleaned.txt'
+                                      r'|multiple_tagged.txt|image.png)')
     all_ids = []
     counter_txt = 0
     for file in path_to_validate.glob('*'):
@@ -167,11 +175,6 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError('Directory is empty!')
 
     sorted_all_ids = sorted(all_ids)
-    previous_id_of_file = 0
-    for id_of_file in sorted_all_ids:
-        if id_of_file - previous_id_of_file > 1:
-            raise InconsistentDatasetError('Dataset is inconsistent')
-        previous_id_of_file = id_of_file
 
     if sorted_all_ids[0] != 1:
         raise InconsistentDatasetError()
@@ -183,14 +186,9 @@ def check_balance(path_to_validate):
     """
     Checks the balance between *_raw.txt and *_meta.json files
     """
-    counter_txt = 0
-    counter_meta = 0
-    for file in path_to_validate.glob('*'):
-        if file.name.endswith('raw.txt'):
-            counter_txt += 1
-        elif file.name.endswith('meta.json'):
-            counter_meta += 1
-    if counter_txt != counter_meta:
+    txt_list = list(path_to_validate.glob('*raw.txt'))
+    meta_list = list(path_to_validate.glob('*meta.json'))
+    if len(txt_list) != len(meta_list):
         return False
     return True
 
