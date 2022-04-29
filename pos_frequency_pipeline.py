@@ -52,12 +52,12 @@ def get_image_path(article):
 
 def get_meta(article):
     return {
-        'id': self.article_id,
-        'url': self.url,
-        'title': self.title,
-        'date': self._date_to_text(),
-        'author': self.author,
-        'topics': self.topics
+        'id': article.article_id,
+        'url': article.url,
+        'title': article.title,
+        'date': article._date_to_text(),
+        'author': article.author,
+        'topics': article.topics
     }
 
 
