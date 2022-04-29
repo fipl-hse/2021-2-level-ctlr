@@ -174,7 +174,7 @@ def validate_dataset(path_to_validate):
 
         article_ids.append(int(re.search(pattern, file.name).group()))
 
-    for article_id in sorted(article_ids):
+    for article_id in set(article_ids):
         if (not (path_to_validate / f'{article_id}_meta.json').exists() or
                 not (path_to_validate / f'{article_id}_raw.txt').exists()):
             raise InconsistentDatasetError
