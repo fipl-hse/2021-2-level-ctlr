@@ -16,8 +16,7 @@ from core_utils.pdf_utils import PDFRawFile
 
 from constants import ASSETS_PATH
 from constants import CRAWLER_CONFIG_PATH
-from constants import HEADERS
-# checks
+# from constants import HEADERS
 
 
 class IncorrectURLError(Exception):
@@ -104,9 +103,9 @@ class HTMLParser:
         Extracts all necessary data from the article web page
         """
         sleep(random.uniform(0.0, 1.0))
-        # user_agent = UserAgent().get_random_user_agent()
-        # headers = {'User-Agent': user_agent}
-        response = requests.get(self.article_url, headers=HEADERS)
+        user_agent = UserAgent().get_random_user_agent()
+        headers = {'User-Agent': user_agent}
+        response = requests.get(self.article_url, headers=headers)
         article_bs = BeautifulSoup(response.text, 'html.parser')
 
         self._fill_article_with_text(article_bs)
