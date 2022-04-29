@@ -118,7 +118,7 @@ class HTMLParser:
             self.article.text += k.text
 
     def parse(self):
-        response = requests.get(self.article_url, timeout=30)
+        response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
