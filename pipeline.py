@@ -73,8 +73,9 @@ class CorpusManager:
         paths_to_files = Path(self.path_to_raw_txt_data).glob('*_raw.txt')
         id_template = re.compile(r'\d+')
         for file_path in paths_to_files:
-            file_id = int(id_template.search(file_path.name).group())
-            if file_id:
+            file_id_match = id_template.search(file_path.name)
+            if file_id_match:
+                file_id = int(id_template.search(file_path.name).group())
                 article_object = Article(url=None, article_id=file_id)
                 self._storage[file_id] = article_object
 
@@ -163,7 +164,7 @@ def validate_dataset(path_to_validate):
 
 def main():
     # YOUR CODE HERE
-    validate_dataset(ASSETS_PATH)
+    #validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
     pipeline.run()
