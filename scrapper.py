@@ -77,7 +77,6 @@ class Crawler:
             self._extract_url(soup)
 
 
-
     def get_search_urls(self):
         """
         Returns seed_urls param
