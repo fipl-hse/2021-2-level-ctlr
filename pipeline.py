@@ -199,7 +199,6 @@ def validate_dataset(path_to_validate):
 
 if __name__ == "__main__":
     validate_dataset(ASSETS_PATH)
-    corpus_manager = CorpusManager(ASSETS_PATH)
-    pipeline = TextProcessingPipeline(corpus_manager)
+    corp_manager = CorpusManager(ASSETS_PATH)
+    pipeline = TextProcessingPipeline(corp_manager)
     pipeline.run()
-
