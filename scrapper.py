@@ -68,7 +68,7 @@ class Crawler:
                 if len(self.urls) < self.max_articles:
                     if url not in self.urls:
                         self.urls.append(url)
-            sleep(2)
+            sleep(4)
 
     def get_search_urls(self):
         """
