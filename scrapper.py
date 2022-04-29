@@ -129,13 +129,13 @@ def validate_config(crawler_path):
 if __name__ == '__main__':
     seed_urls_main, total_articles_main = validate_config(CRAWLER_CONFIG_PATH)
     prepare_environment(ASSETS_PATH)
-    
+
     crawler = Crawler(seed_urls_main, total_articles_main)
     crawler.find_articles()
 
-    ID = 1
+    COUNTER_ID = 1
     for article_url_main in crawler.urls:
-        article_parser = HTMLParser(article_url = article_url_main, article_id = ID)
+        article_parser = HTMLParser(article_url = crawler_url, article_id = COUNTER_ID)
         article = article_parser.parse()
         article.save_raw()
-        ID += 1
+        COUNTER_ID += 1
