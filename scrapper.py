@@ -38,6 +38,7 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
+
         self.seed_urls = seed_urls
         self.max_articles = max_articles
         self.urls = []
