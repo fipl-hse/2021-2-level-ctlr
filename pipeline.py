@@ -171,9 +171,6 @@ def validate_dataset(path_to_validate):
     txts = list(path_to_dataset.glob('*_raw.txt'))
     jsons = list(path_to_dataset.glob('*_meta.json'))
 
-    if not len(list(txts)) == len(list(jsons)):
-        raise InconsistentDatasetError
-
     digit_pattern = re.compile(r'\d+')
 
     txt_indices = []
@@ -210,6 +207,17 @@ def validate_dataset(path_to_validate):
 
     if sorted(txt_indices) != sorted(json_indices):
         raise InconsistentDatasetError
+
+    if not check_if_balanced(path_to_validate):
+        raise InconsistentDatasetError
+
+
+def check_if_balanced(path_to_validate):
+    txts = list(path_to_validate.glob('*_raw.txt'))
+    jsons = list(path_to_validate.glob('*_meta.json'))
+    if len(txts) != len(jsons):
+        return False
+    return True
 
 
 def main():
