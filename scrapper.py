@@ -1,7 +1,17 @@
 """
 Scrapper implementation
 """
+from datetime import datetime
+import json
+import random
+import shutil
+from time import sleep
 
+from bs4 import BeautifulSoup
+import requests
+
+from core_utils.article import Article
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 
 class IncorrectURLError(Exception):
     """
@@ -26,23 +36,44 @@ class Crawler:
     Crawler implementation
     """
     def __init__(self, seed_urls, max_articles: int):
-        x
-        pass
+        self.seed_urls = seed_urls
+        self.total_max_articles = total_max_articles
+        self.urls = []
+        
 
     def _extract_url(self, article_bs):
-        pass
-
+        not_full_urls = []
+        all_urls_bs = article_bs.find_all('a", class_='newszagolobok')
+        for url_bs in all_url_bs:
+            url_to_article = url_bs['href']
+            not_full_urls.append(url_to_article)
+        full_urls = [HTTP_PATTERN + not_full_url for not_full_url in
+                     not_full_urls if not 'http' in not_full_url]
+                                          
+        for full_url in full_urls:
+            if len(self.urls) < self.total_max_articles and full_url not in self.urls:
+                self.urls.append(full_url)
+                                       
     def find_articles(self):
         """
         Finds articles
         """
-        pass
-
+        for seed_url in self.seed_urls:
+            sleep (2)                              
+            response = request.get(url=seed_url, timeout=60)
+            if not response.ok:
+                continue
+            soup = BeautifulSoup (response.text, 'lxml')
+            self._extract_url(soup)
+            
+                                          
     def get_search_urls(self):
         """
         Returns seed_urls param
         """
-        pass
+        return self.seed_urls
+                                          
+            
 
 
 def prepare_environment(base_path):
