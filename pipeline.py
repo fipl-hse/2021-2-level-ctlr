@@ -122,12 +122,12 @@ class TextProcessingPipeline:
 
         tokens = []
         for token in analyzed_text:
-            if not (token.keys() & {"analysis", "text"} or
-                    token.get("analysis") or token.get("text")):
+            if not token.keys() & {"analysis", "text"} or \
+                    not token.get("analysis") or not token.get("text"):
                 continue
-            if not (token.get("analysis")[0].keys() & {"lex", "gr"} or
-                    token.get("analysis")[0].get("lex") or
-                    token.get("analysis")[0].get("gr")):
+            if not token.get("analysis")[0].keys() & {"lex", "gr"} or \
+                    not token.get("analysis")[0].get("lex") or \
+                    not token.get("analysis")[0].get("gr"):
                 continue
             morph_token = MorphologicalToken(original_word=token['text'])
             morph_token.normalized_form = token['analysis'][0]['lex']
