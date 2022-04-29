@@ -134,7 +134,6 @@ class HTMLParser:
             number_of_references = new_list[-1]
             references = re.findall(r'([а-я]|[А-Я])+.{1,2}\d{4}\s+—', number_of_references)
             len_of_references = len(references)
-            print(len_of_references)
             self.article.text = ''.join(new_list[:-1])
 
 
