@@ -5,11 +5,12 @@ Implementation of POSFrequencyPipeline for score ten only.
 import json
 import re
 
-import pymorphy2
+from pymorphy2 import MorphAnalyzer
+from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
 from core_utils.visualizer import visualize
-from pipeline import CorpusManager, MorphologicalToken
+from pipeline import CorpusManager, TextProcessingPipeline, MorphologicalToken
 
 
 class EmptyFileError(Exception):
@@ -21,6 +22,7 @@ class EmptyFileError(Exception):
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
+        self.morph_analysis = TextProcessingPipeline(corpus_manager)
 
     def run(self):
         for article in self.corpus_manager.get_articles().values():
@@ -39,13 +41,15 @@ class POSFrequencyPipeline:
                     pos_frequencies[pos] = 1
                 else:
                     pos_frequencies[pos] += 1
+            count = 0
+            morph = MorphAnalyzer()
             tokens = []
             for token in article.get_raw_text().split():
                 morphological_token = MorphologicalToken(token)
-                morphological_token.tags_pymorphy = pymorphy2.MorphAnalyzer().parse(token)[0].tag
+                parse_word = morph.parse(token)
+                morphological_token.tags_pymorphy = parse_word[0].tag
                 tokens.append(morphological_token)
             articles.append(tokens)
-            count = 0
             for tokens in articles:
                 for token in tokens:
                     if (('NOUN' or 'NPRO') and 'plur') in token.tags_pymorphy:
