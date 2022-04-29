@@ -25,15 +25,13 @@ class POSFrequencyPipeline:
             article_tag_path = article_item.get_file_path('single_tagged')
             frequencies_dict = {}
             pos_pattern = re.compile(r'<[A-Z]{1,6}')
-            #anima_pattern = re.compile(r'не?од=')
             with open(article_tag_path, 'r', encoding='utf-8') as text:
                 text_n_tags = text.read()
                 if not text_n_tags:
                     raise EmptyFileError
             pos_all = pos_pattern.findall(text_n_tags)
-            anima = text_n_tags.count(',од=')
-            unanima = text_n_tags.count(',неод=')
-            animated_n_count = {'animated': anima, 'unanimated': unanima}
+            animated_n_count = {'animated': text_n_tags.count(',од='),
+                                'unanimated': text_n_tags.count(',од=')}
             for pos in pos_all:
                 pos_cleaned = pos[1:]
                 if pos_cleaned not in frequencies_dict:
