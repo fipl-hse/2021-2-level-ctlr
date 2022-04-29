@@ -56,6 +56,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
+            sleep(2)
             response = requests.get(url=seed_url)
 
             if not response.ok:
@@ -68,7 +69,6 @@ class Crawler:
                 if len(self.urls) < self.max_articles:
                     if url not in self.urls:
                         self.urls.append(url)
-            sleep(2)
 
     def get_search_urls(self):
         """
