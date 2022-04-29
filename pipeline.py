@@ -2,10 +2,8 @@
 Pipeline for text processing implementation
 """
 
-import re
-import pymorphy2
-
 from pathlib import Path
+import pymorphy2
 from pymystem3 import Mystem
 
 from constants import ASSETS_PATH
@@ -30,7 +28,6 @@ class MorphologicalToken:
     """
     Stores language params for each processed token
     """
-    
     def __init__(self, original_word):
         pass
         self.original_word = original_word
