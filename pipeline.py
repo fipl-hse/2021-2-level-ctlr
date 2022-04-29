@@ -165,7 +165,7 @@ def validate_dataset(path_to_validate):
     article_ids = []
     pattern = re.compile(r'(\d+)')
 
-    if not any(re.search(pattern, file.name) for file in path_to_validate.glob('*')):
+    if not all(re.search(pattern, file.name) for file in path_to_validate.glob('*')):
         raise InconsistentDatasetError
 
     for file in sorted(path_to_validate.glob('*'), key=lambda x: int(re.search(pattern, x.name).group())):
