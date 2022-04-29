@@ -72,8 +72,13 @@ class Crawler:
         Returns seed_urls param
         """
         return self.seed_urls
-                                          
-            
+ 
+ class HTMLParser:
+    def __init__(self, article_url, article_id):
+        self.article_url = article_url
+        self.article_id = article_id
+        self.article = Article(self.article_url, self.article_id)
+   
 
 
 def prepare_environment(base_path):
