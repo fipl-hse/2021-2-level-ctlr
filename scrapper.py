@@ -3,7 +3,6 @@ Scrapper implementation
 """
 from datetime import datetime
 from pathlib import Path
-import random
 import json
 import shutil
 from time import sleep
@@ -60,7 +59,7 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            sleep (random.randint(1, 6))
+            sleep (3)
             response = requests.get(url=seed_url, timeout=60)
             if not response.ok:
                 continue
