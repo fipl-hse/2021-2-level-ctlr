@@ -33,7 +33,7 @@ class IncorrectNumberOfArticlesError(Exception):
     """
 
 
-class Crawler:
+class Crawler:  # way
     """
     Crawler implementation
     """
@@ -59,6 +59,7 @@ class Crawler:
         """
         Finds articles
         """
+        global response
         for seed_url in self.seed_urls:
             sleep(random.randint(1, 5))
 
@@ -77,7 +78,6 @@ class Crawler:
             #    file.write(str(soup))
             self._extract_url(soup)
 
-
     def get_search_urls(self):
         """
         Returns seed_urls param
@@ -92,7 +92,7 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        self.article.title = article_bs.find('article')#.find_all('a')[0].contents[0]
+        self.article.title = article_bs.find('article')  #  .find_all('a')[0].contents[0]
         print(article_bs.find('article'))
         author = article_bs.find(class_="extra").contents
         author = re.findall(r"""Текст: [\w ]+[^,'"<]""", str(author))[0][7:]
