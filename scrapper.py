@@ -59,7 +59,7 @@ class Crawler:
         """
         Finds articles
         """
-        global response
+
         for seed_url in self.seed_urls:
             sleep(random.randint(1, 5))
 
