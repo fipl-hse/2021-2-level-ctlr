@@ -9,7 +9,6 @@ import re
 import shutil
 
 from bs4 import BeautifulSoup
-from fake_headers import Headers
 import requests
 
 from constants import (
@@ -44,8 +43,7 @@ def _clean_text(text):
 
 
 def _get_page(link):
-    headers = Headers().generate()
-    response = requests.get(link, headers=headers)
+    response = requests.get(link)
     if not response.ok:
         return None
     return BeautifulSoup(response.text, "html.parser")
@@ -112,6 +110,8 @@ class CrawlerRecursive(Crawler):
         self.urls.append(href)
 
     def get_cache(self):
+        if not CRAWLER_CACHE_PATH.exists():
+            return
         if not CRAWLER_CACHE_PATH.stat().st_size:
             return
         with open(CRAWLER_CACHE_PATH, encoding="utf-8") as file:
