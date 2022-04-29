@@ -12,7 +12,7 @@ import random
 import requests
 from bs4 import BeautifulSoup
 
-from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH, HEADERS
+from constants import ASSETS_PATH, CRAWLER_CONFIG_PATH
 from core_utils.article import Article
 
 
@@ -118,7 +118,7 @@ class HTMLParser:
             self.article.text += k.text
 
     def parse(self):
-        response = requests.get(self.article_url, headers=HEADERS)
+        response = requests.get(self.article_url)
         article_bs = BeautifulSoup(response.text, 'lxml')
 
         self._fill_article_with_text(article_bs)
