@@ -156,7 +156,10 @@ def validate_dataset(path_to_validate):
 
 
 def _id_from_path(path):
-    return int(re.sub(r"[^0-9]", "", path.name))
+    path_id = re.sub(r"[^0-9]", "", path.name)
+    if not path_id.isdigit():
+        raise InconsistentDatasetError("file name contains no id")
+    return int(path_id)
 
 
 def main():
