@@ -119,14 +119,23 @@ class TextProcessingPipeline:
 
         return ' '.join(_lower_words)
 
+
+    def _remove_special_characters(self, raw_text):
+        """
+        Removes any specact special characters from the raw text
+        """
         raw_text = raw_text.replace('«', '')
         raw_text = raw_text.replace('»', '')
         raw_text = raw_text.replace('–', '')
         pattern = re.compile(r'[а-яА-Яa-zA-z ё]')
+
         for symbol in raw_text:
             if not pattern.match(symbol):
                 return raw_text.replace(symbol, '')
         return raw_text
+
+    def _remove_special_characters(self, _text):
+        pass
 
 
 def validate_dataset(path_to_validate):
