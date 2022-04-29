@@ -123,9 +123,12 @@ class TextProcessingPipeline:
 
         tokens = []
         for token in analyzed_text:
-            if not token.keys() & {"analysis", "text"}:
+            if not token.keys() & {"analysis", "text"} or \
+                    not token.get("analysis") or not token.get("text"):
                 continue
-            if not token.get("analysis")[0].keys() & {"lex", "gr"}:
+            if not token.get("analysis")[0].keys() & {"lex", "gr"} or \
+                    not token.get("analysis")[0].get("lex") or \
+                    not token.get("analysis")[0].get("gr"):
                 continue
             if not morphs.parse(token['text']):
                 continue
@@ -170,9 +173,7 @@ def validate_dataset(path_to_validate):
     metas_sorted = sorted(metas, key=lambda x: int(pattern.search(x.name).group(0)))
 
     for text_index, text in enumerate(raw_texts_sorted):
-        if text.stat().st_size == 0:
-            raise InconsistentDatasetError
-        if not re.match(pattern, text.name):
+        if text.stat().st_size == 0 or not re.match(pattern, text.name):
             raise InconsistentDatasetError
         file_id = int(pattern.search(text.name).group(0))
         if file_id - text_index != 1 or not (path_to_validate / f'{file_id}_meta.json').is_file():
