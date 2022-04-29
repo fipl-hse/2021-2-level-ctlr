@@ -44,7 +44,7 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         not_full_urls = []
-        all_urls_bs = article_bs.find_all('a", class_='mnname')
+        all_urls_bs = article_bs.find_all('a', class_='mnname')
         for url_bs in all_url_bs:
             url_to_article = url_bs['href']
             not_full_urls.append(url_to_article)
@@ -88,11 +88,8 @@ class Crawler:
              self.article.author = article_bs.find('p', 'strong', 'em').text.strip().split('  ')[0]
          except AttributeError:
              self.article.author = 'NOT FOUND'
-        # ключевые слова
-         try: 
-             self.article.topics.append(article_bs.find('div', class_='topic').text)
-         except AttributeError:
-             self.article.topics = 'NOT FOUND'
+        #KEY_WORDS
+        self.article.topics = 'NOT FOUND'
         # дата
          raw_date = article_bs.find('div', class_='mddata').find('time')['datetime'][:-5]
          self.article.date = datetime.strptime(raw_date, '%Y-%m-%dT%H:%M:%S')
