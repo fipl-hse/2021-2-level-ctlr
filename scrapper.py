@@ -11,9 +11,8 @@ from time import sleep
 import requests
 import html2text
 from bs4 import BeautifulSoup
-from article import Article
 from constants import CRAWLER_CONFIG_PATH, ASSETS_PATH
-
+from core_utils.article import Article
 
 
 class IncorrectURLError(Exception):
