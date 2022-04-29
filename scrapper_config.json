@@ -1,4 +1,5 @@
 {
-    "seed_urls": [],
-    "total_articles_to_find_and_parse": 0
+    "seed_urls": ["http://www.selsknov.ru/news-2.html?page=1&id1=2", "http://www.selsknov.ru/news-2.html?page=2&id1=2", "http://www.selsknov.ru/news-2.html?page=3&id1=2", "http://www.selsknov.ru/news-2.html?page=4&id1=2", "http://www.selsknov.ru/news-2.html?page=5&id1=2", "http://www.selsknov.ru/news-2.html?page=6&id1=2", "http://www.selsknov.ru/news-2.html?page=7&id1=2", "http://www.selsknov.ru/news-2.html?page=8&id1=2", "http://www.selsknov.ru/news-2.html?page=9&id1=2", "http://www.selsknov.ru/news-2.html?page=10&id1=2", "http://www.selsknov.ru/news-2.html?page=11&id1=2"],
+    "total_articles_to_find_and_parse": 100
+    
 }
