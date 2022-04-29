@@ -55,7 +55,7 @@ def get_meta(article):
         'id': article.article_id,
         'url': article.url,
         'title': article.title,
-        'date': article._date_to_text(),
+        'date': article.date.strftime("%Y-%m-%d %H:%M:%S"),
         'author': article.author,
         'topics': article.topics
     }
