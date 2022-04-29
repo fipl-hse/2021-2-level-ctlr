@@ -7,7 +7,7 @@ import re
 from pathlib import Path
 import shutil
 from datetime import datetime
-import time
+from time import sleep
 import random
 import requests
 from bs4 import BeautifulSoup
@@ -57,8 +57,9 @@ class Crawler:
         Finds articles
         """
         for seed_url in self.seed_urls:
-            time.sleep(random.random())
             response = requests.get(url=seed_url)
+            wait = random.randint(1, 3)
+            sleep(wait)
 
             if not response.ok:
                 continue
