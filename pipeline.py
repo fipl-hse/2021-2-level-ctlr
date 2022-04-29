@@ -111,6 +111,23 @@ class TextProcessingPipeline:
             article.save_as(' '.join(tokens_for_article), ArtifactType.cleaned)
             article.save_as(' '.join(single_tagged_tokens), ArtifactType.single_tagged)
             article.save_as(' '.join(multiple_tagged_tokens), ArtifactType.multiple_tagged)
+            print(self.get_freq_dict_pos())
+
+    def get_freq_dict_pos(self):
+        articles = self.corpus_manager.get_articles().values()
+        for article in articles:
+            with open(article.get_file_path(ArtifactType.single_tagged), encoding="utf-8") as file:
+                text = file.read()
+                freqs_dict = {}
+                pos_pattern = re.compile(r"<([A-Z]+)")
+                tags = pos_pattern.finditer(text)
+                for tag in tags:
+                    pos_name = tag.group(1)
+                    if pos_name not in freqs_dict:
+                        freqs_dict[pos_name] = 1
+                    else:
+                        freqs_dict[pos_name] +=1
+                return freqs_dict
 
     def _process(self, raw_text: str):
         """
@@ -151,8 +168,8 @@ def validate_dataset(path_to_validate):
     if not list(path_to_dataset.iterdir()):
         raise EmptyDirectoryError
 
-    txts = path_to_dataset.glob('*_raw.txt')
-    jsons = path_to_dataset.glob('*_meta.json')
+    txts = list(path_to_dataset.glob('*_raw.txt'))
+    jsons = list(path_to_dataset.glob('*_meta.json'))
 
     if not len(list(txts)) == len(list(jsons)):
         raise InconsistentDatasetError
@@ -163,14 +180,18 @@ def validate_dataset(path_to_validate):
     json_indices = []
 
     for txt, json in zip(txts, jsons):
-        match_txt = digit_pattern.match(txt.name)
+        match_txt = re.match(digit_pattern, txt.name).group()
         if not match_txt:
             raise InconsistentDatasetError
-        txt_indices.append(int(digit_pattern.search(txt.name).group()))
-        match_json = digit_pattern.match(json.name)
+        txt_indices.append(int(match_txt))
+
+        match_json = re.match(digit_pattern, json.name).group()
         if not match_json:
             raise InconsistentDatasetError
-        txt_indices.append(int(digit_pattern.search(json.name).group()))
+        json_indices.append(int(match_json))
+
+    txt_indices = sorted(txt_indices)
+    json_indices = sorted(json_indices)
 
     for file in path_to_dataset.iterdir():
         if file.stat().st_size == 0:
@@ -178,8 +199,6 @@ def validate_dataset(path_to_validate):
 
     if txt_indices[0] != 1 or json_indices[0] != 1:
         raise InconsistentDatasetError
-
-    ideal_list_with_indices =
 
     for i, txt_id in enumerate(txt_indices):
         if i + 1 != txt_id:
@@ -191,7 +210,6 @@ def validate_dataset(path_to_validate):
 
     if sorted(txt_indices) != sorted(json_indices):
         raise InconsistentDatasetError
-
 
 def main():
     validate_dataset(ASSETS_PATH)
