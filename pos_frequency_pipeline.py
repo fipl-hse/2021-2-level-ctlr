@@ -20,30 +20,35 @@ class EmptyFileError(Exception):
 class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
+        self.pos_freq = {}
+
+    def find_tags(self, article):
+        path_to_article = article.get_file_path(ArtifactType.single_tagged)
+
+        with open(Path(path_to_article), "r", encoding='utf-8') as file:
+            tags = file.read()
+            if not tags:
+                raise EmptyFileError
+        return tags
+
+    def _pos_counter(self, tags):
+        pattern = re.compile(r'<([A-Z]+)')
+        for pos in pattern.findall(tags):
+            self.pos_freq[pos] = self.pos_freq.get(pos, 0) + 1
+
+    def _update_meta(self, article):
+        with open(Path(article.get_meta_file_path()), 'r', encoding='utf-8') as meta_file:
+            meta = json.load(meta_file)
+        meta.update({"pos_frequencies": self.pos_freq})
+        with open(Path(article.get_meta_file_path()), 'w', encoding='utf-8') as new_meta_file:
+            json.dump(meta, new_meta_file, sort_keys=False,
+                      indent=4, ensure_ascii=False, separators=(',', ': '))
 
     def run(self):
-        articles = self.corpus_manager.get_articles()
-        for article in articles.values():
-            path_to_article = article.get_file_path(ArtifactType.single_tagged)
-
-            with open(Path(path_to_article), "r", encoding='utf-8') as file:
-                tags = file.read()
-                if not tags:
-                    raise EmptyFileError
-
-            pos_freq = {}
-            pattern = re.compile(r'<([A-Z]+)')
-            for pos in pattern.findall(tags):
-                pos_freq[pos] = pos_freq.get(pos, 0) + 1
-
-            with open(Path(article.get_meta_file_path()), 'r', encoding='utf-8') as meta_file:
-                meta = json.load(meta_file)
-            meta.update({"pos_frequencies": pos_freq})
-            with open(Path(article.get_meta_file_path()), 'w', encoding='utf-8') as new_meta_file:
-                json.dump(meta, new_meta_file, sort_keys=False,
-                          indent=4, ensure_ascii=False, separators=(',', ': '))
-
-            visualize(pos_freq, path_to_save=ASSETS_PATH / f'{article.article_id}_image.png')
+        for article in self.corpus_manager.get_articles().values():
+            self._pos_counter(self.find_tags(article))
+            self._update_meta(article)
+            visualize(self.pos_freq, path_to_save=ASSETS_PATH / f'{article.article_id}_image.png')
 
 
 def main():
