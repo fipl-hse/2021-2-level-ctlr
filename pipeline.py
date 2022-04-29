@@ -73,9 +73,10 @@ class CorpusManager:
         """
         pattern = re.compile(r'\d+')
         for texts in self.path_to_raw_txt_data.glob("*_raw.txt"):
-            if re.match(pattern, texts.name):
-                article_id = int(pattern.search(texts.name).group(0))
-                self._storage[article_id] = Article(url=None, article_id=article_id)
+            if not re.match(pattern, texts.name):
+                raise InconsistentDatasetError
+            article_id = int(pattern.search(texts.name).group(0))
+            self._storage[article_id] = Article(url=None, article_id=article_id)
 
     def get_articles(self):
         """
@@ -161,6 +162,8 @@ def validate_dataset(path_to_validate):
 
     for text_index, text in enumerate(raw_texts):
         if text.stat().st_size == 0:
+            raise InconsistentDatasetError
+        if not re.match(pattern, text.name):
             raise InconsistentDatasetError
         file_id = int(pattern.search(text.name).group(0))
         if file_id - text_index != 1 or not (path_to_validate / f'{file_id}_meta.json').is_file():
