@@ -40,19 +40,11 @@ class POSFrequencyPipeline:
                     pos_frequencies[pos] = 1
                 else:
                     pos_frequencies[pos] += 1
-            count = 0
-            morph = MorphAnalyzer()
-            tokens = []
-            for token in article.get_raw_text().split():
-                morphological_token = MorphologicalToken(token)
-                morphological_token.tags_pymorphy = morph.parse(token)[0].tag
-                tokens.append(morphological_token)
-            articles.append(tokens)
-            for tokens in articles:
-                for token in tokens:
-                    if (('NOUN' or 'NPRO') and 'plur') in token.tags_pymorphy:
-                        count += 1
-                print(count)
+            with open(article.get_file_path('multiple_tagged'),
+                      'r', encoding='utf-8') as file_multiple_tagged:
+                text_multiple_tagged = file_multiple_tagged.read()
+            noun_find = re.findall('\(NOUN[a-z,\s]+plur[a-z,\s]+\)', text_multiple_tagged)
+            print(len(noun_find))
             with open(article.get_meta_file_path(), 'r', encoding='utf-8') as meta_file:
                 meta_data = json.load(meta_file)
                 if not meta_data:
