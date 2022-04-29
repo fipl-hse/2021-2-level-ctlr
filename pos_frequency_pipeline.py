@@ -22,7 +22,6 @@ class POSFrequencyPipeline:
 
     def run(self):
         for article in self.corpus_manager.get_articles().values():
-            articles = []
             with open(article.get_file_path('single_tagged'),
                       'r', encoding='utf-8') as file_single_tagged:
                 text_single_tagged = file_single_tagged.read()
