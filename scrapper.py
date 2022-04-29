@@ -127,7 +127,7 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         configuration = json.load(file)
 
-    for url in scrapper_config["seed_urls"]:
+    for url in configuration["seed_urls"]:
         if HTTP_PATTERN not in url:
             raise IncorrectURLError
 
