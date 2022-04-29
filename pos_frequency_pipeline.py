@@ -26,13 +26,13 @@ class POSFrequencyPipeline:
         """
         for article in self.corpus_manager.get_articles().values():
 
-            with open(article.get_file_path(ArtifactType.single_tagged), encoding='utf=8') as file:
+            with open(article.get_file_path(ArtifactType.multiple_tagged), encoding='utf=8') as file:
                 text = file.read()
             if not text:
                 raise EmptyFileError
 
             pos_freq = {}
-            pattern = re.compile(r'<([A-Z]+)')
+            pattern = re.compile(r'\(([A-Z]+)')
 
             for pos in pattern.findall(text):
                 if pos not in pos_freq:

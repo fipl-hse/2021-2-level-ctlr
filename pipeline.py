@@ -133,7 +133,12 @@ class TextProcessingPipeline:
             morph_token = MorphologicalToken(original_word=token['text'])
             morph_token.normalized_form = token['analysis'][0]['lex']
             morph_token.tags_mystem = token['analysis'][0]['gr']
-            morph_token.tags_pymorphy = morph.parse(token['text'])[0].tag
+
+            parsed = morph.parse(token['text'])
+            if not parsed:
+                continue
+
+            morph_token.tags_pymorphy = parsed[0].tag
             tokens.append(morph_token)
         return tokens
 
@@ -162,6 +167,8 @@ def validate_dataset(path_to_validate):
     for file in path.glob('*'):
 
         number = int(pattern.search(file.name)[0])
+        if not number:
+            raise InconsistentDatasetError
         numeration.append(number)
 
         if file.name.endswith('raw.txt'):
@@ -169,9 +176,8 @@ def validate_dataset(path_to_validate):
         if file.name.endswith('meta.json'):
             number_meta += 1
 
-        if '_raw.txt' in file.name:
-            if file.stat().st_size == 0:
-                raise InconsistentDatasetError
+        if '_raw.txt' in file.name and file.stat().st_size == 0:
+            raise InconsistentDatasetError
 
     sorted_numeration = sorted(set(numeration))
     if sorted_numeration[0] != 1:
@@ -191,6 +197,7 @@ def main():
     corpus_manager = CorpusManager(ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager)
     pipeline.run()
+
 
 
 if __name__ == "__main__":
