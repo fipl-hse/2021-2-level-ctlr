@@ -118,11 +118,7 @@ class TextProcessingPipeline:
         """
         Processes each token and creates MorphToken class instance
         """
-        letters = re.compile(r'[A-Za-zА-Яа-яё]')
-        normal_text = ""
-        for symbol in raw_text:
-            if letters.match(symbol) or symbol.isspace():
-                normal_text += symbol
+        normal_text = raw_text.replace("\n", " ")
 
         analyzed_text = Mystem().analyze(normal_text)
         morphs = pymorphy2.MorphAnalyzer()
@@ -132,8 +128,6 @@ class TextProcessingPipeline:
             if not token.get("analysis"):
                 continue
             if "analysis" not in token:
-                continue
-            if "LATN" in token['analysis'][0]['gr']:
                 continue
             morph_token = MorphologicalToken(original_word=token['text'])
             morph_token.normalized_form = token['analysis'][0]['lex']
