@@ -129,17 +129,17 @@ def validate_config(crawler_path):
     seed_urls = configuration["seed_urls"]
     total_articles = configuration["total_articles_to_find_and_parse"]
 
-    if not isinstance(total_articles, int) or total_articles_to_find_and_parse <= 0:
+    if not isinstance(total_articles, int) or total_articles <= 0:
         raise IncorrectNumberOfArticlesError
-        
+
     if not isinstance(seed_urls, list) or not seed_urls:
         raise IncorrectURLError
-        http_pattern = "http://www.selsknov.ru/"
+        http_pattern = "http://www.selsknov.ru"
         for url in configuration["seed_urls"]:
             if http_pattern not in url:
                 raise IncorrectURLError
 
-    if total_articles_to_find_and_parse > 200:
+    if total_articles > 200:
         raise NumberOfArticlesOutOfRangeError
 
     return seed_urls, total_articles
