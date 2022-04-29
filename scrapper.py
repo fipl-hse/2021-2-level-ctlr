@@ -144,6 +144,7 @@ class HTMLParser:
         tag = table_bs.find('a')['href']
         link = re.sub(r'(?i)view(?=\W)', 'download', tag)
         pdf_file = PDFRawFile(link, self.article_id)
+        self.article.url = link + ".pdf"
 
         pdf_file.download()
         text = pdf_file.get_text()
