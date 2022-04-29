@@ -6,8 +6,7 @@ import json
 import re
 from pathlib import Path
 import shutil
-import random
-import datetime
+from datetime import datetime
 from time import sleep
 import requests
 from bs4 import BeautifulSoup
@@ -58,7 +57,6 @@ class Crawler:
         """
         for seed_url in self.seed_urls:
             response = requests.get(url=seed_url)
-            sleep(random.randint(1, 3))
 
             if not response.ok:
                 continue
@@ -70,6 +68,7 @@ class Crawler:
                 if len(self.urls) < self.max_articles:
                     if url not in self.urls:
                         self.urls.append(url)
+            sleep(2)
 
     def get_search_urls(self):
         """
