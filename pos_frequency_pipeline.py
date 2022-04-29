@@ -56,7 +56,7 @@ class POSFrequencyPipeline:
         if not text:
             raise EmptyFileError
 
-        pattern_for_tags = re.compile(r'<([a-zA-Z])')
+        pattern_for_tags = re.compile(r'<([a-zA-Z]+)')
         tags = pattern_for_tags.finditer(text)
         for tag in tags:
             name_tag = tag.group(1)
