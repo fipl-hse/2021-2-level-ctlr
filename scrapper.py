@@ -14,6 +14,7 @@ import requests
 
 from constants import (
     ASSETS_PATH,
+    CRAWLER_CACHE_PATH,
     CRAWLER_CONFIG_PATH
 )
 from core_utils.article import Article
@@ -71,7 +72,10 @@ class Crawler:
                 continue
             if len(self.urls) == self.max_articles:
                 break
-            self.urls.append(node["href"])
+            self._add_url(node["href"])
+
+    def _add_url(self, href):
+        self.urls.append(href)
 
     def find_articles(self):
         """
@@ -93,15 +97,36 @@ class Crawler:
 
 
 class CrawlerRecursive(Crawler):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, seed_urls, max_articles, cached=True):
+
+        super().__init__(seed_urls, max_articles)
         self._crawled = set()
+        self._cached = cached
+        if self._cached:
+            self.get_cache()
+
+    def _add_url(self, href):
+        print(len(self.urls))
+        if self._cached:
+            self.update_cache(href)
+        self.urls.append(href)
+
+    def get_cache(self):
+        if not CRAWLER_CACHE_PATH.stat().st_size:
+            return
+        with open(CRAWLER_CACHE_PATH, encoding="utf-8") as file:
+            self.urls = file.read().split("\n")
+            self._crawled = set(self.urls)
+
+    def update_cache(self, href):
+        with open(CRAWLER_CACHE_PATH, "w", encoding="utf-8") as file:
+            file.write("\n".join(self.urls))
 
     def find_articles(self):
         self.recurse(self.seed_urls.pop())
 
     def recurse(self, seed):
-        if len(self.urls) == self.max_articles:
+        if len(self.urls) >= self.max_articles:
             return
         if seed in self._crawled:
             return
@@ -116,18 +141,17 @@ class CrawlerRecursive(Crawler):
             self._extract_url(page)
             return
         # if the page is an archive of issues, recurse over them
-        if "archive" in seed:
-            for link in page.find_all("a"):
-                if "href" not in link.attrs:
-                    continue
-                href = link.attrs["href"]
+        for link in page.find_all("a"):
+            if "href" not in link.attrs:
+                continue
+            href = link.attrs["href"]
+            if "archive" in seed:
                 if "showToc" in href:
                     self.recurse(href)
-                # also recurse over next pages in archive.
-                # the order (issues before next page) matters for priority.
-                if "issuesPage" in href:
-                    self.recurse(href)
-            return
+            # also recurse over next pages in archive.
+            # the order (issues before next page) matters for priority.
+            if "archive" in href:
+                self.recurse(href)
 
 
 class HTMLParser:
