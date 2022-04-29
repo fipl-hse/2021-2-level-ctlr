@@ -123,12 +123,9 @@ class TextProcessingPipeline:
 
         tokens = []
         for token in analyzed_text:
-            if not token.keys() & {"analysis", "text"} or \
-                    not token.get("analysis") or not token.get("text"):
+            if not token.keys() & {"analysis", "text"}:
                 continue
-            if not token.get("analysis")[0].keys() & {"lex", "gr"} or \
-                    not token.get("analysis")[0].get("lex") or \
-                    not token.get("analysis")[0].get("gr"):
+            if not token.get("analysis")[0].keys() & {"lex", "gr"}:
                 continue
             if not morphs.parse(token['text']):
                 continue
