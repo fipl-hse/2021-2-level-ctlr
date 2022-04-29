@@ -170,6 +170,7 @@ if __name__ == '__main__':
 
     print("searching articles...")
     crawler = Crawler(my_seed_urls, my_max_articles)
+
     crawler.find_articles()
 
     print("parsing of pages")
