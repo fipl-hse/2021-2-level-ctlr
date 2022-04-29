@@ -20,7 +20,7 @@ class POSFrequencyPipeline:
     def __init__(self, corpus_manager: CorpusManager):
         self.corpus_manager = corpus_manager
 
-    def run(self):  # create separate methods
+    def run(self):
         articles = self.corpus_manager.get_articles().values()
 
         for article in articles:
