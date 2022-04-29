@@ -133,7 +133,6 @@ def validate_config(crawler_path):
         raise IncorrectNumberOfArticlesError
 
     if not isinstance(seed_urls, list) or not seed_urls:
-        raise IncorrectURLError
         http_pattern = "http://www.selsknov.ru"
         for url in configuration["seed_urls"]:
             if http_pattern not in url:
