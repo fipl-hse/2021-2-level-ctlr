@@ -147,7 +147,7 @@ def _validate_path(path_to_validate):
     if not env_path.is_dir():
         raise NotADirectoryError("File not exists")
     if len(os.listdir(path_to_validate)) == 0:
-        raise EmptyDirectoryError("Directory is empty")
+        raise EmptyDirectoryError("directory is empty")
 
 def _validate_filenames(list_to_validate):
     for filename in list_to_validate:
