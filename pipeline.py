@@ -31,7 +31,7 @@ class MorphologicalToken:
     Stores language params for each processed token
     """
     
-        def __init__(self, original_word):
+    def __init__(self, original_word):
         pass
         self.original_word = original_word
         self.normalized_form = ''
