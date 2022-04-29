@@ -128,6 +128,7 @@ class TextProcessingPipeline:
                 return raw_text.replace(symbol, '')
         return raw_text
 
+
 def validate_dataset(path_to_validate):
     """
     Validates folder with assets
@@ -181,11 +182,38 @@ def _validate_files(filenames, basepath):
                     raise InconsistentDatasetError
 
 
+def _check_consistency(path):
+    _env_path = Path(path)
+    _validate_path(path)
+    _txt_ext = "*_raw.txt"
+    _json_ext = "*_meta.json"
+    _txt_ids = sorted(map(_path_id, path.glob(_txt_ext)))
+    _json_ids = sorted(map(_path_id, path.glob(_json_ext)))
+    if len(_txt_ids) != len(_json_ids):
+        raise InconsistentDatasetError("number of txt and jsons files must be equal")
+
+
+def _path_id(path):
+    return int(re.sub(r"[^0-9]", "", path.name))
+
+
+def _get_file_names(path_to_dir):
+    """
+    Extract names of files in directory
+    """
+    filenames_list = []
+
+    for (_, _, filenames) in walk(path_to_dir):
+        filenames_list.extend(filenames)
+        return filenames_list
+
+
 def main():
     # YOUR CODE HERE
     validate_dataset(ASSETS_PATH)
     corpus_manager = CorpusManager(path_to_raw_txt_data=ASSETS_PATH)
     pipeline = TextProcessingPipeline(corpus_manager=corpus_manager)
+
     pipeline.run()
 
 
