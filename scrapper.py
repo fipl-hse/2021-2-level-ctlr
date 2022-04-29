@@ -43,7 +43,7 @@ class Crawler:
 
     def _extract_url(self, article_bs):
         not_full_urls = []
-        all_urls_bs = article_bs.find_all('a", class_='newszagolobok')
+        all_urls_bs = article_bs.find_all('a", class_='mnname')
         for url_bs in all_url_bs:
             url_to_article = url_bs['href']
             not_full_urls.append(url_to_article)
