@@ -125,18 +125,14 @@ def validate_config(crawler_path):
     Validates given config
     """
     with open(crawler_path) as file:
-        scrapper_config = json.load(file)
+        configuration = json.load(file)
 
     for url in scrapper_config["seed_urls"]:
         if HTTP_PATTERN not in url:
-            print(url)
             raise IncorrectURLError
 
-    seed_urls = scrapper_config["seed_urls"]
-    total_articles_to_find_and_parse = scrapper_config["total_articles_to_find_and_parse"]
-
-    if not seed_urls:
-        raise IncorrectURLError
+    seed_urls = configuration["seed_urls"]
+    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
 
     if not isinstance(total_articles_to_find_and_parse, int) or total_articles_to_find_and_parse <= 0:
         raise IncorrectNumberOfArticlesError
