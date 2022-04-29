@@ -115,7 +115,7 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    main_path = Path(base path)
+    main_path = Path(base_path)
     if main_path.exists():
         shitil.rmtree(base_path)                                     
     path_for_environment.mkdir(parents = True)
