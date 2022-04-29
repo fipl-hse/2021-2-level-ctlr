@@ -32,7 +32,7 @@ class POSFrequencyPipeline:
                 raise EmptyFileError
 
             pos_freq = {}
-            pattern = re.compile(r'<([A-Z]+)')
+            pattern = re.compile(r'\(([A-Z]+)')
 
             for pos in pattern.findall(text):
                 if pos not in pos_freq:
