@@ -144,7 +144,7 @@ def validate_dataset(path_to_validate):
         raise NotADirectoryError('Path is not a directory')
 
     pattern_for_filename = re.compile(r'(\d+)_(cleaned.txt|meta.json|multiple_tagged.txt|raw.txt|raw.pdf'
-                                      r'|single_tagged.txt)')
+                                      r'|single_tagged.txt|image.png)')
     all_ids = []
     counter_txt = 0
     for file in path_to_validate.glob('*'):
