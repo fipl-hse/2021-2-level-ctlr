@@ -126,20 +126,23 @@ def validate_config(crawler_path):
     with open(crawler_path) as file:
         configuration = json.load(file)
 
-    for url in configuration["seed_urls"]:
-        if HTTP_PATTERN not in url:
-            raise IncorrectURLError
-
     seed_urls = configuration["seed_urls"]
-    total_articles_to_find_and_parse = configuration["total_articles_to_find_and_parse"]
+    total_articles = configuration["total_articles_to_find_and_parse"]
 
-    if not isinstance(total_articles_to_find_and_parse, int) or total_articles_to_find_and_parse <= 0:
+    if not isinstance(total_articles, int) or total_articles_to_find_and_parse <= 0:
         raise IncorrectNumberOfArticlesError
+        
+    if not isinstance(seed_urls, list) or not seed_urls:
+        raise IncorrectURLError
+        http_pattern = "http://www.selsknov.ru/"
+        for url in configuration["seed_urls"]:
+            if http_pattern not in url:
+                raise IncorrectURLError
 
     if total_articles_to_find_and_parse > 200:
         raise NumberOfArticlesOutOfRangeError
 
-    return seed_urls, total_articles_to_find_and_parse
+    return seed_urls, total_articles
 
 
 if __name__ == '__main__':
