@@ -31,7 +31,7 @@ class POSFrequencyPipeline:
                     raise EmptyFileError
             pos_all = pos_pattern.findall(text_n_tags)
             animated_n_count = {'animated': text_n_tags.count(',од='),
-                                'unanimated': text_n_tags.count(',од=')}
+                                'unanimated': text_n_tags.count(',неод=')}
             for pos in pos_all:
                 pos_cleaned = pos[1:]
                 if pos_cleaned not in frequencies_dict:

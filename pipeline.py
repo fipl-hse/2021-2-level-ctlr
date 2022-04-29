@@ -74,8 +74,9 @@ class CorpusManager:
         id_template = re.compile(r'\d+')
         for file_path in paths_to_files:
             file_id = int(id_template.search(file_path.name).group())
-            article_object = Article(url=None, article_id=file_id)
-            self._storage[file_id] = article_object
+            if file_id:
+                article_object = Article(url=None, article_id=file_id)
+                self._storage[file_id] = article_object
 
     def get_articles(self):
         """
