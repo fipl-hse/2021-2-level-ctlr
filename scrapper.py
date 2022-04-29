@@ -63,9 +63,9 @@ class Crawler:
             if not response.ok:
                 continue
 
-            soup_lib = BeautifulSoup(response.text, 'lxml')
+            s_lib = BeautifulSoup(response.text, 'lxml')
 
-            urls = self._extract_url(soup_lib)
+            urls = self._extract_url(s_lib)
             for url in urls:
                 if len(self.urls) < self.max_articles:
                     if url not in self.urls:
