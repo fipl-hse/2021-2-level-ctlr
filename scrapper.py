@@ -117,8 +117,10 @@ def prepare_environment(base_path):
     """
     Creates ASSETS_PATH folder if not created and removes existing folder
     """
-    pass
-
+    main_path = Path(base path)
+    if main_path.exists():
+        shitil.rmtree(base_path)                                     
+    path_for_environment.mkdir(parents = True)
 
 def validate_config(crawler_path):
     """
@@ -128,5 +130,13 @@ def validate_config(crawler_path):
 
 
 if __name__ == '__main__':
-    # YOUR CODE HERE
-    pass
+    seed_urls_main, total_articles_main = validate_config(CRAMER_CONFIG_PATH)
+    prepare_environment(ASSETS_PATH)
+    crawler = Crawler(seed_urls_main, total_articles_main)
+    crawler.find_articles()                                      
+    
+    ID = 1
+    for article_url_main in crawler.urles:
+        article_parser = HTMLParser(article_url = article_url_main, articcle_id = ID)
+        article.save_raw()
+        ID += 1                                  
