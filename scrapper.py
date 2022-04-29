@@ -80,16 +80,17 @@ class HTMLParser:
         self.article = Article(self.article_url, self.article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        # заголовок
-        self.article.title = article_bs.find('h2').text.strip()
-        # автор
+        # TITLE
+        self.article.title = article_bs.find('h2', class_="mnname").text.strip()
+
+        # AUTHOR
         try:
-            self.article.author = article_bs.find('p', 'strong', 'em').text.strip().split('  ')[0]
+            self.article.author = article_bs.find('p' and'strong').text.strip().split('  ')[0]
         except AttributeError:
             self.article.author = 'NOT FOUND'
         #KEY_WORDS
         self.article.topics = 'NOT FOUND'
-        # дата
+        # DATE
         raw_date = article_bs.find('div', class_='mddata').find('time')['datetime'][:-5]
         self.article.date = datetime.strptime(raw_date, '%Y-%m-%dT%H:%M:%S')
 
