@@ -175,6 +175,6 @@ if __name__ == '__main__':
     print("parsing of pages")
     for i in range(len(crawler.urls)):
         parser = HTMLParser(article_url=crawler.urls[i], article_id=i)
-        article = parser.parse()
+        article_a = parser.parse()
         #  print(article.author, article.date, article.title)
         #  print(article.text)
