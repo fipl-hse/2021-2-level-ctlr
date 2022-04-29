@@ -3,3 +3,4 @@ lxml==4.8.0
 requests==2.27.1
 pymorphy2==0.9.1
 pymystem3==0.2.0
+html2text~=2020.1.16
