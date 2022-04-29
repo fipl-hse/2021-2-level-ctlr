@@ -4,6 +4,7 @@ Scrapper implementation
 import datetime
 import json
 from pathlib import Path
+import random
 import shutil
 from time import sleep
 
@@ -53,8 +54,7 @@ class Crawler:
 
         for full_url in full_urls:
             if len(self.urls) < self.total_max_articles and full_url not in self.urls:
-                if requests.get(full_url).status_code == 200:
-                    self.urls.append(full_url)
+                self.urls.append(full_url)
 
     def find_articles(self):
         """
@@ -128,11 +128,18 @@ class HTMLParser:
 
     def parse(self):
         response = requests.get(url=self.article_url)
+        if response.status_code == 200:
 
-        article_bs = BeautifulSoup(response.text, 'lxml')
+            article_bs = BeautifulSoup(response.text, 'lxml')
 
-        self._fill_article_with_text(article_bs)
-        self._fill_article_with_meta_information(article_bs)
+            self._fill_article_with_text(article_bs)
+            self._fill_article_with_meta_information(article_bs)
+        else:
+            self.article.title = 'NOT FOUND'
+            self.article.date = datetime.datetime.today()
+            self.article.author = 'NOT FOUND'
+            self.article.topics = []
+            self.article.text = 'NOT FOUND'
         return self.article
 
 
