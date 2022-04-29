@@ -59,7 +59,6 @@ class Crawler:
         """
         Finds articles
         """
-
         for seed_url in self.seed_urls:
             sleep(random.randint(1, 5))
 
@@ -92,7 +91,7 @@ class HTMLParser:
         self.article = Article(article_url, article_id)
 
     def _fill_article_with_meta_information(self, article_bs):
-        self.article.title = article_bs.find('article')  #  .find_all('a')[0].contents[0]
+        self.article.title = article_bs.find('article')  # .find_all('a')[0].contents[0]
         print(article_bs.find('article'))
         author = article_bs.find(class_="extra").contents
         author = re.findall(r"""Текст: [\w ]+[^,'"<]""", str(author))[0][7:]
@@ -165,8 +164,8 @@ def validate_config(crawler_path):
 if __name__ == '__main__':
     print("env configuration...")
     my_seed_urls, my_max_articles = validate_config(CRAWLER_CONFIG_PATH)
-    #  print(my_seed_urls, my_max_articles)
-    #  print(ASSETS_PATH)
+    # print(my_seed_urls, my_max_articles)
+    # print(ASSETS_PATH)
     prepare_environment(ASSETS_PATH)
 
     print("searching articles...")
@@ -176,6 +175,7 @@ if __name__ == '__main__':
     print("parsing of pages")
     for i in range(len(crawler.urls)):
         parser = HTMLParser(article_url=crawler.urls[i], article_id=i)
-        article_a = parser.parse()
-        #  print(article.author, article.date, article.title)
-        #  print(article.text)
+        article = parser.parse()
+        # print(article.author, article.date, article.title)
+        # print(article.text)
+
