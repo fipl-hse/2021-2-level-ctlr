@@ -130,6 +130,8 @@ class TextProcessingPipeline:
                     not token.get("analysis")[0].get("lex") or \
                     not token.get("analysis")[0].get("gr"):
                 continue
+            if not morphs.parse(token['text']):
+                continue
             morph_token = MorphologicalToken(original_word=token['text'])
             morph_token.normalized_form = token['analysis'][0]['lex']
             morph_token.tags_mystem = token['analysis'][0]['gr']
@@ -157,10 +159,20 @@ def validate_dataset(path_to_validate):
         raise EmptyDirectoryError
 
     pattern = re.compile(r'\d+')
-    raw_texts = sorted(list(path_to_validate.glob('*_raw.txt')), key=lambda x: int(pattern.search(x.name).group(0)))
-    metas = sorted(list(path_to_validate.glob('*_meta.json')), key=lambda x: int(pattern.search(x.name).group(0)))
 
-    for text_index, text in enumerate(raw_texts):
+    raw_texts = list(path_to_validate.glob("*_raw.txt"))
+    metas = list(path_to_validate.glob('*_meta.json'))
+    for text in raw_texts:
+        if not pattern.match(text.name):
+            raw_texts.remove(text)
+    for meta in metas:
+        if not pattern.match(meta.name):
+            metas.remove(meta)
+
+    raw_texts_sorted = sorted(raw_texts, key=lambda x: int(pattern.search(x.name).group(0)))
+    metas_sorted = sorted(metas, key=lambda x: int(pattern.search(x.name).group(0)))
+
+    for text_index, text in enumerate(raw_texts_sorted):
         if text.stat().st_size == 0:
             raise InconsistentDatasetError
         if not re.match(pattern, text.name):
@@ -169,7 +181,7 @@ def validate_dataset(path_to_validate):
         if file_id - text_index != 1 or not (path_to_validate / f'{file_id}_meta.json').is_file():
             raise InconsistentDatasetError
 
-    if len(raw_texts) != len(metas):
+    if len(raw_texts_sorted) != len(metas_sorted):
         raise InconsistentDatasetError
 
 
